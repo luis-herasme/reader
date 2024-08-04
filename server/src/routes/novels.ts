@@ -1,57 +1,40 @@
 import z from "zod";
-import * as cheerio from "cheerio";
 import { publicProcedure, router } from "../trpc";
 
 type SearchResult = {
-  count: number;
-  next: string | null;
-  previous: string | null;
-  results: {
-    name: string;
-    image: string;
-    slug: string;
-  }[];
+  name: string;
+  image: string;
+  slug: string;
 };
 
-type ChapterData = {
+type GetChaptersResult = {
   title: string;
-  novSlugChapSlug: string;
+  slug: string;
 };
+
+const URL = process.env.DATA_URL;
 
 export const novels = router({
   search: publicProcedure
     .input(
       z.object({
         search: z.string(),
-        limit: z.number().positive().int(),
-        offset: z.number().min(0).int(),
+        page: z.number().min(0).int(),
       })
     )
     .query(async ({ input }) => {
-      const searchParam = new URLSearchParams({
-        search: input.search,
-        limit: String(input.limit),
-        offset: String(input.offset),
-      });
-
-      const response = await fetch(process.env.SEARCH_URL + searchParam.toString());
-      return (await response.json()) as SearchResult;
+      let { search, page } = input;
+      const response = await fetch(URL + `/search/${search}/${page}`);
+      return (await response.json()) as SearchResult[];
     }),
 
   chapters: publicProcedure.input(z.string()).query(async ({ input }) => {
-    const response = await fetch(process.env.CHAPTERS_URL + input);
-    return (await response.json()) as ChapterData[];
+    const response = await fetch(URL + `/chapters/${input}`);
+    return (await response.json()) as GetChaptersResult[];
   }),
 
   chapter: publicProcedure.input(z.string()).query(async ({ input }) => {
-    const response = await fetch(process.env.CHAPTER_TEXT_URL + input);
-    const $ = cheerio.load(await response.text());
-
-    const text = $(process.env.CHAPTER_TEXT_SELECTOR)
-      .toArray()
-      .map((element) => $(element).text())
-      .join("\n\n");
-
-    return text;
+    const response = await fetch(URL + `/chapter/${input}`);
+    return await response.text();
   }),
 });
