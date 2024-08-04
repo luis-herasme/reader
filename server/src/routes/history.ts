@@ -30,7 +30,7 @@ export const history = router({
     .input(
       z.object({
         slug: z.string(),
-        chapter: z.number(),
+        chapter: z.string(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -53,7 +53,7 @@ export const history = router({
     .input(
       z.object({
         slug: z.string(),
-        chapter: z.number(),
+        chapter: z.string(),
       })
     )
     .query(async ({ ctx, input }) => {
@@ -74,7 +74,7 @@ export const history = router({
     .input(
       z.object({
         slug: z.string(),
-        chapter: z.number(),
+        chapter: z.string(),
         sentenceIndex: z.number(),
         length: z.number(),
       })

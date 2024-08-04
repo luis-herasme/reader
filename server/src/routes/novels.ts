@@ -12,6 +12,12 @@ type GetChaptersResult = {
   slug: string;
 };
 
+type GetChapterResult = {
+  content: string;
+  next: string | null;
+  prev: string | null;
+};
+
 const URL = process.env.DATA_URL;
 
 export const novels = router({
@@ -23,7 +29,7 @@ export const novels = router({
       })
     )
     .query(async ({ input }) => {
-      let { search, page } = input;
+      const { search, page } = input;
       const response = await fetch(URL + `/search/${search}/${page}`);
       return (await response.json()) as SearchResult[];
     }),
@@ -33,8 +39,16 @@ export const novels = router({
     return (await response.json()) as GetChaptersResult[];
   }),
 
-  chapter: publicProcedure.input(z.string()).query(async ({ input }) => {
-    const response = await fetch(URL + `/chapter/${input}`);
-    return await response.text();
-  }),
+  chapter: publicProcedure
+    .input(
+      z.object({
+        novel: z.string(),
+        chapter: z.string(),
+      })
+    )
+    .query(async ({ input }) => {
+      const { novel, chapter } = input;
+      const response = await fetch(URL + `/chapter/${novel}/${chapter}`);
+      return (await response.json()) as GetChapterResult;
+    }),
 });

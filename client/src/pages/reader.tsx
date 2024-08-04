@@ -19,7 +19,6 @@ import {
 } from "@/components/reader/settings";
 import { FullScreen } from "@/components/reader/fullscreen";
 import { useTrackSentenceIndex } from "@/components/reader/track-sentence-index";
-import { getChaptersSlugs } from "@/components/reader/get-chapter-slugs";
 import { FollowReader } from "@/components/reader/follow-reader";
 import UserButton from "@/components/reader/user";
 import { trpc, trpcVanilla } from "../trpc";
@@ -28,29 +27,46 @@ import { themes } from "../themes";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
 
-export default function Reader({ slug }: { slug: string }) {
+function slugToTitle(slug: string): string {
+  return slug
+    .split("-")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
+export default function Reader({
+  novel,
+  chapter,
+}: {
+  novel: string;
+  chapter: string;
+}) {
   const navigate = useLocation()[1];
 
   useEffect(() => {
-    localStorage.setItem(slug, "true");
-  }, [slug]);
+    localStorage.setItem(chapter, "true");
+  }, [chapter]);
 
   const { settings } = useSettings();
 
   const togglingPlay = useRef(false);
   const sentencesRef = useRef<HTMLSpanElement[]>([]);
 
-  const {
-    title,
-    novelSlug,
-    nextChapterSlug,
-    previousChapterSlug,
-    currentChapterNumber,
-  } = getChaptersSlugs(slug);
+  const style = themes[useSettingsStore.getState().theme];
 
-  const style = themes[useSettingsStore.getState().theme || "Dark"];
-  const { data: text, isLoading } = trpc.novels.chapter.useQuery(slug);
-  const { player } = usePlayer(text || "", slug);
+  const { data, isLoading } = trpc.novels.chapter.useQuery(
+    {
+      novel,
+      chapter,
+    },
+    {
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+      refetchOnWindowFocus: false,
+    }
+  );
+
+  const { player } = usePlayer(data?.content || "", novel, chapter);
   useTrackSentenceIndex(player, sentencesRef);
 
   useEffect(() => {
@@ -104,8 +120,8 @@ export default function Reader({ slug }: { slug: string }) {
       ) {
         const nextIndex = player.nextIndex();
 
-        if (nextIndex >= player.sentences.length) {
-          navigate(nextChapterSlug);
+        if (data && data.next && nextIndex >= player.sentences.length) {
+          navigate(data.next);
           return;
         }
 
@@ -121,8 +137,8 @@ export default function Reader({ slug }: { slug: string }) {
       ) {
         const previousIndex = player.previousIndex();
 
-        if (previousIndex < 0) {
-          navigate(previousChapterSlug);
+        if (data && data.prev && previousIndex < 0) {
+          navigate(data.prev);
           return;
         }
 
@@ -206,40 +222,49 @@ export default function Reader({ slug }: { slug: string }) {
   });
 
   player.nextChapter = () => {
-    navigate(nextChapterSlug);
+    if (data && data.next) {
+      navigate(data.next);
+    }
   };
 
   useEffect(() => {
-    document.title = title;
-  }, [title]);
+    document.title = slugToTitle(novel);
+  }, [novel]);
 
   const debouncedUpdateHistory = useRef(
-    debounce((slug: string, sentenceIndex: number, length: number) => {
-      const { novelSlug, currentChapterNumber } = getChaptersSlugs(slug);
-      trpcVanilla.history.add.mutate({
-        slug: novelSlug,
-        chapter: currentChapterNumber,
-        sentenceIndex,
-        length,
-      });
-    }, 500)
+    debounce(
+      (state: {
+        slug: string;
+        chapter: string;
+        sentenceIndex: number;
+        length: number;
+      }) => {
+        trpcVanilla.history.add.mutate(state);
+      },
+      500
+    )
   ).current;
 
   useEffect(() => {
-    debouncedUpdateHistory(
-      slug,
-      player.currentSentenceIndex,
-      player.sentences.length
-    );
+    debouncedUpdateHistory({
+      slug: novel,
+      chapter,
+      sentenceIndex: player.currentSentenceIndex,
+      length: player.sentences.length,
+    });
   }, [player.currentSentenceIndex]);
 
   return (
     <main>
       <audio id="silent-audio" src="/silence.mp3" />
-      {currentChapterNumber > 1 && (
+      {data && data.prev && (
         <div
           className="translate-y-[50%] z-[49] fixed flex items-center justify-center gap-4 px-4 md:px-8 py-4 text-white duration-300 bg-black bg-opacity-50 border border-white rounded-full cursor-pointer select-none hover:bg-[#333] bottom-16 left-12 border-opacity-10 backdrop-blur"
-          onClick={() => navigate(previousChapterSlug)}
+          onClick={() => {
+            if (data.prev) {
+              navigate(`/reader/${novel}/${data.prev}`);
+            }
+          }}
         >
           <ArrowLeft className="w-6 h-6" />
           <span className="hidden md:block">Previous Chapter</span>
@@ -251,7 +276,11 @@ export default function Reader({ slug }: { slug: string }) {
           <Home className="w-6 h-6" />
         </CircleButton>
 
-        <ListChapters name={title} slug={novelSlug} currentChapterSlug={slug} />
+        <ListChapters
+          name={slugToTitle(novel)}
+          slug={novel}
+          currentChapterSlug={chapter}
+        />
       </div>
       <div className="z-[49] fixed flex flex-col items-end justify-center gap-4 top-6 right-6 sm:top-12 sm:right-12">
         <FullScreen />
@@ -259,13 +288,19 @@ export default function Reader({ slug }: { slug: string }) {
         <UserButton />
       </div>
 
-      <div
-        className="translate-y-[50%] z-[49] fixed flex items-center justify-center gap-4 px-4 md:px-8 py-4 text-white duration-300 bg-black bg-opacity-50 border border-white rounded-full cursor-pointer select-none hover:bg-[#333] bottom-16 right-12 border-opacity-10 backdrop-blur"
-        onClick={() => navigate(nextChapterSlug)}
-      >
-        <span className="hidden md:block">Next Chapter</span>
-        <ArrowRight className="w-6 h-6" />
-      </div>
+      {data && data.next && (
+        <div
+          className="translate-y-[50%] z-[49] fixed flex items-center justify-center gap-4 px-4 md:px-8 py-4 text-white duration-300 bg-black bg-opacity-50 border border-white rounded-full cursor-pointer select-none hover:bg-[#333] bottom-16 right-12 border-opacity-10 backdrop-blur"
+          onClick={() => {
+            if (data.next) {
+              navigate(`/reader/${novel}/${data.next}`);
+            }
+          }}
+        >
+          <span className="hidden md:block">Next Chapter</span>
+          <ArrowRight className="w-6 h-6" />
+        </div>
+      )}
       <div className="translate-y-[50%] z-[49] px-4 py-4 gap-4 bottom-16 left-[50%] translate-x-[-50%] fixed bg-black bg-opacity-50 rounded-full border border-white border-opacity-10 backdrop-blur flex items-center justify-center">
         {player.playing ? (
           <button
@@ -285,7 +320,7 @@ export default function Reader({ slug }: { slug: string }) {
         <FollowReader
           player={player}
           sentencesRef={sentencesRef}
-          text={text || ""}
+          text={data?.content || ""}
         />
       </div>
       <div
@@ -301,7 +336,7 @@ export default function Reader({ slug }: { slug: string }) {
           }}
           className="text-2xl source-serif-4 mb-12"
         >
-          {title}
+          {slugToTitle(novel)}
         </h1>
       </div>
       {isLoading ? (

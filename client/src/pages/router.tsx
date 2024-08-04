@@ -9,8 +9,8 @@ export function Router() {
       <Route path="login">
         <Login />
       </Route>
-      <Route path="/reader/:slug">
-        {(params) => <Reader slug={params.slug} />}
+      <Route path="/reader/:novel/:chapter">
+        {(params) => <Reader chapter={params.chapter} novel={params.novel} />}
       </Route>
       <Route>
         <Home />

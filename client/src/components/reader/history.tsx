@@ -33,7 +33,7 @@ function HistoryItem({
 }: {
   slug: string;
   date: string;
-  chapter: number;
+  chapter: string;
 }) {
   const utils = trpc.useUtils();
   const deleteMutation = trpc.history.delete.useMutation();

@@ -1,16 +1,15 @@
 import { useEffect, useState } from "react";
 import { useForceUpdate } from "./use-force-update";
 import { trpcVanilla } from "../trpc";
-import { getChaptersSlugs } from "@/components/reader/get-chapter-slugs";
 import { useSettings, useSettingsStore } from "@/components/reader/settings";
 import NoSleep from "nosleep.js";
 import { AudioLoader } from "./audio-loader";
 const noSleep = new NoSleep();
 
-export function usePlayer(text: string, slug: string) {
+export function usePlayer(text: string, slug: string, chapterSlug: string) {
   const forceUpdate = useForceUpdate();
   const [player, setPlayer] = useState(
-    () => new Player(text, slug, forceUpdate)
+    () => new Player(text, slug, chapterSlug, forceUpdate)
   );
   const { settings } = useSettings();
 
@@ -25,7 +24,7 @@ export function usePlayer(text: string, slug: string) {
     const playing = player.playing;
     player.destroy();
 
-    const newPlayer = new Player(text, slug, forceUpdate);
+    const newPlayer = new Player(text, slug, chapterSlug, forceUpdate);
     if (settings) {
       newPlayer.setSpeed(settings.speed);
       newPlayer.autoAdvance = settings.autoAdvance;
@@ -53,9 +52,16 @@ export class Player {
   private speed: number = 1;
   autoAdvance: boolean = true;
   slug: string;
+  chapterSlug: string;
 
-  constructor(text: string, slug: string, forceUpdate: () => void) {
+  constructor(
+    text: string,
+    slug: string,
+    chapterSlug: string,
+    forceUpdate: () => void
+  ) {
     this.slug = slug;
+    this.chapterSlug = chapterSlug;
     this.forceUpdate = forceUpdate;
 
     this.sentences = extractSentences(text);
@@ -77,11 +83,9 @@ export class Player {
   }
 
   async getCurrentSentenceIndexFromServer() {
-    const { novelSlug, currentChapterNumber } = getChaptersSlugs(this.slug);
-
     const historyItem = await trpcVanilla.history.read.query({
-      slug: novelSlug,
-      chapter: currentChapterNumber,
+      slug: this.slug,
+      chapter: this.chapterSlug,
     });
 
     if (!historyItem) {

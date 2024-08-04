@@ -107,7 +107,7 @@ export function ChaptersDialog({
                               : "#FFF",
                         }}
                         key={chapter.slug + "-" + chapter.title}
-                        onClick={() => navigate(`/reader/${chapter.slug}`)}
+                        onClick={() => navigate(`/reader/${slug}/${chapter.slug}`)}
                       >
                         <div className="cursor-pointer hover:underline">
                           {chapter.title}
