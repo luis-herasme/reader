@@ -1,0 +1,82 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-1.1.x", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Session {
+  id        String   @id
+  userId    String
+  expiresAt DateTime
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  sessions  Session[]
+  histories History[]
+  favorites Favorite[]
+  settings  Settings?
+}
+
+model History {
+  userId        String
+  slug          String
+  chapter       Int
+  sentenceIndex Int
+  length        Int
+  updatedAt     DateTime @updatedAt
+  createdAt     DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, slug, chapter])
+}
+
+model Favorite {
+  userId    String
+  slug      String
+  updatedAt DateTime @default(now()) @updatedAt
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, slug])
+}
+
+model Settings {
+  userId      String
+  autoAdvance Boolean  @default(true)
+  font        Font     @default(serif)
+  fontSize    Float    @default(1.125)
+  speed       Float    @default(1)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  updatedAt   DateTime @updatedAt
+  createdAt   DateTime @default(now())
+
+  @@unique([userId])
+}
+
+enum Font {
+  serif
+  sans_serif
+  monospace
+}
