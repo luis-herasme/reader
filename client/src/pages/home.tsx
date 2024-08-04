@@ -12,15 +12,13 @@ import { Logo } from "@/components/logo";
 export default function Home() {
   const [search, setSearch] = useState<{
     search: string;
-    limit: number;
-    offset: number;
-  }>({
-    search: "",
-    limit: 20,
-    offset: 0,
+    page: number;
+  }>({ search: "", page: 0 });
+
+  const searchQuery = trpc.novels.search.useQuery(search, {
+    enabled: Boolean(search.search),
   });
 
-  const searchQuery = trpc.novels.search.useQuery(search);
   const inputRef = useRef<HTMLInputElement>(null);
   const { data: isAuthenticated } = trpc.auth.isAuthenticated.useQuery();
 
@@ -93,50 +91,40 @@ export default function Home() {
           <div className="flex items-center justify-between w-full relative  mb-8 ">
             <div
               className={`sm:text-xl text-white flex items-center justify-between gap-2 select-none ${
-                searchQuery.data.previous ? "cursor-pointer" : "opacity-0"
+                search.page ? "cursor-pointer" : "opacity-0"
               }`}
-              onClick={async () => {
-                if (!searchQuery.data.previous) return;
+              onClick={() => {
+                setSearch((value) => {
+                  if (value.page === 0) {
+                    return value;
+                  }
 
-                const url = new URL(searchQuery.data.previous);
-                const limit = url.searchParams.get("limit") || "20";
-                const offset = url.searchParams.get("offset") || "0";
-
-                setSearch({
-                  search: search.search,
-                  limit: parseInt(limit),
-                  offset: parseInt(offset),
+                  return {
+                    search: search.search,
+                    page: value.page - 1,
+                  };
                 });
               }}
             >
               <ArrowLeft className="w-6 h-6" />
               Previous
             </div>
-            <div className="flex flex-col items-center justify-center text-center absolute left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%]">
+            {/* <div className="flex flex-col items-center justify-center text-center absolute left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%]">
               <div className="text-white sm:text-2xl">
                 {searchQuery.data.count.toLocaleString()} results found
               </div>
               <div className="text-white opacity-50 ">
                 Showing {search.offset + 1} to {search.offset + search.limit}
               </div>
-            </div>
+            </div> */}
 
             <div
-              className={`sm:text-xl text-white flex items-center justify-between gap-2 select-none ${
-                searchQuery.data.next ? "cursor-pointer" : "opacity-10"
-              }`}
-              onClick={async () => {
-                if (!searchQuery.data.next) return;
-
-                const url = new URL(searchQuery.data.next);
-                const limit = url.searchParams.get("limit") || "20";
-                const offset = url.searchParams.get("offset") || "0";
-
-                setSearch({
+              className={`sm:text-xl text-white flex items-center justify-between gap-2 select-none cursor-pointer`}
+              onClick={() => {
+                setSearch((value) => ({
                   search: search.search,
-                  limit: parseInt(limit),
-                  offset: parseInt(offset),
-                });
+                  page: value.page + 1,
+                }));
               }}
             >
               Next
@@ -144,7 +132,7 @@ export default function Home() {
             </div>
           </div>
           <div className="flex flex-wrap justify-center max-w-[1200px]">
-            {searchQuery.data.results.map((result) => (
+            {searchQuery.data.map((result) => (
               <Manga
                 key={result.name + "-" + result.image}
                 name={result.name}

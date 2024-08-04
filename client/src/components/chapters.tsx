@@ -8,6 +8,7 @@ import {
 import { Eye, Loader2, Search } from "lucide-react";
 import { CircleButton } from "./reader/circle-button";
 import { trpc } from "@/trpc";
+import { useLocation } from "wouter";
 
 export function ListChapters({
   slug,
@@ -55,6 +56,7 @@ export function ChaptersDialog({
   currentChapterSlug?: string;
 }) {
   const { data: chapters, isLoading } = trpc.novels.chapters.useQuery(slug);
+  const navigate = useLocation()[1];
 
   const currentChapterRef = useCallback(
     (node: any) => {
@@ -90,28 +92,26 @@ export function ChaptersDialog({
                     {chapters?.map((chapter) => (
                       <div
                         ref={
-                          chapter.novSlugChapSlug === currentChapterSlug
+                          chapter.slug === currentChapterSlug
                             ? currentChapterRef
                             : null
                         }
                         style={{
                           backgroundColor:
-                            chapter.novSlugChapSlug === currentChapterSlug
+                            chapter.slug === currentChapterSlug
                               ? "#FF0"
                               : "transparent",
                           color:
-                            chapter.novSlugChapSlug === currentChapterSlug
+                            chapter.slug === currentChapterSlug
                               ? "#000"
                               : "#FFF",
                         }}
-                        key={chapter.novSlugChapSlug + "-" + chapter.title}
-                        onClick={() => {
-                          window.location.href = `/reader/${chapter.novSlugChapSlug}`;
-                        }}
+                        key={chapter.slug + "-" + chapter.title}
+                        onClick={() => navigate(`/reader/${chapter.slug}`)}
                       >
                         <div className="cursor-pointer hover:underline">
                           {chapter.title}
-                          {localStorage.getItem(chapter.novSlugChapSlug) && (
+                          {localStorage.getItem(chapter.slug) && (
                             <span className="ml-2">
                               <Eye className="inline-block w-4 h-4" />
                             </span>
