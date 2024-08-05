@@ -133,7 +133,7 @@ export default function Home() {
           </div>
           <div className="flex flex-wrap justify-center max-w-[1200px]">
             {searchQuery.data.map((result) => (
-              <Manga
+              <Novel
                 key={result.name + "-" + result.image}
                 name={result.name}
                 slug={result.slug}
@@ -147,7 +147,7 @@ export default function Home() {
   );
 }
 
-function Manga({
+function Novel({
   image,
   name,
   slug,
@@ -161,11 +161,11 @@ function Manga({
   return (
     <>
       <div key={name + "-" + image} onClick={async () => setOpen(true)}>
-        <div className="flex flex-col items-center shadow justify-center m-4 duration-100 cursor-pointer hover:scale-105">
+        <div className="flex flex-col items-center justify-center m-4 duration-100 cursor-pointer hover:scale-105">
           {image ? (
-            <img className="w-48 h-64" src={image} />
+            <img className="w-48 h-64 shadow-xl" src={image} />
           ) : (
-            <div className="w-48 h-64 bg-[#222] border border-white border-opacity-20 shadow text-white flex flex-col gap-2 items-center justify-center font-mono text-xs">
+            <div className="w-48 h-64 bg-[#222] border border-white border-opacity-20 shadow-xl text-white flex flex-col gap-2 items-center justify-center font-mono text-xs">
               <FileWarning className="w-12 h-12" strokeWidth={1} />
               no image
             </div>
