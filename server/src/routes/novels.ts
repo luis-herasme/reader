@@ -26,29 +26,41 @@ export const novels = router({
       z.object({
         search: z.string(),
         page: z.number().min(0).int(),
+        server: z.string(),
       })
     )
     .query(async ({ input }) => {
-      const { search, page } = input;
-      const response = await fetch(URL + `/search/${search}/${page}`);
+      const { search, page, server } = input;
+      const response = await fetch(URL + `/${server}/search/${search}/${page}`);
       return (await response.json()) as SearchResult[];
     }),
 
-  chapters: publicProcedure.input(z.string()).query(async ({ input }) => {
-    const response = await fetch(URL + `/chapters/${input}`);
-    return (await response.json()) as GetChaptersResult[];
-  }),
+  chapters: publicProcedure
+    .input(
+      z.object({
+        slug: z.string(),
+        server: z.string(),
+      })
+    )
+    .query(async ({ input }) => {
+      const { slug, server } = input;
+      const response = await fetch(URL + `/${server}/chapters/${slug}`);
+      return (await response.json()) as GetChaptersResult[];
+    }),
 
   chapter: publicProcedure
     .input(
       z.object({
         novel: z.string(),
         chapter: z.string(),
+        server: z.string(),
       })
     )
     .query(async ({ input }) => {
-      const { novel, chapter } = input;
-      const response = await fetch(URL + `/chapter/${novel}/${chapter}`);
+      const { server, novel, chapter } = input;
+      const response = await fetch(
+        URL + `/${server}/chapter/${novel}/${chapter}`
+      );
       return (await response.json()) as GetChapterResult;
     }),
 });

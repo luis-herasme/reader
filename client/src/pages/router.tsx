@@ -9,11 +9,20 @@ export function Router() {
       <Route path="login">
         <Login />
       </Route>
-      <Route path="/reader/:novel/:chapter">
-        {(params) => <Reader chapter={params.chapter} novel={params.novel} />}
+      <Route path="/:server/reader/:novel/:chapter">
+        {(params) => (
+          <Reader
+            server={params.server}
+            chapter={params.chapter}
+            novel={params.novel}
+          />
+        )}
+      </Route>
+      <Route path="/:server">
+        {(params) => <Home server={params.server} />}
       </Route>
       <Route>
-        <Home />
+        <Home server="s1" />
       </Route>
     </Switch>
   );

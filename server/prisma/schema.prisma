@@ -5,7 +5,7 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["native", "debian-openssl-1.1.x", "debian-openssl-3.0.x"]
 }
 
@@ -41,6 +41,7 @@ model History {
   userId        String
   slug          String
   chapter       String
+  server        String
   sentenceIndex Int
   length        Int
   updatedAt     DateTime @updatedAt
@@ -48,18 +49,19 @@ model History {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, slug, chapter])
+  @@unique([userId, slug, chapter, server])
 }
 
 model Favorite {
   userId    String
   slug      String
+  server    String
   updatedAt DateTime @default(now()) @updatedAt
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, slug])
+  @@unique([userId, slug, server])
 }
 
 model Settings {

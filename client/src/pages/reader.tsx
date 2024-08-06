@@ -37,9 +37,11 @@ function slugToTitle(slug: string): string {
 export default function Reader({
   novel,
   chapter,
+  server,
 }: {
   novel: string;
   chapter: string;
+  server: string;
 }) {
   const navigate = useLocation()[1];
 
@@ -58,6 +60,7 @@ export default function Reader({
     {
       novel,
       chapter,
+      server
     },
     {
       refetchOnMount: false,
@@ -238,6 +241,7 @@ export default function Reader({
         chapter: string;
         sentenceIndex: number;
         length: number;
+        server: string;
       }) => {
         trpcVanilla.history.add.mutate(state);
       },
@@ -247,6 +251,7 @@ export default function Reader({
 
   useEffect(() => {
     debouncedUpdateHistory({
+      server,
       slug: novel,
       chapter,
       sentenceIndex: player.currentSentenceIndex,
@@ -262,7 +267,7 @@ export default function Reader({
           className="translate-y-[50%] z-[49] fixed flex items-center justify-center gap-4 px-4 md:px-8 py-4 text-white duration-300 bg-black bg-opacity-50 border border-white rounded-full cursor-pointer select-none hover:bg-[#333] bottom-16 left-12 border-opacity-10 backdrop-blur"
           onClick={() => {
             if (data.prev) {
-              navigate(`/reader/${novel}/${data.prev}`);
+              navigate(`/${server}/reader/${novel}/${data.prev}`);
             }
           }}
         >
@@ -277,8 +282,9 @@ export default function Reader({
         </CircleButton>
 
         <ListChapters
-          name={slugToTitle(novel)}
+          server={server}
           slug={novel}
+          name={slugToTitle(novel)}
           currentChapterSlug={chapter}
         />
       </div>
@@ -293,7 +299,7 @@ export default function Reader({
           className="translate-y-[50%] z-[49] fixed flex items-center justify-center gap-4 px-4 md:px-8 py-4 text-white duration-300 bg-black bg-opacity-50 border border-white rounded-full cursor-pointer select-none hover:bg-[#333] bottom-16 right-12 border-opacity-10 backdrop-blur"
           onClick={() => {
             if (data.next) {
-              navigate(`/reader/${novel}/${data.next}`);
+              navigate(`/${server}/reader/${novel}/${data.next}`);
             }
           }}
         >

@@ -8,21 +8,21 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-export function Favorite({ slug }: { slug: string }) {
+export function Favorite({ slug, server }: { slug: string; server: string }) {
   const utils = trpc.useUtils();
-  const { data } = trpc.favorites.isFavorite.useQuery({ slug });
+  const { data } = trpc.favorites.isFavorite.useQuery({ slug, server });
 
   const addToFavorites = trpc.favorites.add.useMutation({
     onSuccess: () => {
       toast("Added novel to library");
-      utils.favorites.isFavorite.invalidate({ slug });
+      utils.favorites.isFavorite.invalidate({ slug, server });
     },
   });
 
   const removeFromFavorites = trpc.favorites.delete.useMutation({
     onSuccess: () => {
       toast("Removed novel from library");
-      utils.favorites.isFavorite.invalidate({ slug });
+      utils.favorites.isFavorite.invalidate({ slug, server });
     },
   });
 
@@ -42,9 +42,9 @@ export function Favorite({ slug }: { slug: string }) {
             }`}
             onClick={() => {
               if (data) {
-                removeFromFavorites.mutate({ slug });
+                removeFromFavorites.mutate({ slug, server });
               } else {
-                addToFavorites.mutate({ slug });
+                addToFavorites.mutate({ slug, server });
               }
             }}
           >

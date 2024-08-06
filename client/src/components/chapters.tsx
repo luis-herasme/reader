@@ -14,10 +14,12 @@ export function ListChapters({
   slug,
   name,
   currentChapterSlug,
+  server,
 }: {
   slug: string;
   name: string;
   currentChapterSlug?: string;
+  server: string;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -32,6 +34,7 @@ export function ListChapters({
         <Search className="w-6 h-6" />
       </CircleButton>
       <ChaptersDialog
+        server={server}
         name={name}
         open={open}
         slug={slug}
@@ -48,14 +51,20 @@ export function ChaptersDialog({
   slug,
   setOpen,
   currentChapterSlug,
+  server,
 }: {
   name: string;
   open: boolean;
   slug: string;
   setOpen: (open: boolean) => void;
   currentChapterSlug?: string;
+  server: string;
 }) {
-  const { data: chapters, isLoading } = trpc.novels.chapters.useQuery(slug);
+  const { data: chapters, isLoading } = trpc.novels.chapters.useQuery({
+    slug,
+    server,
+  });
+
   const navigate = useLocation()[1];
 
   const currentChapterRef = useCallback(
@@ -107,7 +116,9 @@ export function ChaptersDialog({
                               : "#FFF",
                         }}
                         key={chapter.slug + "-" + chapter.title}
-                        onClick={() => navigate(`/reader/${slug}/${chapter.slug}`)}
+                        onClick={() =>
+                          navigate(`/${server}/reader/${slug}/${chapter.slug}`)
+                        }
                       >
                         <div className="cursor-pointer hover:underline">
                           {chapter.title}

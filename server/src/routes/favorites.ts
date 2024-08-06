@@ -8,20 +8,23 @@ export const favorites = router({
     .input(
       z.object({
         slug: z.string(),
+        server: z.string(),
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const { slug } = input;
+      const { slug, server } = input;
 
       const favorite = await prisma.favorite.upsert({
         where: {
-          userId_slug: {
+          userId_slug_server: {
             slug,
+            server,
             userId: ctx.user.id,
           },
         },
         create: {
           slug,
+          server,
           userId: ctx.user.id,
         },
         update: {},
@@ -34,15 +37,17 @@ export const favorites = router({
     .input(
       z.object({
         slug: z.string(),
+        server: z.string(),
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const { slug } = input;
+      const { slug, server } = input;
 
       const favorite = await prisma.favorite.delete({
         where: {
-          userId_slug: {
+          userId_slug_server: {
             slug,
+            server,
             userId: ctx.user.id,
           },
         },
@@ -65,15 +70,17 @@ export const favorites = router({
     .input(
       z.object({
         slug: z.string(),
+        server: z.string(),
       })
     )
     .query(async ({ ctx, input }) => {
-      const { slug } = input;
+      const { slug, server } = input;
 
       const favorite = await prisma.favorite.findFirst({
         where: {
           userId: ctx.user.id,
           slug,
+          server,
         },
       });
 

@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 // import { Button } from "@/components/ui/button";
 import { FileWarning, Loader2, LogIn, LogOut } from "lucide-react";
@@ -8,13 +8,32 @@ import { ChaptersDialog } from "@/components/chapters";
 import HistoryDialog from "@/components/reader/history";
 import { trpc } from "@/trpc";
 import { Logo } from "@/components/logo";
+import { Button } from "@/components/ui/button";
+import { useLocation } from "wouter";
 
-export default function Home() {
+const SERVERS = [
+  {
+    label: "server 1",
+    slug: "s1",
+  },
+  {
+    label: "server 2",
+    slug: "s2",
+  },
+];
+
+export default function Home({ server }: { server: string }) {
   const [search, setSearch] = useState<{
     search: string;
     page: number;
-  }>({ search: "", page: 0 });
+    server: string;
+  }>({ search: "", page: 0, server });
 
+  useEffect(() => {
+    setSearch((value) => ({ ...value, server, page: 0 }));
+  }, [server]);
+
+  const navigate = useLocation()[1];
   const searchQuery = trpc.novels.search.useQuery(search, {
     enabled: Boolean(search.search),
   });
@@ -80,6 +99,29 @@ export default function Home() {
             )}
           </Button> */}
         </div>
+        <div className="max-w-[90vw] w-96">
+          <div className="text-sm mt-2 bg-[#222] rounded p-4">
+            You can search for novels from multiple sources. There are currently
+            two sources available:
+            <div className="flex items-center mt-2 gap-2">
+              {SERVERS.map((s) => (
+                <Button
+                  size="sm"
+                  className="rounded"
+                  disabled={s.slug === server}
+                  onClick={() => navigate(`/${s.slug}`)}
+                >
+                  {s.label}
+                </Button>
+              ))}
+            </div>
+          </div>
+          <div className="mt-2 opacity-50 text-xs">
+            You are currently searching from{" "}
+            <b>{SERVERS.find((s) => s.slug === server)?.label}</b>. If you can't
+            find anything, try searching from another server.
+          </div>
+        </div>
       </div>
       {searchQuery.isLoading && (
         <div className="flex items-center justify-center w-full h-[20vh]">
@@ -100,7 +142,8 @@ export default function Home() {
                   }
 
                   return {
-                    search: search.search,
+                    server: value.server,
+                    search: value.search,
                     page: value.page - 1,
                   };
                 });
@@ -122,7 +165,8 @@ export default function Home() {
               className={`sm:text-xl text-white flex items-center justify-between gap-2 select-none cursor-pointer`}
               onClick={() => {
                 setSearch((value) => ({
-                  search: search.search,
+                  server: value.server,
+                  search: value.search,
                   page: value.page + 1,
                 }));
               }}
@@ -138,6 +182,7 @@ export default function Home() {
                 name={result.name}
                 slug={result.slug}
                 image={result.image}
+                server={server}
               />
             ))}
           </div>
@@ -151,10 +196,12 @@ function Novel({
   image,
   name,
   slug,
+  server,
 }: {
   image: string;
   name: string;
   slug: string;
+  server: string;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -173,7 +220,13 @@ function Novel({
           <div className="w-48 mt-2 text-center text-white">{name}</div>
         </div>
       </div>
-      <ChaptersDialog name={name} open={open} setOpen={setOpen} slug={slug} />
+      <ChaptersDialog
+        server={server}
+        name={name}
+        open={open}
+        setOpen={setOpen}
+        slug={slug}
+      />
     </>
   );
 }

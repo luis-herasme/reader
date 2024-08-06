@@ -31,16 +31,18 @@ export const history = router({
       z.object({
         slug: z.string(),
         chapter: z.string(),
+        server: z.string(),
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const { slug, chapter } = input;
+      const { slug, chapter, server } = input;
 
       const history = await prisma.history.delete({
         where: {
-          userId_slug_chapter: {
+          userId_slug_chapter_server: {
             slug,
             chapter,
+            server,
             userId: ctx.user.id,
           },
         },
@@ -75,24 +77,27 @@ export const history = router({
       z.object({
         slug: z.string(),
         chapter: z.string(),
+        server: z.string(),
         sentenceIndex: z.number(),
         length: z.number(),
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const { slug, chapter, sentenceIndex, length } = input;
+      const { slug, server, chapter, sentenceIndex, length } = input;
 
       const history = await prisma.history.upsert({
         where: {
-          userId_slug_chapter: {
+          userId_slug_chapter_server: {
             slug,
             chapter,
+            server,
             userId: ctx.user.id,
           },
         },
         create: {
           slug,
           chapter,
+          server,
           sentenceIndex,
           length,
           userId: ctx.user.id,

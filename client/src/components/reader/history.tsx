@@ -8,6 +8,7 @@ import {
 import { Bookmark, Loader2, Trash } from "lucide-react";
 import { Favorite } from "./favorite";
 import { LibraryContent } from "./library";
+import { useLocation } from "wouter";
 
 export default function HistoryDialog() {
   return (
@@ -28,22 +29,25 @@ export default function HistoryDialog() {
 
 function HistoryItem({
   slug,
-  date,
+  updatedAt,
+  server,
   chapter,
 }: {
   slug: string;
-  date: string;
+  updatedAt: string;
+  server: string;
   chapter: string;
 }) {
   const utils = trpc.useUtils();
   const deleteMutation = trpc.history.delete.useMutation();
+  const navigate = useLocation()[1];
 
   return (
     <div className="flex items-center justify-between gap-4">
       <div
-          className="flex flex-col w-full gap-1 cursor-pointer"
-          onClick={() => {
-          window.location.href = `/reader/${slug}-${chapter}`;
+        className="flex flex-col w-full gap-1 cursor-pointer"
+        onClick={() => {
+          navigate(`/${server}/reader/${slug}/${chapter}`);
         }}
       >
         <div className={`text-base`}>
@@ -53,7 +57,7 @@ function HistoryItem({
             .join(" ")}
         </div>
         <div className="font-mono text-xs opacity-50">
-          {new Date(date).toLocaleDateString("en-US", {
+          {new Date(updatedAt).toLocaleDateString("en-US", {
             weekday: "long",
             year: "numeric",
             month: "long",
@@ -67,7 +71,7 @@ function HistoryItem({
             Chapter {chapter}
           </div>
         </div>
-        <Favorite slug={slug} />
+        <Favorite slug={slug} server={server} />
         <div
           className={`rounded-full p-2 hover:bg-destructive duration-200 ${
             deleteMutation.isPending ? "opacity-50" : "cursor-pointer"
@@ -78,7 +82,11 @@ function HistoryItem({
             }
 
             deleteMutation.mutate(
-              { slug, chapter },
+              {
+                slug,
+                server,
+                chapter,
+              },
               {
                 onSuccess() {
                   utils.history.readAll.invalidate();
@@ -107,10 +115,8 @@ export function History() {
         {data &&
           data.map((history) => (
             <HistoryItem
-              key={history.slug + history.chapter}
-              slug={history.slug}
-              date={history.updatedAt}
-              chapter={history.chapter}
+              {...history}
+              key={history.server + "-" + history.slug + "-" + history.chapter}
             />
           ))}
       </div>

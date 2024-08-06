@@ -5,11 +5,13 @@ import { History } from "./history";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { trpc, trpcVanilla } from "../../trpc";
 import { toast } from "sonner";
+import { useLocation } from "wouter";
 
 function Favorites() {
   const utils = trpc.useUtils();
   const { data } = trpc.favorites.read.useQuery();
   const removeFavorite = trpc.favorites.delete.useMutation();
+  const navigate = useLocation()[1];
 
   if (!data || data.length === 0) {
     return (
@@ -39,7 +41,10 @@ function Favorites() {
                 await trpcVanilla.favorites.getNovelChapter.query({
                   slug: favorite.slug,
                 });
-              window.location.href = `/reader/${favorite.slug}-${currentChapter}`;
+
+              navigate(
+                `/${favorite.server}/reader/${favorite.slug}/${currentChapter}`
+              );
             }}
           >
             <div className={`text-base`}>
@@ -67,15 +72,19 @@ function Favorites() {
                   return;
                 }
 
-                const slug = favorite.slug;
-
                 removeFavorite.mutate(
-                  { slug },
+                  {
+                    slug: favorite.slug,
+                    server: favorite.server,
+                  },
                   {
                     onSuccess() {
                       toast("Removed novel from library");
                       utils.favorites.read.invalidate();
-                      utils.favorites.isFavorite.invalidate({ slug });
+                      utils.favorites.isFavorite.invalidate({
+                        slug: favorite.slug,
+                        server: favorite.server,
+                      });
                     },
                   }
                 );
