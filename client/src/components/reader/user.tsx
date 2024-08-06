@@ -36,7 +36,7 @@ export default function UserButton() {
         ) : (
           <a
             className="flex items-center justify-center w-full gap-2 p-2 rounded-lg cursor-pointer select-none border-opacity-10 bg-[#111] hover:bg-[#222] duration-200 text-sm"
-            href="/login/google"
+            href="/login"
           >
             Login
             <LogIn className="w-4 h-4" />
