@@ -2,7 +2,7 @@ import { log } from "@/lib/logs";
 import { useEffect, useRef } from "react";
 import { Player, usePlayer } from "@/lib/player";
 
-import { ArrowLeft, ArrowRight, Loader2, Pause, Play } from "lucide-react";
+import { Loader2, Pause, Play } from "lucide-react";
 import { ListChapters } from "@/components/chapters";
 import {
   ReaderSettings,
@@ -19,6 +19,7 @@ import { themes } from "../themes";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
 import { HomeButton } from "@/components/reader/home-button";
+import { NavArrows } from "@/components/reader/nav-arrows";
 
 function slugToTitle(slug: string): string {
   return slug
@@ -254,23 +255,15 @@ export default function Reader({
 
   return (
     <main>
-      <audio id="silent-audio" src="/silence.mp3" />
-      {data && data.prev && (
-        <div
-          className="translate-y-[50%] z-[49] fixed flex items-center justify-center gap-4 px-4 md:px-8 py-4 text-white duration-300 bg-black bg-opacity-50 border border-white rounded-full cursor-pointer select-none hover:bg-[#333] bottom-16 left-12 border-opacity-10 backdrop-blur"
-          onClick={() => {
-            if (data.prev) {
-              navigate(`/${server}/reader/${novel}/${data.prev}`);
-            }
-          }}
-        >
-          <ArrowLeft className="w-6 h-6" />
-          <span className="hidden md:block">Previous Chapter</span>
-        </div>
+      {data && (
+        <NavArrows
+          next={`/${server}/reader/${novel}/${data.next}`}
+          prev={`/${server}/reader/${novel}/${data.prev}`}
+        />
       )}
 
       <div className="z-[49] flex-col fixed flex items-end justify-center gap-4 top-6 left-6 sm:top-12 sm:left-12">
-        <HomeButton  />
+        <HomeButton />
 
         <ListChapters
           server={server}
@@ -285,19 +278,6 @@ export default function Reader({
         <UserButton />
       </div>
 
-      {data && data.next && (
-        <div
-          className="translate-y-[50%] z-[49] fixed flex items-center justify-center gap-4 px-4 md:px-8 py-4 text-white duration-300 bg-black bg-opacity-50 border border-white rounded-full cursor-pointer select-none hover:bg-[#333] bottom-16 right-12 border-opacity-10 backdrop-blur"
-          onClick={() => {
-            if (data.next) {
-              navigate(`/${server}/reader/${novel}/${data.next}`);
-            }
-          }}
-        >
-          <span className="hidden md:block">Next Chapter</span>
-          <ArrowRight className="w-6 h-6" />
-        </div>
-      )}
       <div className="translate-y-[50%] z-[49] px-4 py-4 gap-4 bottom-16 left-[50%] translate-x-[-50%] fixed bg-black bg-opacity-50 rounded-full border border-white border-opacity-10 backdrop-blur flex items-center justify-center">
         {player.playing ? (
           <button
