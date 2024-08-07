@@ -27,11 +27,8 @@ export default function Reader({
   chapter: string;
   server: string;
 }) {
+  const utils = trpc.useUtils();
   const navigate = useLocation()[1];
-
-  useEffect(() => {
-    localStorage.setItem(chapter, "true");
-  }, [chapter]);
 
   const togglingPlay = useRef(false);
   const sentencesRef = useRef<HTMLSpanElement[]>([]);
@@ -188,13 +185,17 @@ export default function Reader({
 
   useEffect(() => {
     if (data) {
-      trpcVanilla.history.add.mutate({
-        server,
-        slug: novel,
-        chapter,
-        sentenceIndex: player.currentSentenceIndex,
-        length: player.sentences.length,
-      });
+      trpcVanilla.history.add
+        .mutate({
+          server,
+          slug: novel,
+          chapter,
+          sentenceIndex: player.currentSentenceIndex,
+          length: player.sentences.length,
+        })
+        .then(() => {
+          utils.history.novelHistory.invalidate(novel);
+        });
     }
   }, [data, player.currentSentenceIndex]);
 

@@ -26,6 +26,19 @@ export const history = router({
     return histories;
   }),
 
+  novelHistory: authProcedure
+    .input(z.string())
+    .query(async ({ ctx, input }) => {
+      const chapters = await prisma.history.findMany({
+        where: {
+          userId: ctx.user.id,
+          slug: input,
+        },
+      });
+
+      return chapters;
+    }),
+
   delete: authProcedure
     .input(
       z.object({

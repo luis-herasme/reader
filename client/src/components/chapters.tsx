@@ -65,6 +65,7 @@ export function ChaptersDialog({
     server,
   });
 
+  const { data: history } = trpc.history.novelHistory.useQuery(slug);
   const navigate = useLocation()[1];
 
   const currentChapterRef = useCallback(
@@ -122,7 +123,7 @@ export function ChaptersDialog({
                       >
                         <div className="cursor-pointer hover:underline">
                           {chapter.title}
-                          {localStorage.getItem(chapter.slug) && (
+                          {history?.find((c) => c.chapter === chapter.slug) && (
                             <span className="ml-2">
                               <Eye className="inline-block w-4 h-4" />
                             </span>
