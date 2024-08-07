@@ -167,17 +167,9 @@ export default function Reader({
     }
 
     if ("mediaSession" in navigator) {
-      navigator.mediaSession.setActionHandler("play", () => {
-        handlePlay(true);
-      });
-
-      navigator.mediaSession.setActionHandler("pause", () => {
-        handlePlay(false);
-      });
-
-      navigator.mediaSession.setActionHandler("stop", () => {
-        handlePlay(false);
-      });
+      navigator.mediaSession.setActionHandler("play", () => handlePlay(true));
+      navigator.mediaSession.setActionHandler("pause", () => handlePlay(false));
+      navigator.mediaSession.setActionHandler("stop", () => handlePlay(false));
     }
 
     return () => {
