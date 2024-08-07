@@ -1,5 +1,5 @@
 import { AlertCircle, Library, Loader2, Trash } from "lucide-react";
-import { CircleButton } from "./circle-button";
+import { CircleButton } from "../circle-button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { History } from "./history";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";

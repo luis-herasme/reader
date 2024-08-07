@@ -1,5 +1,5 @@
 import { Expand, Shrink } from "lucide-react";
-import { CircleButton } from "./circle-button";
+import { CircleButton } from "../circle-button";
 import { useEffect, useState } from "react";
 
 export function FullScreen() {

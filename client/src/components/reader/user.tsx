@@ -1,4 +1,4 @@
-import { CircleButton } from "./circle-button";
+import { CircleButton } from "../circle-button";
 import { LogIn, LogOut, User } from "lucide-react";
 import {
   Dialog,

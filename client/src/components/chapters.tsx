@@ -6,7 +6,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Eye, Loader2, Search } from "lucide-react";
-import { CircleButton } from "./reader/circle-button";
+import { CircleButton } from "./circle-button";
 import { trpc } from "@/trpc";
 import { useLocation } from "wouter";
 

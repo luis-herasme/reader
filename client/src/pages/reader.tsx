@@ -2,16 +2,8 @@ import { log } from "@/lib/logs";
 import { useEffect, useRef } from "react";
 import { Player, usePlayer } from "@/lib/player";
 
-import {
-  ArrowLeft,
-  ArrowRight,
-  Home,
-  Loader2,
-  Pause,
-  Play,
-} from "lucide-react";
+import { ArrowLeft, ArrowRight, Loader2, Pause, Play } from "lucide-react";
 import { ListChapters } from "@/components/chapters";
-import { CircleButton } from "@/components/reader/circle-button";
 import {
   ReaderSettings,
   useSettings,
@@ -26,6 +18,7 @@ import { debounce } from "@/lib/debounce";
 import { themes } from "../themes";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
+import { HomeButton } from "@/components/reader/home-button";
 
 function slugToTitle(slug: string): string {
   return slug
@@ -60,7 +53,7 @@ export default function Reader({
     {
       novel,
       chapter,
-      server
+      server,
     },
     {
       refetchOnMount: false,
@@ -277,9 +270,7 @@ export default function Reader({
       )}
 
       <div className="z-[49] flex-col fixed flex items-end justify-center gap-4 top-6 left-6 sm:top-12 sm:left-12">
-        <CircleButton tooltip="Home" onClick={() => navigate("/")}>
-          <Home className="w-6 h-6" />
-        </CircleButton>
+        <HomeButton  />
 
         <ListChapters
           server={server}
