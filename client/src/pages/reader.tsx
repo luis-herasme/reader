@@ -221,7 +221,7 @@ export default function Reader({
         />
       )}
 
-      <div className="z-[49] flex-col fixed flex items-end justify-center gap-4 top-6 left-6 sm:top-12 sm:left-12">
+      <div className="z-[49] fixed flex flex-col items-end justify-center gap-4 top-6 sm:top-12 left-6 sm:left-12">
         <HomeButton />
 
         <ListChapters
@@ -231,13 +231,14 @@ export default function Reader({
           currentChapterSlug={chapter}
         />
       </div>
-      <div className="z-[49] fixed flex flex-col items-end justify-center gap-4 top-6 right-6 sm:top-12 sm:right-12">
+
+      <div className="z-[49] fixed flex flex-col items-end justify-center gap-4 top-6 sm:top-12 right-6 sm:right-12">
         <FullScreen />
         <ReaderSettings />
         <UserButton />
       </div>
 
-      <div className="translate-y-[50%] z-[49] px-4 py-4 gap-4 bottom-16 left-[50%] translate-x-[-50%] fixed bg-black bg-opacity-50 rounded-full border border-white border-opacity-10 backdrop-blur flex items-center justify-center">
+      <div className="translate-y-[50%] z-[49] p-4 gap-4 bottom-16 left-[50%] translate-x-[-50%] fixed bg-black bg-opacity-50 rounded-full border border-white border-opacity-10 backdrop-blur flex items-center justify-center">
         <PlayButton
           playing={player.playing}
           onClick={() => {
