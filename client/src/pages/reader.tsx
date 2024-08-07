@@ -2,7 +2,7 @@ import { log } from "@/lib/logs";
 import { useEffect, useRef } from "react";
 import { Player, usePlayer } from "@/lib/player";
 
-import { Loader2, Pause, Play } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { ListChapters } from "@/components/chapters";
 import {
   ReaderSettings,
@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import { useLocation } from "wouter";
 import { HomeButton } from "@/components/reader/home-button";
 import { NavArrows } from "@/components/reader/nav-arrows";
+import { PlayButton } from "@/components/reader/play-pause";
 
 function slugToTitle(slug: string): string {
   return slug
@@ -279,21 +280,17 @@ export default function Reader({
       </div>
 
       <div className="translate-y-[50%] z-[49] px-4 py-4 gap-4 bottom-16 left-[50%] translate-x-[-50%] fixed bg-black bg-opacity-50 rounded-full border border-white border-opacity-10 backdrop-blur flex items-center justify-center">
-        {player.playing ? (
-          <button
-            className="bg-[#222] outline-none hover:bg-[#444] duration-300 p-2 text-white border border-white rounded-full border-opacity-10"
-            onClick={() => player.cancel()}
-          >
-            <Pause fill="currentColor" className="w-6 h-6" />
-          </button>
-        ) : (
-          <button
-            onClick={() => player.play(player.currentSentenceIndex)}
-            className="bg-[#222] outline-none hover:bg-[#444] duration-300 p-2 text-white border border-white rounded-full border-opacity-10"
-          >
-            <Play fill="currentColor" className="w-6 h-6" />
-          </button>
-        )}
+        <PlayButton
+          playing={player.playing}
+          onClick={() => {
+            if (player.playing) {
+              player.cancel();
+            } else {
+              player.play(player.currentSentenceIndex);
+            }
+          }}
+        />
+
         <FollowReader
           player={player}
           sentencesRef={sentencesRef}
