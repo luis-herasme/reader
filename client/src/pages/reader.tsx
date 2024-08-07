@@ -3,7 +3,7 @@ import { useEffect, useRef } from "react";
 import { usePlayer } from "@/lib/player";
 
 import { ListChapters } from "@/components/chapters";
-import { ReaderSettings, useSettings } from "@/components/reader/settings";
+import { ReaderSettings } from "@/components/reader/settings";
 import { FullScreen } from "@/components/reader/fullscreen";
 import { useTrackSentenceIndex } from "@/components/reader/track-sentence-index";
 import { FollowReader } from "@/components/reader/follow-reader";
@@ -17,6 +17,7 @@ import { PlayButton } from "@/components/reader/play-pause";
 import { slugToTitle, Title } from "@/components/reader/title";
 import { Sentence } from "@/components/reader/sentence";
 import { LoadingScreen } from "@/components/reader/loading-screen";
+import { Sentences } from "@/components/reader/sentences";
 
 export default function Reader({
   novel,
@@ -32,8 +33,6 @@ export default function Reader({
   useEffect(() => {
     localStorage.setItem(chapter, "true");
   }, [chapter]);
-
-  const { settings, theme } = useSettings();
 
   const togglingPlay = useRef(false);
   const sentencesRef = useRef<HTMLSpanElement[]>([]);
@@ -270,33 +269,17 @@ export default function Reader({
       {isLoading ? (
         <LoadingScreen />
       ) : (
-        <div
-          style={{
-            background: theme.background,
-          }}
-        >
-          <p
-            className={`text-xl max-w-[1200px] mx-auto py-32
-            ${settings?.font === "sans_serif" && "font-sans"} ${
-              settings?.font === "serif" && "source-serif-4"
-            } ${settings?.font === "monospace" && "font-mono"}
-          `}
-            style={{
-              fontSize: settings?.fontSize + "rem",
-              lineHeight: settings ? settings.fontSize + 0.5 + "rem" : "",
-            }}
-          >
-            {player.sentences.map((sentence, index) => (
-              <Sentence
-                key={"sentence-" + index}
-                player={player}
-                index={index}
-                sentencesRef={sentencesRef}
-                sentence={sentence}
-              />
-            ))}
-          </p>
-        </div>
+        <Sentences>
+          {player.sentences.map((sentence, index) => (
+            <Sentence
+              key={"sentence-" + index}
+              player={player}
+              index={index}
+              sentencesRef={sentencesRef}
+              sentence={sentence}
+            />
+          ))}
+        </Sentences>
       )}
     </div>
   );
