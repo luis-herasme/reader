@@ -184,7 +184,7 @@ export default function Reader({
   };
 
   useEffect(() => {
-    if (data) {
+    if (data && player.sentences) {
       trpcVanilla.history.add
         .mutate({
           server,
