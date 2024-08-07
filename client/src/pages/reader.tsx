@@ -21,13 +21,7 @@ import { useLocation } from "wouter";
 import { HomeButton } from "@/components/reader/home-button";
 import { NavArrows } from "@/components/reader/nav-arrows";
 import { PlayButton } from "@/components/reader/play-pause";
-
-function slugToTitle(slug: string): string {
-  return slug
-    .split("-")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
-}
+import { slugToTitle, Title } from "@/components/reader/title";
 
 export default function Reader({
   novel,
@@ -225,10 +219,6 @@ export default function Reader({
     }
   };
 
-  useEffect(() => {
-    document.title = slugToTitle(novel);
-  }, [novel]);
-
   const debouncedUpdateHistory = useRef(
     debounce(
       (state: {
@@ -297,22 +287,9 @@ export default function Reader({
           text={data?.content || ""}
         />
       </div>
-      <div
-        className="fixed top-0 left-0 z-[10] w-full h-32 hidden sm:flex items-center justify-center"
-        style={{
-          background: `linear-gradient(180deg, ${style.background} 0%, rgba(0,0,0,0) 100%)`,
-        }}
-      >
-        <h1
-          style={{
-            textShadow: `0 0 10px ${style.background}`,
-            color: style.readySentenceColor,
-          }}
-          className="text-2xl source-serif-4 mb-12"
-        >
-          {slugToTitle(novel)}
-        </h1>
-      </div>
+
+      <Title slug={novel} />
+
       {isLoading ? (
         <div
           className="flex items-center justify-center h-screen"
