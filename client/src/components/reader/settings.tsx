@@ -79,6 +79,7 @@ export function useSettings() {
     updateSettings,
     debouncedUpdateSettings,
     optimisticUpdateWithDebounce,
+    theme: themes[settings.theme],
   } as const;
 }
 

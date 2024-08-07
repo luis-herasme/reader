@@ -2,7 +2,6 @@ import { log } from "@/lib/logs";
 import { useEffect, useRef } from "react";
 import { usePlayer } from "@/lib/player";
 
-import { Loader2 } from "lucide-react";
 import { ListChapters } from "@/components/chapters";
 import {
   ReaderSettings,
@@ -22,6 +21,7 @@ import { NavArrows } from "@/components/reader/nav-arrows";
 import { PlayButton } from "@/components/reader/play-pause";
 import { slugToTitle, Title } from "@/components/reader/title";
 import { Sentence } from "@/components/reader/sentence";
+import { LoadingScreen } from "@/components/reader/loading-screen";
 
 export default function Reader({
   novel,
@@ -229,7 +229,7 @@ export default function Reader({
   }, [player.currentSentenceIndex]);
 
   return (
-    <main>
+    <div>
       {data && (
         <NavArrows
           next={`/${server}/reader/${novel}/${data.next}`}
@@ -275,15 +275,7 @@ export default function Reader({
       <Title slug={novel} />
 
       {isLoading ? (
-        <div
-          className="flex items-center justify-center h-screen"
-          style={{
-            background: style.background,
-            color: style.readySentenceColor,
-          }}
-        >
-          <Loader2 className="w-16 h-16 animate-spin" />
-        </div>
+        <LoadingScreen />
       ) : (
         <div
           style={{
@@ -313,6 +305,6 @@ export default function Reader({
           </p>
         </div>
       )}
-    </main>
+    </div>
   );
 }
