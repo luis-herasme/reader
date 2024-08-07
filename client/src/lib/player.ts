@@ -58,10 +58,8 @@ export class Player {
 
     this.sentences = extractSentences(text);
 
-    for (let sentence of this.sentences) {
-      if (sentence.includes("<") && sentence.includes(">")) {
-        sentence = sentence.replaceAll("<", "").replaceAll(">", "");
-      }
+    for (let i = 0; i < this.sentences.length; i++) {
+      this.sentences[i] = this.sentences[i].replaceAll("<", "").replaceAll(">", "");
     }
 
     this.audioLoader = new AudioLoader(this.sentences, forceUpdate);
