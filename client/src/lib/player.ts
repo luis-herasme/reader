@@ -109,21 +109,11 @@ export class Player {
     this.audioLoader.deleteFetchings(index);
   }
 
-  // private video: HTMLVideoElement | undefined;
-  // private playVideo() {
-  //   if (!this.video) {
-  //     this.video = document.getElementById("silent-video") as HTMLVideoElement;
-  //   }
-
-  //   this.video.play();
-  // }
-
   async play(index: number) {
     noSleep.enable();
     this.cancel();
     navigator.mediaSession.playbackState = "playing";
 
-    // this.playVideo();
     const id = crypto.randomUUID();
     this.playing = true;
     this.currentPlayID = id;
