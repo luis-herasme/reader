@@ -3,18 +3,13 @@ import { useEffect, useRef } from "react";
 import { usePlayer } from "@/lib/player";
 
 import { ListChapters } from "@/components/chapters";
-import {
-  ReaderSettings,
-  useSettings,
-  useSettingsStore,
-} from "@/components/reader/settings";
+import { ReaderSettings, useSettings } from "@/components/reader/settings";
 import { FullScreen } from "@/components/reader/fullscreen";
 import { useTrackSentenceIndex } from "@/components/reader/track-sentence-index";
 import { FollowReader } from "@/components/reader/follow-reader";
 import UserButton from "@/components/reader/user";
 import { trpc, trpcVanilla } from "../trpc";
 import { debounce } from "@/lib/debounce";
-import { themes } from "../themes";
 import { useLocation } from "wouter";
 import { HomeButton } from "@/components/reader/home-button";
 import { NavArrows } from "@/components/reader/nav-arrows";
@@ -38,12 +33,10 @@ export default function Reader({
     localStorage.setItem(chapter, "true");
   }, [chapter]);
 
-  const { settings } = useSettings();
+  const { settings, theme } = useSettings();
 
   const togglingPlay = useRef(false);
   const sentencesRef = useRef<HTMLSpanElement[]>([]);
-
-  const style = themes[useSettingsStore.getState().theme];
 
   const { data, isLoading } = trpc.novels.chapter.useQuery(
     {
@@ -279,7 +272,7 @@ export default function Reader({
       ) : (
         <div
           style={{
-            background: style.background,
+            background: theme.background,
           }}
         >
           <p
