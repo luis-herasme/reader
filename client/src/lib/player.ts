@@ -37,6 +37,12 @@ export function usePlayer(text: string, sentenceIndex: number) {
     }
   }, [text, sentenceIndex]);
 
+  useEffect(() => {
+    return () => {
+      player.destroy();
+    };
+  }, [player]);
+
   return { player } as const;
 }
 
@@ -59,7 +65,9 @@ export class Player {
     this.sentences = extractSentences(text);
 
     for (let i = 0; i < this.sentences.length; i++) {
-      this.sentences[i] = this.sentences[i].replaceAll("<", "").replaceAll(">", "");
+      this.sentences[i] = this.sentences[i]
+        .replaceAll("<", "")
+        .replaceAll(">", "");
     }
 
     this.audioLoader = new AudioLoader(this.sentences, forceUpdate);
