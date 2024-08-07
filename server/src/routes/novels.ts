@@ -1,5 +1,6 @@
 import z from "zod";
 import { publicProcedure, router } from "../trpc";
+import { prisma } from "../db";
 
 type SearchResult = {
   name: string;
@@ -56,11 +57,32 @@ export const novels = router({
         server: z.string(),
       })
     )
-    .query(async ({ input }) => {
+    .query(async ({ input, ctx }) => {
       const { server, novel, chapter } = input;
       const response = await fetch(
         URL + `/${server}/chapter/${novel}/${chapter}`
       );
-      return (await response.json()) as GetChapterResult;
+
+      const result = (await response.json()) as GetChapterResult;
+      let sentenceIndex = null;
+
+      if (ctx.user) {
+        const history = await prisma.history.findFirst({
+          where: {
+            userId: ctx.user.id,
+            slug: novel,
+            chapter,
+          },
+          select: {
+            sentenceIndex: true,
+          },
+        });
+
+        if (history) {
+          sentenceIndex = history.sentenceIndex;
+        }
+      }
+
+      return { ...result, sentenceIndex };
     }),
 });

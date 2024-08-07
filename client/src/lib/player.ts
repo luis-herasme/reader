@@ -1,15 +1,14 @@
 import { useEffect, useState } from "react";
 import { useForceUpdate } from "./use-force-update";
-import { trpcVanilla } from "../trpc";
 import { useSettings, useSettingsStore } from "@/components/reader/settings";
 import NoSleep from "nosleep.js";
 import { AudioLoader } from "./audio-loader";
 const noSleep = new NoSleep();
 
-export function usePlayer(text: string, slug: string, chapterSlug: string) {
+export function usePlayer(text: string, sentenceIndex: number) {
   const forceUpdate = useForceUpdate();
   const [player, setPlayer] = useState(
-    () => new Player(text, slug, chapterSlug, forceUpdate)
+    () => new Player(text, sentenceIndex, forceUpdate)
   );
   const { settings } = useSettings();
 
@@ -24,17 +23,19 @@ export function usePlayer(text: string, slug: string, chapterSlug: string) {
     const playing = player.playing;
     player.destroy();
 
-    const newPlayer = new Player(text, slug, chapterSlug, forceUpdate);
+    const newPlayer = new Player(text, sentenceIndex, forceUpdate);
+
     if (settings) {
       newPlayer.setSpeed(settings.speed);
       newPlayer.autoAdvance = settings.autoAdvance;
     }
+
     setPlayer(newPlayer);
 
     if (playing) {
       newPlayer.play(newPlayer.currentSentenceIndex);
     }
-  }, [text]);
+  }, [text, sentenceIndex]);
 
   return { player } as const;
 }
@@ -51,17 +52,8 @@ export class Player {
   private forceUpdate: () => void;
   private speed: number = 1;
   autoAdvance: boolean = true;
-  slug: string;
-  chapterSlug: string;
 
-  constructor(
-    text: string,
-    slug: string,
-    chapterSlug: string,
-    forceUpdate: () => void
-  ) {
-    this.slug = slug;
-    this.chapterSlug = chapterSlug;
+  constructor(text: string, sentenceIndex: number, forceUpdate: () => void) {
     this.forceUpdate = forceUpdate;
 
     this.sentences = extractSentences(text);
@@ -74,25 +66,12 @@ export class Player {
 
     this.audioLoader = new AudioLoader(this.sentences, forceUpdate);
     this.audioLoader.preLoadAudios();
-    this.getCurrentSentenceIndexFromServer();
+    this.currentSentenceIndex = sentenceIndex;
   }
 
   setSpeed(speed: number) {
     this.speed = speed;
     this.audioElement.playbackRate = speed;
-  }
-
-  async getCurrentSentenceIndexFromServer() {
-    const historyItem = await trpcVanilla.history.read.query({
-      slug: this.slug,
-      chapter: this.chapterSlug,
-    });
-
-    if (!historyItem) {
-      return;
-    }
-
-    this.currentSentenceIndex = historyItem.sentenceIndex;
   }
 
   get fetchings() {

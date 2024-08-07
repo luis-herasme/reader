@@ -9,7 +9,6 @@ import { useTrackSentenceIndex } from "@/components/reader/track-sentence-index"
 import { FollowReader } from "@/components/reader/follow-reader";
 import UserButton from "@/components/reader/user";
 import { trpc, trpcVanilla } from "../trpc";
-import { debounce } from "@/lib/debounce";
 import { useLocation } from "wouter";
 import { HomeButton } from "@/components/reader/home-button";
 import { NavArrows } from "@/components/reader/nav-arrows";
@@ -50,7 +49,7 @@ export default function Reader({
     }
   );
 
-  const { player } = usePlayer(data?.content || "", novel, chapter);
+  const { player } = usePlayer(data?.content || "", data?.sentenceIndex || 0);
   useTrackSentenceIndex(player, sentencesRef);
 
   useEffect(() => {
@@ -187,30 +186,17 @@ export default function Reader({
     }
   };
 
-  const debouncedUpdateHistory = useRef(
-    debounce(
-      (state: {
-        slug: string;
-        chapter: string;
-        sentenceIndex: number;
-        length: number;
-        server: string;
-      }) => {
-        trpcVanilla.history.add.mutate(state);
-      },
-      500
-    )
-  ).current;
-
   useEffect(() => {
-    debouncedUpdateHistory({
-      server,
-      slug: novel,
-      chapter,
-      sentenceIndex: player.currentSentenceIndex,
-      length: player.sentences.length,
-    });
-  }, [player.currentSentenceIndex]);
+    if (data) {
+      trpcVanilla.history.add.mutate({
+        server,
+        slug: novel,
+        chapter,
+        sentenceIndex: player.currentSentenceIndex,
+        length: player.sentences.length,
+      });
+    }
+  }, [data, player.currentSentenceIndex]);
 
   return (
     <div>
