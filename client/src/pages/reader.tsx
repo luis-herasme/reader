@@ -1,6 +1,6 @@
 import { log } from "@/lib/logs";
 import { useEffect, useRef } from "react";
-import { Player, usePlayer } from "@/lib/player";
+import { usePlayer } from "@/lib/player";
 
 import { Loader2 } from "lucide-react";
 import { ListChapters } from "@/components/chapters";
@@ -16,12 +16,12 @@ import UserButton from "@/components/reader/user";
 import { trpc, trpcVanilla } from "../trpc";
 import { debounce } from "@/lib/debounce";
 import { themes } from "../themes";
-import { toast } from "sonner";
 import { useLocation } from "wouter";
 import { HomeButton } from "@/components/reader/home-button";
 import { NavArrows } from "@/components/reader/nav-arrows";
 import { PlayButton } from "@/components/reader/play-pause";
 import { slugToTitle, Title } from "@/components/reader/title";
+import { Sentence } from "@/components/reader/sentence";
 
 export default function Reader({
   novel,
@@ -197,22 +197,6 @@ export default function Reader({
     };
   }, [player]);
 
-  const sentences = player.sentences.map((sentence, index) => {
-    if (sentence === "\n") {
-      return <br key={"jump-" + index} />;
-    }
-
-    return (
-      <Sentence
-        key={"sentence-" + index}
-        player={player}
-        index={index}
-        sentencesRef={sentencesRef}
-        sentence={sentence}
-      />
-    );
-  });
-
   player.nextChapter = () => {
     if (data && data.next) {
       navigate(data.next);
@@ -317,103 +301,18 @@ export default function Reader({
               lineHeight: settings ? settings.fontSize + 0.5 + "rem" : "",
             }}
           >
-            {sentences}
+            {player.sentences.map((sentence, index) => (
+              <Sentence
+                key={"sentence-" + index}
+                player={player}
+                index={index}
+                sentencesRef={sentencesRef}
+                sentence={sentence}
+              />
+            ))}
           </p>
         </div>
       )}
     </main>
-  );
-}
-
-function Sentence({
-  player,
-  index,
-  sentencesRef,
-  sentence,
-}: {
-  player: Player;
-  index: number;
-  sentencesRef: React.MutableRefObject<HTMLSpanElement[]>;
-  sentence: string;
-}) {
-  const isSentence = player.currentSentenceIndex === index;
-  const isLoading = player.fetchings.get(index);
-  const isReady = player.audios.get(index);
-  const STYLE = themes[useSettingsStore.getState().theme || "Dark"];
-
-  let style: React.CSSProperties = {};
-
-  if (isSentence) {
-    style = {
-      backgroundColor: STYLE.activeSentenceBackgroundColor,
-      color: "#000000",
-    };
-  } else if (!isReady && isLoading) {
-    style = {
-      backgroundColor: STYLE.loadingSentenceBackgroundColor,
-      color: STYLE.readySentenceColor,
-      animation: "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
-      cursor: "pointer",
-    };
-  } else if (!isReady && !isLoading) {
-    style = {
-      color: STYLE.inactiveSentenceColor,
-      cursor: "pointer",
-    };
-  } else if (isReady && !isLoading) {
-    style = {
-      color: STYLE.readySentenceColor,
-      cursor: "pointer",
-    };
-  }
-
-  return (
-    <>
-      <span
-        ref={
-          isSentence
-            ? (element) => {
-                if (!element) return;
-                sentencesRef.current[index] = element;
-              }
-            : null
-        }
-        style={style}
-        className={`duration-300 ${isSentence ? "" : "sentence_hover"}`}
-        onClick={() => {
-          if (isSentence) {
-            return;
-          }
-
-          // If this sentence is loading refetch it
-          if (player.fetchings.get(index)) {
-            player.refetchSentences();
-            toast("Refetching sentence");
-            return;
-          }
-
-          if (player.playing) {
-            player.play(index);
-          } else {
-            player.currentSentenceIndex = index;
-          }
-        }}
-        onDoubleClick={() => {
-          if (player.fetchings.get(index)) {
-            toast("Removing sentence from queue");
-            player.removeFetching(index);
-
-            if (player.currentSentenceIndex === index) {
-              player.play(player.nextIndex());
-            }
-
-            return;
-          }
-        }}
-      >
-        {sentence}
-      </span>
-      &nbsp;
-    </>
   );
 }
