@@ -1,5 +1,4 @@
 import { toast } from "sonner";
-import { themes } from "@/themes";
 import { Player } from "@/lib/player";
 import { useSettings } from "./settings";
 
@@ -17,31 +16,30 @@ export function Sentence({
   const isSentence = player.currentSentenceIndex === index;
   const isLoading = player.fetchings.get(index);
   const isReady = player.audios.get(index);
-  const { settings } = useSettings();
-  const STYLE = themes[settings.theme];
+  const { theme } = useSettings();
 
   let style: React.CSSProperties = {};
 
   if (isSentence) {
     style = {
-      backgroundColor: STYLE.activeSentenceBackgroundColor,
+      backgroundColor: theme.activeSentenceBackgroundColor,
       color: "#000000",
     };
   } else if (!isReady && isLoading) {
     style = {
-      backgroundColor: STYLE.loadingSentenceBackgroundColor,
-      color: STYLE.readySentenceColor,
+      backgroundColor: theme.loadingSentenceBackgroundColor,
+      color: theme.readySentenceColor,
       animation: "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
       cursor: "pointer",
     };
   } else if (!isReady && !isLoading) {
     style = {
-      color: STYLE.inactiveSentenceColor,
+      color: theme.inactiveSentenceColor,
       cursor: "pointer",
     };
   } else if (isReady && !isLoading) {
     style = {
-      color: STYLE.readySentenceColor,
+      color: theme.readySentenceColor,
       cursor: "pointer",
     };
   }
