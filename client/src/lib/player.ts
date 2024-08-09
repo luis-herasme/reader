@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useForceUpdate } from "./use-force-update";
-import { useSettings, useSettingsStore } from "@/components/reader/settings";
+import { useSettings } from "@/components/reader/settings";
 import NoSleep from "nosleep.js";
 import { AudioLoader } from "./audio-loader";
 const noSleep = new NoSleep();
@@ -16,6 +16,7 @@ export function usePlayer(text: string, sentenceIndex: number) {
     if (settings) {
       player.setSpeed(settings.speed);
       player.autoAdvance = settings.autoAdvance;
+      player.stopOffset = settings.stopOffset;
     }
   }, [player, settings]);
 
@@ -56,8 +57,11 @@ export class Player {
   private audioLoader: AudioLoader;
   private audioElement: HTMLAudioElement = new Audio();
   private forceUpdate: () => void;
+
+  // User state settings
   private speed: number = 1;
-  autoAdvance: boolean = true;
+  public autoAdvance: boolean = true;
+  public stopOffset: number = 0;
 
   constructor(text: string, sentenceIndex: number, forceUpdate: () => void) {
     this.forceUpdate = forceUpdate;
@@ -178,7 +182,7 @@ export class Player {
       const interval = setInterval(() => {
         if (
           this.audioElement.currentTime >=
-          this.audioElement.duration - useSettingsStore.getState().stopOffset
+          this.audioElement.duration - this.stopOffset
         ) {
           clearInterval(interval);
           resolve();
