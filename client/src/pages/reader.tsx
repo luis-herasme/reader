@@ -51,61 +51,53 @@ export default function Reader({
   const { player } = usePlayer(data?.content || "", data?.sentenceIndex || 0);
   useTrackSentenceIndex(player, sentencesRef);
 
-  const onNext = useCallback(
-    () =>
-      debounce(() => {
-        if (!data) {
-          return;
-        }
+  const onNext = useCallback(() => {
+    if (!data) {
+      return;
+    }
 
-        const nextIndex = player.nextIndex();
+    const nextIndex = player.nextIndex();
 
-        if (nextIndex === null) {
-          if (data.next) {
-            navigate(data.next);
-          } else {
-            toast("There are no more chapters");
-          }
+    if (nextIndex === null) {
+      if (data.next) {
+        navigate(data.next);
+      } else {
+        toast("There are no more chapters");
+      }
 
-          return;
-        }
+      return;
+    }
 
-        if (player.isPlaying()) {
-          player.play(nextIndex);
-        } else {
-          player.currentSentenceIndex = nextIndex;
-        }
-      }, 300),
-    [player, data]
-  );
+    if (player.isPlaying()) {
+      player.play(nextIndex);
+    } else {
+      player.currentSentenceIndex = nextIndex;
+    }
+  }, [player, data]);
 
-  const onPrev = useCallback(
-    () =>
-      debounce(() => {
-        if (!data) {
-          return;
-        }
+  const onPrev = useCallback(() => {
+    if (!data) {
+      return;
+    }
 
-        const previousIndex = player.previousIndex();
+    const previousIndex = player.previousIndex();
 
-        if (previousIndex === null) {
-          if (data.prev) {
-            navigate(data.prev);
-          } else {
-            toast("There are no previous chapters");
-          }
+    if (previousIndex === null) {
+      if (data.prev) {
+        navigate(data.prev);
+      } else {
+        toast("There are no previous chapters");
+      }
 
-          return;
-        }
+      return;
+    }
 
-        if (player.isPlaying()) {
-          player.play(previousIndex);
-        } else {
-          player.currentSentenceIndex = previousIndex;
-        }
-      }, 300),
-    [player, data]
-  );
+    if (player.isPlaying()) {
+      player.play(previousIndex);
+    } else {
+      player.currentSentenceIndex = previousIndex;
+    }
+  }, [player, data]);
 
   const onTogglePlay = useCallback(
     debounce(() => {
