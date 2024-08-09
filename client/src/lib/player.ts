@@ -192,6 +192,8 @@ export class Player {
     });
   }
 
+  // Returns the next index that is a valid sentence, or null if
+  // there are no more valid sentences (reached the end)
   nextIndex() {
     let index = this.currentSentenceIndex + 1;
 
@@ -199,13 +201,15 @@ export class Player {
       index += 1;
 
       if (index >= this.sentences.length) {
-        return index;
+        return null;
       }
     }
 
     return index;
   }
 
+  // Returns the previous index that is a valid sentence, or null
+  // if there are no more valid sentences (reached the start)
   previousIndex() {
     let index = this.currentSentenceIndex - 1;
 
@@ -213,7 +217,7 @@ export class Player {
       index -= 1;
 
       if (index < 0) {
-        return index;
+        return null;
       }
     }
 

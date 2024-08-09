@@ -1,5 +1,5 @@
 import { log } from "@/lib/logs";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { usePlayer } from "@/lib/player";
 
 import { ListChapters } from "@/components/chapters";
@@ -17,6 +17,9 @@ import { slugToTitle, Title } from "@/components/reader/title";
 import { Sentence } from "@/components/reader/sentence";
 import { LoadingScreen } from "@/components/reader/loading-screen";
 import { Sentences } from "@/components/reader/sentences";
+import { toast } from "sonner";
+import { useKeyboardControl } from "@/lib/use-keyboard-control";
+import { debounce } from "@/lib/debounce";
 
 export default function Reader({
   novel,
@@ -30,7 +33,6 @@ export default function Reader({
   const utils = trpc.useUtils();
   const navigate = useLocation()[1];
 
-  const togglingPlay = useRef(false);
   const sentencesRef = useRef<HTMLSpanElement[]>([]);
 
   const { data, isLoading } = trpc.novels.chapter.useQuery(
@@ -49,117 +51,77 @@ export default function Reader({
   const { player } = usePlayer(data?.content || "", data?.sentenceIndex || 0);
   useTrackSentenceIndex(player, sentencesRef);
 
-  useEffect(() => {
-    function handleKeyDown(event: KeyboardEvent) {
-      // If the event is not inside an input prevent default
-      if (
-        event.target instanceof HTMLInputElement ||
-        event.target instanceof HTMLTextAreaElement
-      ) {
-        return;
-      }
-
-      // If the control key is pressed, don't prevent default
-      if (event.ctrlKey) {
-        return;
-      }
-
-      event.preventDefault();
-      event.stopPropagation();
-
-      if (togglingPlay.current) {
-        return;
-      }
-
-      log("");
-      log(`Key pressed: ${event.key} - ${event.code}`);
-      log(`playing ${player.isPlaying()}`);
-
-      if (
-        event.code === "Space" ||
-        event.key === "MediaPlayPause" ||
-        event.key === "MediaPlay" ||
-        event.key === "MediaPause"
-      ) {
-        togglingPlay.current = true;
-        setTimeout(() => {
-          togglingPlay.current = false;
-        }, 100);
-
-        if (player.isPlaying()) {
-          player.cancel();
-        } else {
-          player.play(player.currentSentenceIndex);
-        }
-
-        togglingPlay.current = false;
-      } else if (
-        event.key === "ArrowRight" ||
-        event.key === "MediaTrackNext" ||
-        event.key === "ArrowDown"
-      ) {
-        const nextIndex = player.nextIndex();
-
-        if (data && data.next && nextIndex >= player.sentences.length) {
-          navigate(data.next);
-          return;
-        }
-
-        if (player.isPlaying()) {
-          player.play(nextIndex);
-        } else {
-          player.currentSentenceIndex = nextIndex;
-        }
-      } else if (
-        event.key === "ArrowLeft" ||
-        event.key === "ArrowUp" ||
-        event.key === "MediaTrackPrevious"
-      ) {
-        const previousIndex = player.previousIndex();
-
-        if (data && data.prev && previousIndex < 0) {
-          navigate(data.prev);
-          return;
-        }
-
-        if (player.isPlaying() && previousIndex > 0) {
-          player.play(previousIndex);
-        } else {
-          player.currentSentenceIndex = previousIndex;
-        }
-      }
+  const onNext = useCallback(() => {
+    if (!data) {
+      return;
     }
 
-    window.addEventListener("keydown", handleKeyDown);
+    const nextIndex = player.nextIndex();
 
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [player]);
-
-  useEffect(() => {
-    function handlePlay(play: boolean) {
-      if (togglingPlay.current) {
-        return;
+    if (nextIndex === null) {
+      if (data.next) {
+        navigate(data.next);
+      } else {
+        toast("There are no more chapters");
       }
 
-      log("");
-      log(`Handling state change media session: ${player.isPlaying()}`);
+      return;
+    }
 
-      togglingPlay.current = true;
-      setTimeout(() => {
-        togglingPlay.current = false;
-      }, 100);
+    if (player.isPlaying()) {
+      player.play(nextIndex);
+    } else {
+      player.currentSentenceIndex = nextIndex;
+    }
+  }, [player, data]);
 
-      if (player.isPlaying() === play) {
-        return;
+  const onPrev = useCallback(() => {
+    if (!data) {
+      return;
+    }
+
+    const previousIndex = player.previousIndex();
+
+    if (previousIndex === null) {
+      if (data.prev) {
+        navigate(data.prev);
+      } else {
+        toast("There are no previous chapters");
       }
 
+      return;
+    }
+
+    if (player.isPlaying()) {
+      player.play(previousIndex);
+    } else {
+      player.currentSentenceIndex = previousIndex;
+    }
+  }, [player, data]);
+
+  const onTogglePlay = useCallback(
+    debounce(() => {
       if (player.isPlaying()) {
         player.cancel();
       } else {
         player.play(player.currentSentenceIndex);
       }
+    }, 100),
+    [player]
+  );
+
+  useKeyboardControl({ onNext, onPrev, onTogglePlay });
+
+  useEffect(() => {
+    function handlePlay(play: boolean) {
+      log("");
+      log(`Handling state change media session: ${player.isPlaying()}`);
+
+      if (player.isPlaying() === play) {
+        return;
+      }
+
+      onTogglePlay();
     }
 
     if ("mediaSession" in navigator) {
@@ -175,7 +137,7 @@ export default function Reader({
         navigator.mediaSession.setActionHandler("stop", null);
       }
     };
-  }, [player]);
+  }, [player, onTogglePlay]);
 
   player.nextChapter = () => {
     if (data && data.next) {
