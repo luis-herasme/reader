@@ -35,6 +35,7 @@ export class Player {
     this.audioLoader = new AudioLoader(this.sentences, forceUpdate);
     this.audioLoader.preLoadAudios();
     this.currentSentenceIndex = sentenceIndex;
+    this.audioLoader.preloadAudioIndex = this.currentSentenceIndex;
     this.forceUpdate();
   }
 
