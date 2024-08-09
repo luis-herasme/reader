@@ -67,14 +67,11 @@ export function ChaptersDialog({
 
   const { data: history } = trpc.history.novelHistory.useQuery(slug);
 
-  const currentChapterRef = useCallback(
-    (node: any) => {
-      if (node !== null) {
-        node.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
-    },
-    [currentChapterSlug]
-  );
+  const currentChapterRef = useCallback((node: HTMLDivElement | null) => {
+    if (node) {
+      node.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, []);
 
   return (
     <Dialog open={open} onOpenChange={(open) => setOpen(open)}>
