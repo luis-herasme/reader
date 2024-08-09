@@ -6,15 +6,14 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useEffect, useRef, useState } from "react";
-import { Player } from "@/lib/player";
 
 export function FollowReader({
   text,
-  player,
+  currentSentenceIndex,
   sentencesRef,
 }: {
   text: string;
-  player: Player;
+  currentSentenceIndex: number;
   sentencesRef: React.MutableRefObject<HTMLSpanElement[]>;
 }) {
   const [followReader, setFollowReader] = useState(true);
@@ -26,7 +25,8 @@ export function FollowReader({
   }, [text]);
 
   useEffect(() => {
-    const currentRef = sentencesRef.current[player.currentSentenceIndex];
+    const currentRef = sentencesRef.current[currentSentenceIndex];
+
     if (currentRef && followReader) {
       scrollingProgrammatically.current = true;
       currentRef.scrollIntoView({ block: "center" });
@@ -36,7 +36,7 @@ export function FollowReader({
         scrollingProgrammatically.current = false;
       }, 100);
     }
-  }, [player.currentSentenceIndex, followReader]);
+  }, [currentSentenceIndex, followReader]);
 
   // If the users scrolls the page, stop following the reader. We should differentiate between the user scrolling and the reader scrolling
   useEffect(() => {
@@ -44,6 +44,7 @@ export function FollowReader({
       if (scrollingProgrammatically.current) {
         return;
       }
+
       setFollowReader(false);
     }
 
@@ -60,7 +61,7 @@ export function FollowReader({
         <TooltipTrigger>
           <div
             className="bg-[#222] outline-none hover:bg-[#444] duration-300 p-2 text-white border border-white rounded-full border-opacity-10"
-            onClick={() => setFollowReader(!followReader)}
+            onClick={() => setFollowReader((value) => !value)}
           >
             {followReader ? (
               <LocateOff className="w-3 h-3" />
