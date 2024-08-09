@@ -29,9 +29,11 @@ export function FollowReader({
 
     if (currentRef && followReader) {
       scrollingProgrammatically.current = true;
+
       currentRef.scrollIntoView({ block: "center" });
 
       clearTimeout(currentScrollTimeout.current);
+
       currentScrollTimeout.current = setTimeout(() => {
         scrollingProgrammatically.current = false;
       }, 100);

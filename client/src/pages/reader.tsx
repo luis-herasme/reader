@@ -163,7 +163,12 @@ export default function Reader({
   }, [player]);
 
   useEffect(() => {
-    if (data && player && player.sentences) {
+    if (
+      data &&
+      player &&
+      player.sentences.length &&
+      player.currentSentenceIndex
+    ) {
       trpcVanilla.history.add
         .mutate({
           server,
