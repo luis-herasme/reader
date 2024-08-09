@@ -18,7 +18,7 @@ export function ListChapters({
 }: {
   slug: string;
   name: string;
-  currentChapterSlug?: string;
+  currentChapterSlug: string;
   server: string;
 }) {
   const [open, setOpen] = useState(false);
