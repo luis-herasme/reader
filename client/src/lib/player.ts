@@ -1,51 +1,7 @@
-import { useEffect, useState } from "react";
-import { useForceUpdate } from "./use-force-update";
-import { useSettings } from "@/components/reader/settings";
-import NoSleep from "nosleep.js";
 import { AudioLoader } from "./audio-loader";
+import NoSleep from "nosleep.js";
+
 const noSleep = new NoSleep();
-
-export function usePlayer(text: string, sentenceIndex: number) {
-  const forceUpdate = useForceUpdate();
-  const [player, setPlayer] = useState(
-    () => new Player(text, sentenceIndex, forceUpdate)
-  );
-  const { settings } = useSettings();
-
-  useEffect(() => {
-    if (settings) {
-      player.setSpeed(settings.speed);
-      player.autoAdvance = settings.autoAdvance;
-      player.stopOffset = settings.stopOffset;
-    }
-  }, [player, settings]);
-
-  useEffect(() => {
-    const playing = player.isPlaying();
-    player.destroy();
-
-    const newPlayer = new Player(text, sentenceIndex, forceUpdate);
-
-    if (settings) {
-      newPlayer.setSpeed(settings.speed);
-      newPlayer.autoAdvance = settings.autoAdvance;
-    }
-
-    setPlayer(newPlayer);
-
-    if (playing) {
-      newPlayer.play(newPlayer.currentSentenceIndex);
-    }
-  }, [text, sentenceIndex]);
-
-  useEffect(() => {
-    return () => {
-      player.destroy();
-    };
-  }, [player]);
-
-  return { player } as const;
-}
 
 export class Player {
   readonly sentences: string[] = [];

@@ -1,6 +1,6 @@
 import { log } from "@/lib/logs";
 import { useCallback, useEffect, useRef } from "react";
-import { usePlayer } from "@/lib/player";
+import { usePlayer } from "@/lib/use-player";
 
 import { ListChapters } from "@/components/chapters";
 import { ReaderSettings } from "@/components/reader/settings";
@@ -48,12 +48,16 @@ export default function Reader({
     }
   );
 
-  const { player } = usePlayer(data?.content || "", data?.sentenceIndex || 0);
+  const player = usePlayer({
+    text: data?.content || "",
+    sentenceIndex: data?.sentenceIndex || 0,
+  });
+
   useTrackSentenceIndex(player, sentencesRef);
 
   const onNext = useCallback(
     debounce(() => {
-      if (!data) {
+      if (!data || !player) {
         return;
       }
 
@@ -80,7 +84,7 @@ export default function Reader({
 
   const onPrev = useCallback(
     debounce(() => {
-      if (!data) {
+      if (!data || !player) {
         return;
       }
 
@@ -107,6 +111,10 @@ export default function Reader({
 
   const onTogglePlay = useCallback(
     debounce(() => {
+      if (!player) {
+        return;
+      }
+
       if (player.isPlaying()) {
         player.cancel();
       } else {
@@ -120,10 +128,9 @@ export default function Reader({
 
   useEffect(() => {
     function handlePlay(play: boolean) {
-      log("");
-      log(`Handling state change media session: ${player.isPlaying()}`);
+      log("Handling state change media session");
 
-      if (player.isPlaying() === play) {
+      if (player?.isPlaying() === play) {
         return;
       }
 
@@ -145,14 +152,18 @@ export default function Reader({
     };
   }, [player, onTogglePlay]);
 
-  player.nextChapter = () => {
-    if (data && data.next) {
-      navigate(data.next);
+  useEffect(() => {
+    if (player) {
+      player.nextChapter = () => {
+        if (data && data.next) {
+          navigate(data.next);
+        }
+      };
     }
-  };
+  }, [player]);
 
   useEffect(() => {
-    if (data && player.sentences) {
+    if (data && player && player.sentences) {
       trpcVanilla.history.add
         .mutate({
           server,
@@ -165,7 +176,7 @@ export default function Reader({
           utils.history.novelHistory.invalidate(novel);
         });
     }
-  }, [data, player.currentSentenceIndex]);
+  }, [data, player?.currentSentenceIndex]);
 
   return (
     <div>
@@ -195,8 +206,10 @@ export default function Reader({
 
       <div className="translate-y-[50%] z-[49] p-4 gap-4 bottom-16 left-[50%] translate-x-[-50%] fixed bg-black bg-opacity-50 rounded-full border border-white border-opacity-10 backdrop-blur flex items-center justify-center">
         <PlayButton
-          playing={player.isPlaying()}
+          playing={player ? player.isPlaying() : false}
           onClick={() => {
+            if (!player) return;
+
             if (player.isPlaying()) {
               player.cancel();
             } else {
@@ -206,7 +219,7 @@ export default function Reader({
         />
 
         <FollowReader
-          player={player}
+          currentSentenceIndex={player ? player.currentSentenceIndex : 0}
           sentencesRef={sentencesRef}
           text={data?.content || ""}
         />
@@ -218,7 +231,7 @@ export default function Reader({
         <LoadingScreen />
       ) : (
         <Sentences>
-          {player.sentences.map((sentence, index) => (
+          {player?.sentences.map((sentence, index) => (
             <Sentence
               key={"sentence-" + index}
               player={player}
