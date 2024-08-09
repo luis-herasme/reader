@@ -35,7 +35,7 @@ export default function Home({ server }: { server: string }) {
     enabled: Boolean(search.search),
   });
 
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
   const { data: isAuthenticated } = trpc.auth.isAuthenticated.useQuery();
 
   return (
@@ -138,14 +138,6 @@ export default function Home({ server }: { server: string }) {
               <ArrowLeft className="w-6 h-6" />
               Previous
             </div>
-            {/* <div className="flex flex-col items-center justify-center text-center absolute left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%]">
-              <div className="text-white sm:text-2xl">
-                {searchQuery.data.count.toLocaleString()} results found
-              </div>
-              <div className="text-white opacity-50 ">
-                Showing {search.offset + 1} to {search.offset + search.limit}
-              </div>
-            </div> */}
 
             <div
               className={`sm:text-xl text-white flex items-center justify-between gap-2 select-none cursor-pointer`}
