@@ -13,12 +13,11 @@ export class Player {
   private readonly audioLoader: AudioLoader;
   private readonly audioElement: HTMLAudioElement = new Audio();
 
-  nextChapter: () => void = () => {};
+  onComplete: () => void = () => {};
   private forceUpdate: () => void;
 
   // User state settings
   private speed: number = 1;
-  public autoAdvance: boolean = true;
   public stopOffset: number = 0;
 
   constructor(text: string, sentenceIndex: number, forceUpdate: () => void) {
@@ -98,16 +97,8 @@ export class Player {
       }
     }
 
-    if (this.autoAdvance) {
-      this.currentSentenceIndex = 0;
-      this.forceUpdate();
-      this.nextChapter();
-    } else {
-      this.playing = false;
-      this.forceUpdate();
-      this.currentSentenceIndex = 0;
-      this.forceUpdate();
-    }
+    this.playing = false;
+    this.onComplete();
   }
 
   destroy() {

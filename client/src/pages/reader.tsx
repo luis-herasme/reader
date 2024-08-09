@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef } from "react";
 import { usePlayer } from "@/lib/use-player";
 
 import { ListChapters } from "@/components/chapters";
-import { ReaderSettings } from "@/components/reader/settings";
+import { ReaderSettings, useSettings } from "@/components/reader/settings";
 import { FullScreen } from "@/components/reader/fullscreen";
 import { useTrackSentenceIndex } from "@/components/reader/track-sentence-index";
 import { FollowReader } from "@/components/reader/follow-reader";
@@ -31,7 +31,7 @@ export default function Reader({
   server: string;
 }) {
   const utils = trpc.useUtils();
-
+  const { settings } = useSettings();
   const sentencesRef = useRef<HTMLSpanElement[]>([]);
 
   const { data, isLoading } = trpc.novels.chapter.useQuery(
@@ -153,13 +153,13 @@ export default function Reader({
 
   useEffect(() => {
     if (player) {
-      player.nextChapter = () => {
-        if (data && data.next) {
+      player.onComplete = () => {
+        if (data && data.next && settings.autoAdvance) {
           navigate(data.next);
         }
       };
     }
-  }, [player, data]);
+  }, [player, data, settings]);
 
   useEffect(() => {
     if (data && player && player.sentences.length) {

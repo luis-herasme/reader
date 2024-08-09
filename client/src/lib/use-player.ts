@@ -17,7 +17,6 @@ export function usePlayer({
   useEffect(() => {
     if (settings && player) {
       player.setSpeed(settings.speed);
-      player.autoAdvance = settings.autoAdvance;
       player.stopOffset = settings.stopOffset;
     }
   }, [player, settings]);
