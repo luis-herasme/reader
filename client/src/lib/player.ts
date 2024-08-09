@@ -59,7 +59,7 @@ export class Player {
 
   async play(index: number) {
     noSleep.enable();
-    this.cancel();
+    this.audioElement.currentTime = 0;
     navigator.mediaSession.playbackState = "playing";
 
     const id = this.currentPlayID + 1;
