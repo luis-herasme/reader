@@ -1,10 +1,9 @@
-import { Logo } from "@/components/logo";
-import { Button } from "@/components/ui/button";
 import { trpc } from "@/trpc";
-// import { signIn, useSession } from "next-auth/react";
-import { ArrowRight } from "lucide-react";
 import { useState } from "react";
 import { useLocation } from "wouter";
+import { Logo } from "@/components/logo";
+import { Button } from "@/components/ui/button";
+import { ArrowRight, Loader2 } from "lucide-react";
 
 export default function Login() {
   const { data: isAuthenticated, isLoading } =
@@ -17,7 +16,11 @@ export default function Login() {
   }
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex items-center justify-center w-full min-h-screen">
+        <Loader2 className="animate-spin w-12 h-12" />
+      </div>
+    );
   }
 
   return (
