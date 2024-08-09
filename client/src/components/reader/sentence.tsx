@@ -73,7 +73,7 @@ export function Sentence({
             return;
           }
 
-          if (player.playing) {
+          if (player.isPlaying()) {
             player.play(index);
           } else {
             player.currentSentenceIndex = index;

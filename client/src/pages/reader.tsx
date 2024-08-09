@@ -73,7 +73,7 @@ export default function Reader({
 
       log("");
       log(`Key pressed: ${event.key} - ${event.code}`);
-      log(`playing ${player.playing}`);
+      log(`playing ${player.isPlaying()}`);
 
       if (
         event.code === "Space" ||
@@ -86,7 +86,7 @@ export default function Reader({
           togglingPlay.current = false;
         }, 100);
 
-        if (player.playing) {
+        if (player.isPlaying()) {
           player.cancel();
         } else {
           player.play(player.currentSentenceIndex);
@@ -105,7 +105,7 @@ export default function Reader({
           return;
         }
 
-        if (player.playing) {
+        if (player.isPlaying()) {
           player.play(nextIndex);
         } else {
           player.currentSentenceIndex = nextIndex;
@@ -122,7 +122,7 @@ export default function Reader({
           return;
         }
 
-        if (player.playing && previousIndex > 0) {
+        if (player.isPlaying() && previousIndex > 0) {
           player.play(previousIndex);
         } else {
           player.currentSentenceIndex = previousIndex;
@@ -144,18 +144,18 @@ export default function Reader({
       }
 
       log("");
-      log(`Handling state change media session: ${player.playing}`);
+      log(`Handling state change media session: ${player.isPlaying()}`);
 
       togglingPlay.current = true;
       setTimeout(() => {
         togglingPlay.current = false;
       }, 100);
 
-      if (player.playing === play) {
+      if (player.isPlaying() === play) {
         return;
       }
 
-      if (player.playing) {
+      if (player.isPlaying()) {
         player.cancel();
       } else {
         player.play(player.currentSentenceIndex);
@@ -227,9 +227,9 @@ export default function Reader({
 
       <div className="translate-y-[50%] z-[49] p-4 gap-4 bottom-16 left-[50%] translate-x-[-50%] fixed bg-black bg-opacity-50 rounded-full border border-white border-opacity-10 backdrop-blur flex items-center justify-center">
         <PlayButton
-          playing={player.playing}
+          playing={player.isPlaying()}
           onClick={() => {
-            if (player.playing) {
+            if (player.isPlaying()) {
               player.cancel();
             } else {
               player.play(player.currentSentenceIndex);

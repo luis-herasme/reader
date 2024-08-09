@@ -21,7 +21,7 @@ export function usePlayer(text: string, sentenceIndex: number) {
   }, [player, settings]);
 
   useEffect(() => {
-    const playing = player.playing;
+    const playing = player.isPlaying();
     player.destroy();
 
     const newPlayer = new Player(text, sentenceIndex, forceUpdate);
@@ -48,14 +48,16 @@ export function usePlayer(text: string, sentenceIndex: number) {
 }
 
 export class Player {
-  sentences: string[] = [];
-  private playing_: boolean = false;
-  private currentSentenceIndex_: number = 0;
-  private currentPlayID: string = crypto.randomUUID();
-  nextChapter: () => void = () => {};
+  readonly sentences: string[] = [];
 
-  private audioLoader: AudioLoader;
-  private audioElement: HTMLAudioElement = new Audio();
+  private playing: boolean = false;
+  private currentPlayID: number = 0;
+  private currentSentenceIndex_: number = 0;
+
+  private readonly audioLoader: AudioLoader;
+  private readonly audioElement: HTMLAudioElement = new Audio();
+
+  nextChapter: () => void = () => {};
   private forceUpdate: () => void;
 
   // User state settings
@@ -92,13 +94,8 @@ export class Player {
     return this.audioLoader.audios;
   }
 
-  get playing() {
-    return this.playing_;
-  }
-
-  set playing(playing: boolean) {
-    this.playing_ = playing;
-    this.forceUpdate();
+  isPlaying() {
+    return this.playing;
   }
 
   get currentSentenceIndex() {
@@ -124,9 +121,11 @@ export class Player {
     this.cancel();
     navigator.mediaSession.playbackState = "playing";
 
-    const id = crypto.randomUUID();
-    this.playing = true;
+    const id = this.currentPlayID + 1;
     this.currentPlayID = id;
+
+    this.playing = true;
+    this.forceUpdate();
 
     for (let i = index; i < this.sentences.length; i++) {
       if (this.currentPlayID !== id) {
@@ -146,6 +145,7 @@ export class Player {
       this.nextChapter();
     } else {
       this.playing = false;
+      this.forceUpdate();
       this.currentSentenceIndex = 0;
     }
   }
@@ -158,6 +158,7 @@ export class Player {
   cancel() {
     navigator.mediaSession.playbackState = "paused";
     this.playing = false;
+    this.forceUpdate();
     this.audioElement.pause();
     this.audioElement.currentTime = 0;
   }
