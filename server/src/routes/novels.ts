@@ -76,6 +76,9 @@ export const novels = router({
           select: {
             sentenceIndex: true,
           },
+          orderBy: {
+            updatedAt: "asc",
+          },
         });
 
         if (history) {
