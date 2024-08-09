@@ -159,7 +159,7 @@ export default function Reader({
         }
       };
     }
-  }, [player]);
+  }, [player, data]);
 
   useEffect(() => {
     if (
