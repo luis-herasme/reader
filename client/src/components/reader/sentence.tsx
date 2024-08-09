@@ -20,10 +20,18 @@ export function Sentence({
   let style: React.CSSProperties = {};
 
   if (isSentence) {
-    style = {
-      backgroundColor: theme.activeSentenceBackgroundColor,
-      color: "#000000",
-    };
+    if (status === "loading") {
+      style = {
+        animation: "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+        backgroundColor: theme.activeSentenceBackgroundColor,
+        color: "#000000",
+      };
+    } else {
+      style = {
+        backgroundColor: theme.activeSentenceBackgroundColor,
+        color: "#000000",
+      };
+    }
   } else if (status === "loading") {
     style = {
       backgroundColor: theme.loadingSentenceBackgroundColor,
