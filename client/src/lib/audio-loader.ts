@@ -5,8 +5,9 @@ const tts = new EdgeSpeechTTS({ locale: "en-US" });
 
 export class AudioLoader {
   private sentences: string[] = [];
-  audios: Map<number, HTMLAudioElement> = new Map();
-  fetchings: Map<number, boolean> = new Map();
+  private audios: Map<number, HTMLAudioElement> = new Map();
+  private fetchings: Map<number, boolean> = new Map();
+
   forceUpdate: () => void;
 
   constructor(sentences: string[], forceUpdate: () => void) {
@@ -44,6 +45,22 @@ export class AudioLoader {
         this.fetchAudio(i);
       }
     }
+  }
+
+  getAudioStatus(index: number): "loading" | "ready" | "inactive" | "invalid" {
+    if (!sentenceIsValid(this.sentences[index])) {
+      return "invalid";
+    }
+
+    if (this.fetchings.get(index)) {
+      return "loading";
+    }
+
+    if (this.audios.get(index)) {
+      return "ready";
+    }
+
+    return "inactive";
   }
 
   async getAudio(
@@ -157,7 +174,12 @@ export class AudioLoader {
       }
 
       if (this.fetchings.size < 10) {
-        this.getAudio(this.preloadAudioIndex, false);
+        const status = this.getAudioStatus(this.preloadAudioIndex);
+
+        if (status === "inactive") {
+          this.fetchAudio(this.preloadAudioIndex);
+        }
+
         this.preloadAudioIndex += 1;
       }
     }, 50);

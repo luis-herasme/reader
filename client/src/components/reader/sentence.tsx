@@ -14,8 +14,7 @@ export function Sentence({
   sentence: string;
 }) {
   const isSentence = player.getCurrentSentenceIndex() === index;
-  const isLoading = player.fetchings.get(index);
-  const isReady = player.audios.get(index);
+  const status = player.audioLoader.getAudioStatus(index);
   const { theme } = useSettings();
 
   let style: React.CSSProperties = {};
@@ -25,19 +24,19 @@ export function Sentence({
       backgroundColor: theme.activeSentenceBackgroundColor,
       color: "#000000",
     };
-  } else if (!isReady && isLoading) {
+  } else if (status === "loading") {
     style = {
       backgroundColor: theme.loadingSentenceBackgroundColor,
       color: theme.readySentenceColor,
       animation: "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
       cursor: "pointer",
     };
-  } else if (!isReady && !isLoading) {
+  } else if (status === "inactive") {
     style = {
       color: theme.inactiveSentenceColor,
       cursor: "pointer",
     };
-  } else if (isReady && !isLoading) {
+  } else if (status === "ready") {
     style = {
       color: theme.readySentenceColor,
       cursor: "pointer",
@@ -67,7 +66,7 @@ export function Sentence({
           }
 
           // If this sentence is loading refetch it
-          if (player.fetchings.get(index)) {
+          if (player.audioLoader.getAudioStatus(index) === "loading") {
             player.refetchSentences();
             toast("Refetching sentence");
             return;
@@ -80,7 +79,7 @@ export function Sentence({
           }
         }}
         onDoubleClick={() => {
-          if (player.fetchings.get(index)) {
+          if (player.audioLoader.getAudioStatus(index) === "loading") {
             toast("Removing sentence from queue");
             player.removeFetching(index);
 

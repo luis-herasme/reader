@@ -5,12 +5,12 @@ const noSleep = new NoSleep();
 
 export class Player {
   readonly sentences: string[] = [];
+  readonly audioLoader: AudioLoader;
 
   private playing: boolean = false;
   private currentPlayID: number = 0;
   private currentSentenceIndex: number = 0;
 
-  private readonly audioLoader: AudioLoader;
   private readonly audioElement: HTMLAudioElement = new Audio();
 
   onComplete: () => void = () => {};
@@ -40,14 +40,6 @@ export class Player {
   setSpeed(speed: number) {
     this.speed = speed;
     this.audioElement.playbackRate = speed;
-  }
-
-  get fetchings() {
-    return this.audioLoader.fetchings;
-  }
-
-  get audios() {
-    return this.audioLoader.audios;
   }
 
   isPlaying() {
