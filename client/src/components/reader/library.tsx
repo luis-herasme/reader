@@ -5,13 +5,12 @@ import { History } from "./history";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { trpc, trpcVanilla } from "../../trpc";
 import { toast } from "sonner";
-import { useLocation } from "wouter";
+import { navigate } from "wouter/use-browser-location";
 
 function Favorites() {
   const utils = trpc.useUtils();
   const { data } = trpc.favorites.read.useQuery();
   const removeFavorite = trpc.favorites.delete.useMutation();
-  const navigate = useLocation()[1];
 
   if (!data || data.length === 0) {
     return (

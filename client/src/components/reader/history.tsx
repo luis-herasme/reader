@@ -8,7 +8,7 @@ import {
 import { Bookmark, Loader2, Trash } from "lucide-react";
 import { Favorite } from "./favorite";
 import { LibraryContent } from "./library";
-import { useLocation } from "wouter";
+import { navigate } from "wouter/use-browser-location";
 
 export default function HistoryDialog() {
   return (
@@ -40,7 +40,6 @@ function HistoryItem({
 }) {
   const utils = trpc.useUtils();
   const deleteMutation = trpc.history.clearNovelHistory.useMutation();
-  const navigate = useLocation()[1];
 
   return (
     <div className="flex items-center justify-between gap-4">

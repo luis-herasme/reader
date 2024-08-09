@@ -9,7 +9,6 @@ import { useTrackSentenceIndex } from "@/components/reader/track-sentence-index"
 import { FollowReader } from "@/components/reader/follow-reader";
 import UserButton from "@/components/reader/user";
 import { trpc, trpcVanilla } from "../trpc";
-import { useLocation } from "wouter";
 import { HomeButton } from "@/components/reader/home-button";
 import { NavArrows } from "@/components/reader/nav-arrows";
 import { PlayButton } from "@/components/reader/play-pause";
@@ -20,6 +19,7 @@ import { Sentences } from "@/components/reader/sentences";
 import { toast } from "sonner";
 import { useKeyboardControl } from "@/lib/use-keyboard-control";
 import { debounce } from "@/lib/debounce";
+import { navigate } from "wouter/use-browser-location";
 
 export default function Reader({
   novel,
@@ -31,7 +31,6 @@ export default function Reader({
   server: string;
 }) {
   const utils = trpc.useUtils();
-  const navigate = useLocation()[1];
 
   const sentencesRef = useRef<HTMLSpanElement[]>([]);
 

@@ -8,7 +8,7 @@ import {
 import { Eye, List, Loader2 } from "lucide-react";
 import { CircleButton } from "./circle-button";
 import { trpc } from "@/trpc";
-import { useLocation } from "wouter";
+import { navigate } from "wouter/use-browser-location";
 
 export function ListChapters({
   slug,
@@ -66,7 +66,6 @@ export function ChaptersDialog({
   });
 
   const { data: history } = trpc.history.novelHistory.useQuery(slug);
-  const navigate = useLocation()[1];
 
   const currentChapterRef = useCallback(
     (node: any) => {

@@ -1,8 +1,6 @@
-import { useLocation } from "wouter";
+import { navigate } from "wouter/use-browser-location";
 
 export function Logo() {
-  const navigate = useLocation()[1];
-
   return (
     <div
       className="flex flex-col items-center justify-center cursor-pointer"

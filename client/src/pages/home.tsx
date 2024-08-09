@@ -9,7 +9,7 @@ import HistoryDialog from "@/components/reader/history";
 import { trpc } from "@/trpc";
 import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
-import { useLocation } from "wouter";
+import { navigate } from "wouter/use-browser-location";
 
 const SERVERS = [
   {
@@ -33,7 +33,6 @@ export default function Home({ server }: { server: string }) {
     setSearch((value) => ({ ...value, server, page: 0 }));
   }, [server]);
 
-  const navigate = useLocation()[1];
   const searchQuery = trpc.novels.search.useQuery(search, {
     enabled: Boolean(search.search),
   });

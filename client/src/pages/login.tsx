@@ -1,15 +1,14 @@
 import { trpc } from "@/trpc";
 import { useState } from "react";
-import { useLocation } from "wouter";
 import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Loader2 } from "lucide-react";
+import { navigate } from "wouter/use-browser-location";
 
 export default function Login() {
   const { data: isAuthenticated, isLoading } =
     trpc.auth.isAuthenticated.useQuery();
   const [hover, setHover] = useState(false);
-  const navigate = useLocation()[1];
 
   if (isAuthenticated) {
     navigate("/");
