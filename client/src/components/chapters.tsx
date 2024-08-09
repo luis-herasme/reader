@@ -5,7 +5,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Eye, Loader2, Search } from "lucide-react";
+import { Eye, List, Loader2 } from "lucide-react";
 import { CircleButton } from "./circle-button";
 import { trpc } from "@/trpc";
 import { useLocation } from "wouter";
@@ -31,7 +31,7 @@ export function ListChapters({
           setOpen(true);
         }}
       >
-        <Search className="w-6 h-6" />
+        <List className="w-6 h-6" />
       </CircleButton>
       <ChaptersDialog
         server={server}
