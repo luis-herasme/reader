@@ -75,7 +75,7 @@ export class Player {
 
       this.currentSentenceIndex = i;
       this.forceUpdate();
-      await this.playSentence(i);
+      await this.playSentence();
 
       if (!this.playing) {
         return;
@@ -99,14 +99,13 @@ export class Player {
     this.audioElement.currentTime = 0;
   }
 
-  private async playSentence(index: number) {
-    const newAudio = await this.audioLoader.getAudio(index, true);
+  private async playSentence() {
+    const newAudio = await this.audioLoader.getAudio(
+      this.currentSentenceIndex,
+      true
+    );
 
     if (!newAudio) {
-      return;
-    }
-
-    if (index !== this.currentSentenceIndex) {
       return;
     }
 
