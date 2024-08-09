@@ -75,7 +75,7 @@ export default function Reader({
         } else {
           player.currentSentenceIndex = nextIndex;
         }
-      }, 100),
+      }, 300),
     [player, data]
   );
 
@@ -103,7 +103,7 @@ export default function Reader({
         } else {
           player.currentSentenceIndex = previousIndex;
         }
-      }, 100),
+      }, 300),
     [player, data]
   );
 
@@ -114,7 +114,7 @@ export default function Reader({
       } else {
         player.play(player.currentSentenceIndex);
       }
-    }, 100),
+    }, 300),
     [player]
   );
 
