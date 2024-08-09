@@ -11,7 +11,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       <Toaster
         toastOptions={{
           classNames: {
-            closeButton: "bg-black text-white border-[#333333] w-6 h-6",
+            closeButton: "bg-black text-white border-[#333333] w-6 h-6 hover:text-black duration-200 transition-colors",
           },
         }}
         closeButton
