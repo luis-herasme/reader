@@ -85,7 +85,11 @@ export function Sentence({
             player.removeFetching(index);
 
             if (player.currentSentenceIndex === index) {
-              player.play(player.nextIndex());
+              const nextIndex = player.nextIndex();
+
+              if (nextIndex) {
+                player.play(nextIndex);
+              }
             }
 
             return;
