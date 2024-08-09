@@ -1,5 +1,5 @@
-import { sentenceIsValid } from "./player";
 import { EdgeSpeechTTS } from "@lobehub/tts";
+import { sentenceIsValid } from "./sentence-utils";
 
 const tts = new EdgeSpeechTTS({ locale: "en-US" });
 
