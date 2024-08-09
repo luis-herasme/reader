@@ -165,8 +165,8 @@ export default function Reader({
     <div>
       {data && (
         <NavArrows
-          next={`/${server}/reader/${novel}/${data.next}`}
-          prev={`/${server}/reader/${novel}/${data.prev}`}
+          next={data.next ? `/${server}/reader/${novel}/${data.next}` : null}
+          prev={data.prev ? `/${server}/reader/${novel}/${data.prev}` : null}
         />
       )}
 
