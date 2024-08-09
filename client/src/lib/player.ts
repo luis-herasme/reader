@@ -35,6 +35,7 @@ export class Player {
     this.audioLoader = new AudioLoader(this.sentences, forceUpdate);
     this.audioLoader.preLoadAudios();
     this.currentSentenceIndex = sentenceIndex;
+    this.forceUpdate();
   }
 
   setSpeed(speed: number) {
@@ -89,6 +90,7 @@ export class Player {
       }
 
       this.currentSentenceIndex = i;
+      this.forceUpdate();
       await this.playSentence(i);
 
       if (!this.playing) {
@@ -98,11 +100,13 @@ export class Player {
 
     if (this.autoAdvance) {
       this.currentSentenceIndex = 0;
+      this.forceUpdate();
       this.nextChapter();
     } else {
       this.playing = false;
       this.forceUpdate();
       this.currentSentenceIndex = 0;
+      this.forceUpdate();
     }
   }
 

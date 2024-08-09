@@ -33,7 +33,7 @@ export function usePlayer({
     if (playing) {
       newPlayer.play(newPlayer.getCurrentSentenceIndex());
     }
-  }, [text, sentenceIndex, forceUpdate, player]);
+  }, [text, sentenceIndex]);
 
   useEffect(() => {
     return () => {
