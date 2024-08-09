@@ -31,7 +31,7 @@ export function usePlayer({
     setPlayer(newPlayer);
 
     if (playing) {
-      newPlayer.play(newPlayer.currentSentenceIndex);
+      newPlayer.play(newPlayer.getCurrentSentenceIndex());
     }
   }, [text, sentenceIndex, forceUpdate, player]);
 

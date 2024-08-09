@@ -75,7 +75,7 @@ export default function Reader({
       if (player.isPlaying()) {
         player.play(nextIndex);
       } else {
-        player.currentSentenceIndex = nextIndex;
+        player.setCurrentSentenceIndex(nextIndex);
       }
     }, 100),
     [player, data]
@@ -102,7 +102,7 @@ export default function Reader({
       if (player.isPlaying()) {
         player.play(previousIndex);
       } else {
-        player.currentSentenceIndex = previousIndex;
+        player.setCurrentSentenceIndex(previousIndex);
       }
     }, 100),
     [player, data]
@@ -117,7 +117,7 @@ export default function Reader({
       if (player.isPlaying()) {
         player.cancel();
       } else {
-        player.play(player.currentSentenceIndex);
+        player.play(player.getCurrentSentenceIndex());
       }
     }, 300),
     [player]
@@ -162,25 +162,20 @@ export default function Reader({
   }, [player, data]);
 
   useEffect(() => {
-    if (
-      data &&
-      player &&
-      player.sentences.length &&
-      player.currentSentenceIndex
-    ) {
+    if (data && player && player.sentences.length) {
       trpcVanilla.history.add
         .mutate({
           server,
           slug: novel,
           chapter,
-          sentenceIndex: player.currentSentenceIndex,
+          sentenceIndex: player.getCurrentSentenceIndex(),
           length: player.sentences.length,
         })
         .then(() => {
           utils.history.novelHistory.invalidate(novel);
         });
     }
-  }, [data, player?.currentSentenceIndex]);
+  }, [data, player?.getCurrentSentenceIndex()]);
 
   return (
     <div>
@@ -217,13 +212,13 @@ export default function Reader({
             if (player.isPlaying()) {
               player.cancel();
             } else {
-              player.play(player.currentSentenceIndex);
+              player.play(player.getCurrentSentenceIndex());
             }
           }}
         />
 
         <FollowReader
-          currentSentenceIndex={player ? player.currentSentenceIndex : 0}
+          currentSentenceIndex={player ? player.getCurrentSentenceIndex() : 0}
           sentencesRef={sentencesRef}
           text={data?.content || ""}
         />

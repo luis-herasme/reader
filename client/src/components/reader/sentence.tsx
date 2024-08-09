@@ -13,7 +13,7 @@ export function Sentence({
   sentencesRef: React.MutableRefObject<HTMLSpanElement[]>;
   sentence: string;
 }) {
-  const isSentence = player.currentSentenceIndex === index;
+  const isSentence = player.getCurrentSentenceIndex() === index;
   const isLoading = player.fetchings.get(index);
   const isReady = player.audios.get(index);
   const { theme } = useSettings();
@@ -76,7 +76,7 @@ export function Sentence({
           if (player.isPlaying()) {
             player.play(index);
           } else {
-            player.currentSentenceIndex = index;
+            player.setCurrentSentenceIndex(index);
           }
         }}
         onDoubleClick={() => {
@@ -84,7 +84,7 @@ export function Sentence({
             toast("Removing sentence from queue");
             player.removeFetching(index);
 
-            if (player.currentSentenceIndex === index) {
+            if (player.getCurrentSentenceIndex() === index) {
               const nextIndex = player.nextIndex();
 
               if (nextIndex) {

@@ -12,7 +12,7 @@ export function useTrackSentenceIndex(
 
       // This is a hack to make sure the user is scrolled to the correct position
       // We need to wait for the page to load and then scroll to the correct position
-      const currentRef = sentencesRef.current[player.currentSentenceIndex];
+      const currentRef = sentencesRef.current[player.getCurrentSentenceIndex()];
 
       if (currentRef) {
         currentRef.scrollIntoView({ block: "center" });
@@ -22,5 +22,5 @@ export function useTrackSentenceIndex(
     return () => {
       clearTimeout(timeout);
     };
-  }, [player]);
+  }, [player, sentencesRef]);
 }

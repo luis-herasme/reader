@@ -8,7 +8,7 @@ export class Player {
 
   private playing: boolean = false;
   private currentPlayID: number = 0;
-  private currentSentenceIndex_: number = 0;
+  private currentSentenceIndex: number = 0;
 
   private readonly audioLoader: AudioLoader;
   private readonly audioElement: HTMLAudioElement = new Audio();
@@ -54,12 +54,12 @@ export class Player {
     return this.playing;
   }
 
-  get currentSentenceIndex() {
-    return this.currentSentenceIndex_;
+  getCurrentSentenceIndex() {
+    return this.currentSentenceIndex;
   }
 
-  set currentSentenceIndex(index: number) {
-    this.currentSentenceIndex_ = index;
+  setCurrentSentenceIndex(index: number) {
+    this.currentSentenceIndex = index;
     this.audioLoader.preloadAudioIndex = this.currentSentenceIndex;
     this.forceUpdate();
   }
