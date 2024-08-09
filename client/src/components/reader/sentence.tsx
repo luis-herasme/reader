@@ -75,7 +75,7 @@ export function Sentence({
 
           // If this sentence is loading refetch it
           if (player.audioLoader.getAudioStatus(index) === "loading") {
-            player.refetchSentences();
+            player.audioLoader.refetchSentences();
             toast("Refetching sentence");
             return;
           }
@@ -89,7 +89,7 @@ export function Sentence({
         onDoubleClick={() => {
           if (player.audioLoader.getAudioStatus(index) === "loading") {
             toast("Removing sentence from queue");
-            player.removeFetching(index);
+            player.audioLoader.deleteFetchings(index);
 
             if (player.getCurrentSentenceIndex() === index) {
               const nextIndex = player.nextIndex();

@@ -57,14 +57,6 @@ export class Player {
     this.forceUpdate();
   }
 
-  refetchSentences() {
-    this.audioLoader.refetchSentences();
-  }
-
-  removeFetching(index: number) {
-    this.audioLoader.deleteFetchings(index);
-  }
-
   async play(index: number) {
     noSleep.enable();
     this.cancel();
