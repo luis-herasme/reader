@@ -100,10 +100,7 @@ export class Player {
   }
 
   private async playSentence() {
-    const newAudio = await this.audioLoader.getAudio(
-      this.currentSentenceIndex,
-      true
-    );
+    const newAudio = await this.audioLoader.getAudio(this.currentSentenceIndex);
 
     if (!newAudio) {
       return;

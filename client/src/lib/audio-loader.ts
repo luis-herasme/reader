@@ -63,10 +63,7 @@ export class AudioLoader {
     return "inactive";
   }
 
-  async getAudio(
-    index: number,
-    jump: boolean
-  ): Promise<HTMLAudioElement | undefined> {
+  async getAudio(index: number): Promise<HTMLAudioElement | undefined> {
     if (!sentenceIsValid(this.sentences[index])) {
       return;
     }
@@ -79,7 +76,7 @@ export class AudioLoader {
       return await this.awaitAudio(index);
     }
 
-    if (this.preloadAudioIndex < index && jump) {
+    if (this.preloadAudioIndex < index) {
       this.preloadAudioIndex = index + 1;
     }
 
