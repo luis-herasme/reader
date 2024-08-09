@@ -45,7 +45,7 @@ function HistoryItem({
   return (
     <div className="flex items-center justify-between gap-4">
       <div
-        className="flex flex-col w-full gap-1 cursor-pointer"
+        className="flex flex-col w-full gap-0.5 cursor-pointer"
         onClick={() => {
           navigate(`/${server}/reader/${slug}/${chapter}`);
         }}
@@ -56,6 +56,7 @@ function HistoryItem({
             .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
             .join(" ")}
         </div>
+        <div className="text-sm min-w-[90px] font-light">Chapter {chapter}</div>
         <div className="font-mono text-xs opacity-50">
           {new Date(updatedAt).toLocaleDateString("en-US", {
             weekday: "long",
@@ -66,11 +67,6 @@ function HistoryItem({
         </div>
       </div>
       <div className="flex items-center justify-center gap-4">
-        <div className="flex flex-col items-end gap-1">
-          <div className="text-sm min-w-[90px] font-light">
-            Chapter {chapter}
-          </div>
-        </div>
         <Favorite slug={slug} server={server} />
         <div
           className={`rounded-full p-2 hover:bg-destructive duration-200 ${
