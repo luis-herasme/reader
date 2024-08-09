@@ -1,11 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { Input } from "@/components/ui/input";
-// import { Button } from "@/components/ui/button";
 import { FileWarning, Loader2, LogIn, LogOut } from "lucide-react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { ChaptersDialog } from "@/components/chapters";
-// import { signOut, useSession } from "next-auth/react";
 import HistoryDialog from "@/components/reader/history";
+import { Input } from "@/components/ui/input";
 import { trpc } from "@/trpc";
 import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
@@ -86,17 +84,6 @@ export default function Home({ server }: { server: string }) {
             placeholder="Search novel..."
             ref={inputRef}
           />
-          {/* <Button
-            className="h-10 px-6 border border-white rounded border-opacity-10"
-            onClick={searchMangas}
-            disabled={searching}
-          >
-            {searchQuery.isLoading ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              "Search"
-            )}
-          </Button> */}
         </div>
         <div className="max-w-[90vw] w-96">
           <div className="text-sm mt-2 bg-[#222] rounded p-4">
