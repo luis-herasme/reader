@@ -16,16 +16,6 @@ export const history = router({
     });
   }),
 
-  readAll: authProcedure.query(async ({ ctx }) => {
-    const histories = await prisma.history.findMany({
-      where: {
-        userId: ctx.user.id,
-      },
-    });
-
-    return histories;
-  }),
-
   novelHistory: authProcedure
     .input(z.string())
     .query(async ({ ctx, input }) => {
@@ -39,25 +29,21 @@ export const history = router({
       return chapters;
     }),
 
-  delete: authProcedure
+  clearNovelHistory: authProcedure
     .input(
       z.object({
         slug: z.string(),
-        chapter: z.string(),
         server: z.string(),
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const { slug, chapter, server } = input;
+      const { slug, server } = input;
 
-      const history = await prisma.history.delete({
+      const history = await prisma.history.deleteMany({
         where: {
-          userId_slug_chapter_server: {
-            slug,
-            chapter,
-            server,
-            userId: ctx.user.id,
-          },
+          userId: ctx.user.id,
+          server,
+          slug,
         },
       });
 

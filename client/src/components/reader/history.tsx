@@ -39,7 +39,7 @@ function HistoryItem({
   chapter: string;
 }) {
   const utils = trpc.useUtils();
-  const deleteMutation = trpc.history.delete.useMutation();
+  const deleteMutation = trpc.history.clearNovelHistory.useMutation();
   const navigate = useLocation()[1];
 
   return (
@@ -85,11 +85,10 @@ function HistoryItem({
               {
                 slug,
                 server,
-                chapter,
               },
               {
                 onSuccess() {
-                  utils.history.readAll.invalidate();
+                  utils.history.getNovels.invalidate();
                 },
               }
             );
