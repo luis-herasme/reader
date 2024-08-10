@@ -115,7 +115,7 @@ export default function Reader({
       }
 
       if (player.isPlaying()) {
-        player.cancel();
+        player.stop();
       } else {
         player.play(player.getCurrentSentenceIndex());
       }
@@ -210,7 +210,7 @@ export default function Reader({
             if (!player) return;
 
             if (player.isPlaying()) {
-              player.cancel();
+              player.stop();
             } else {
               player.play(player.getCurrentSentenceIndex());
             }

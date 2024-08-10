@@ -48,6 +48,18 @@ export class Player {
     return this.playing;
   }
 
+  private setPlaying(value: boolean) {
+    this.playing = value;
+
+    if (value) {
+      navigator.mediaSession.playbackState = "playing";
+    } else {
+      navigator.mediaSession.playbackState = "paused";
+    }
+
+    this.forceUpdate();
+  }
+
   getCurrentSentenceIndex() {
     return this.currentSentenceIndex;
   }
@@ -60,42 +72,33 @@ export class Player {
 
   async play(index: number) {
     noSleep.enable();
+
+    this.setPlaying(true);
+
     this.audioElement.currentTime = 0;
-    navigator.mediaSession.playbackState = "playing";
 
     const id = this.currentPlayID + 1;
     this.currentPlayID = id;
 
-    this.playing = true;
-    this.forceUpdate();
-
     for (let i = index; i < this.sentences.length; i++) {
-      if (this.currentPlayID !== id) {
+      if (this.currentPlayID !== id || !this.playing) {
         return;
       }
 
-      this.currentSentenceIndex = i;
-      this.forceUpdate();
+      this.setCurrentSentenceIndex(i);
       await this.playSentence();
-
-      if (!this.playing) {
-        return;
-      }
     }
 
-    this.playing = false;
     this.onComplete();
   }
 
   destroy() {
-    this.cancel();
+    this.stop();
     this.audioLoader.destroy();
   }
 
-  cancel() {
-    navigator.mediaSession.playbackState = "paused";
-    this.playing = false;
-    this.forceUpdate();
+  stop() {
+    this.setPlaying(false);
     this.audioElement.pause();
     this.audioElement.currentTime = 0;
   }
