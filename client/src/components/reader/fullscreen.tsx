@@ -13,6 +13,18 @@ export function FullScreen() {
     }
   }, [fullScreen]);
 
+  useEffect(() => {
+    const handleFullScreenChange = () => {
+      setFullScreen(Boolean(document.fullscreenElement));
+    };
+
+    document.addEventListener("fullscreenchange", handleFullScreenChange);
+
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullScreenChange);
+    };
+  }, []);
+
   return (
     <CircleButton
       tooltip="Full screen"
