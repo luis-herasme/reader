@@ -4,13 +4,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { trpc, trpcVanilla } from "../../trpc";
 import { toast } from "sonner";
 import { navigate } from "wouter/use-browser-location";
+import { Loading } from "../loading";
 
 function Favorites() {
   const utils = trpc.useUtils();
-  const { data } = trpc.favorites.read.useQuery();
+  const { data, isLoading } = trpc.favorites.read.useQuery();
   const removeFavorite = trpc.favorites.delete.useMutation();
 
-  if (!data || data.length === 0) {
+  if (isLoading || data === undefined) {
+    return <Loading />;
+  }
+
+  if (data && data.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[200px]">
         <AlertCircle className="w-12 h-12 mb-4" strokeWidth={1} />
@@ -101,7 +106,11 @@ function Favorites() {
 }
 
 export function LibraryContent() {
-  const { data } = trpc.auth.isAuthenticated.useQuery();
+  const { data, isLoading } = trpc.auth.isAuthenticated.useQuery();
+
+  if (isLoading) {
+    return <Loading />;
+  }
 
   return (
     <>
