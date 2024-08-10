@@ -49,6 +49,10 @@ export function Sentence({
       color: theme.readySentenceColor,
       cursor: "pointer",
     };
+  } else if (status === "invalid") {
+    style = {
+      color: theme.invalidSentenceColor,
+    };
   }
 
   if (sentence === "\n") {
@@ -67,9 +71,11 @@ export function Sentence({
             : null
         }
         style={style}
-        className={`duration-300 ${isSentence ? "" : "sentence_hover"}`}
+        className={`duration-300 ${
+          isSentence || status === "invalid" ? "" : "sentence_hover"
+        }`}
         onClick={() => {
-          if (isSentence) {
+          if (isSentence || status === "invalid") {
             return;
           }
 
