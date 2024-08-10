@@ -1,6 +1,4 @@
 import { AlertCircle, Library, Loader2, Trash } from "lucide-react";
-import { CircleButton } from "../circle-button";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { History } from "./history";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { trpc, trpcVanilla } from "../../trpc";
@@ -99,21 +97,6 @@ function Favorites() {
         </div>
       ))}
     </div>
-  );
-}
-
-export function LibraryButton() {
-  return (
-    <Dialog>
-      <DialogTrigger>
-        <CircleButton tooltip="Library" onClick={() => {}}>
-          <Library className="w-6 h-6" />
-        </CircleButton>
-      </DialogTrigger>
-      <DialogContent className="text-white max-h-[100dvh] overflow-y-auto">
-        <LibraryContent />
-      </DialogContent>
-    </Dialog>
   );
 }
 
