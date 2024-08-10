@@ -7,7 +7,7 @@ import { ReaderSettings, useSettings } from "@/components/reader/settings";
 import { FullScreen } from "@/components/reader/fullscreen";
 import { useTrackSentenceIndex } from "@/components/reader/track-sentence-index";
 import { FollowReader } from "@/components/reader/follow-reader";
-import UserButton from "@/components/reader/user";
+import LibaryButton from "@/components/reader/libary-button";
 import { trpc, trpcVanilla } from "../trpc";
 import { HomeButton } from "@/components/reader/home-button";
 import { NavArrows } from "@/components/reader/nav-arrows";
@@ -200,7 +200,7 @@ export default function Reader({
       <div className="z-[49] fixed flex flex-col items-end justify-center gap-4 top-6 sm:top-12 right-6 sm:right-12">
         <FullScreen />
         <ReaderSettings />
-        <UserButton />
+        <LibaryButton />
       </div>
 
       <div className="translate-y-[50%] z-[49] p-4 gap-4 bottom-16 left-[50%] translate-x-[-50%] fixed bg-black bg-opacity-50 rounded-full border border-white border-opacity-10 backdrop-blur flex items-center justify-center">

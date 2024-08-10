@@ -5,6 +5,7 @@ import { trpc, trpcVanilla } from "../../trpc";
 import { toast } from "sonner";
 import { navigate } from "wouter/use-browser-location";
 import { Loading } from "../loading";
+import { DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 
 function Favorites() {
   const utils = trpc.useUtils();
@@ -108,17 +109,18 @@ function Favorites() {
 export function LibraryContent() {
   const { data, isLoading } = trpc.auth.isAuthenticated.useQuery();
 
-  if (isLoading) {
-    return <Loading />;
-  }
-
   return (
-    <>
-      <div className="text-lg font-semibold leading-none tracking-tight">
-        <Library className="inline-block w-6 h-6 mr-2" />
-        My library
-      </div>
-      {data ? (
+    <DialogContent>
+      <DialogHeader>
+        <DialogTitle>
+          <Library className="inline-block w-6 h-6 mr-2" />
+          My library
+        </DialogTitle>
+      </DialogHeader>
+
+      {isLoading ? (
+        <Loading />
+      ) : data ? (
         <Tabs defaultValue="library" className="w-full">
           <TabsList className="w-full">
             <TabsTrigger className="w-full" value="library">
@@ -146,6 +148,6 @@ export function LibraryContent() {
           </p>
         </div>
       )}
-    </>
+    </DialogContent>
   );
 }
