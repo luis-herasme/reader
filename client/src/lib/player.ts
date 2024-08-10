@@ -52,6 +52,7 @@ export class Player {
     this.playing = value;
 
     if (value) {
+      noSleep.enable();
       navigator.mediaSession.playbackState = "playing";
     } else {
       navigator.mediaSession.playbackState = "paused";
@@ -71,8 +72,6 @@ export class Player {
   }
 
   async play(index: number) {
-    noSleep.enable();
-
     this.setPlaying(true);
 
     this.audioElement.currentTime = 0;
@@ -81,12 +80,12 @@ export class Player {
     this.currentPlayID = id;
 
     for (let i = index; i < this.sentences.length; i++) {
+      this.setCurrentSentenceIndex(i);
+      await this.playSentence(id);
+
       if (this.currentPlayID !== id || !this.playing) {
         return;
       }
-
-      this.setCurrentSentenceIndex(i);
-      await this.playSentence();
     }
 
     this.onComplete();
@@ -103,7 +102,9 @@ export class Player {
     this.audioElement.currentTime = 0;
   }
 
-  private async playSentence() {
+  private stopOffsetInterval: ReturnType<typeof setInterval> | undefined;
+
+  private async playSentence(playId: number) {
     const newAudio = await this.audioLoader.getAudio(this.currentSentenceIndex);
 
     if (!newAudio) {
@@ -114,14 +115,21 @@ export class Player {
     this.audioElement.playbackRate = this.speed;
     this.audioElement.play();
 
+    clearInterval(this.stopOffsetInterval);
+
     // Await the audio to finish playing
     await new Promise<void>((resolve) => {
-      const interval = setInterval(() => {
+      this.stopOffsetInterval = setInterval(() => {
+        if (playId !== this.currentPlayID || this.playing === false) {
+          clearInterval(this.stopOffsetInterval);
+          resolve();
+        }
+
         if (
           this.audioElement.currentTime >=
           this.audioElement.duration - this.stopOffset
         ) {
-          clearInterval(interval);
+          clearInterval(this.stopOffsetInterval);
           resolve();
         }
       }, 20);
