@@ -131,39 +131,15 @@ export class AudioLoader {
     return audio;
   }
 
-  destroy() {
-    this.stopPreloading();
+  stopPreloading() {
+    clearInterval(this.preloadInterval);
   }
 
-  private stopPreloading() {
-    if (this.preloadInterval) {
-      clearInterval(this.preloadInterval);
-    }
-
-    this.preloading = false;
-  }
-
-  private preloadAudioIndex_ = 0;
-
-  set preloadAudioIndex(value: number) {
-    this.preloadAudioIndex_ = value;
-    this.preLoadAudios();
-  }
-
-  get preloadAudioIndex() {
-    return this.preloadAudioIndex_;
-  }
-
+  public preloadAudioIndex = 0;
   private preloadInterval: ReturnType<typeof setInterval> | undefined;
-  private preloading = false;
 
   async preLoadAudios() {
-    if (this.preloading) {
-      return;
-    }
-
     clearInterval(this.preloadInterval);
-    this.preloading = true;
 
     this.preloadInterval = setInterval(() => {
       if (this.preloadAudioIndex >= this.sentences.length) {
@@ -180,7 +156,5 @@ export class AudioLoader {
         this.preloadAudioIndex += 1;
       }
     }, 50);
-
-    this.preloading = false;
   }
 }

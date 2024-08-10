@@ -93,7 +93,7 @@ export class Player {
 
   destroy() {
     this.stop();
-    this.audioLoader.destroy();
+    this.audioLoader.stopPreloading();
   }
 
   stop() {
