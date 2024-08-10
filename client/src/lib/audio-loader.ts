@@ -3,7 +3,6 @@ import { sentenceIsValid } from "./sentence-utils";
 
 export class AudioLoader {
   public preloadAudioIndex = 0;
-
   private sentences: string[] = [];
   private audios: Map<number, HTMLAudioElement> = new Map();
   private fetchings: Map<number, boolean> = new Map();
@@ -14,6 +13,10 @@ export class AudioLoader {
     this.forceUpdate = forceUpdate;
     this.sentences = sentences;
     this.preLoadAudios();
+  }
+
+  stopPreloading() {
+    clearInterval(this.preloadInterval);
   }
 
   deleteFetchings(key: number) {
@@ -96,10 +99,6 @@ export class AudioLoader {
     this.forceUpdate();
 
     return audio;
-  }
-
-  stopPreloading() {
-    clearInterval(this.preloadInterval);
   }
 
   private async preLoadAudios() {
