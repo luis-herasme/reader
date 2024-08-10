@@ -77,7 +77,7 @@ export const novels = router({
             sentenceIndex: true,
           },
           orderBy: {
-            updatedAt: "asc",
+            updatedAt: "desc",
           },
         });
 
