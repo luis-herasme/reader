@@ -1,4 +1,11 @@
-import { CaseSensitive, ChevronDown, Palette, Settings } from "lucide-react";
+import {
+  CaseSensitive,
+  ChevronDown,
+  LogIn,
+  LogOut,
+  Palette,
+  Settings,
+} from "lucide-react";
 import { CircleButton } from "../circle-button";
 import {
   Dialog,
@@ -23,6 +30,7 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { themes } from "../../themes";
 import ReplaceRules from "@/lib/replace-rules";
+import { Button } from "../ui/button";
 
 type SettingsState = {
   speed: number;
@@ -87,6 +95,7 @@ export function useSettings() {
 export function ReaderSettings() {
   const { settings, updateSettings, optimisticUpdateWithDebounce } =
     useSettings();
+  const { data: isAuthenticated } = trpc.auth.isAuthenticated.useQuery();
 
   return (
     <Dialog>
@@ -286,6 +295,27 @@ export function ReaderSettings() {
         </div>
         <ReplaceRules />
         <Logs />
+
+        {isAuthenticated !== null && isAuthenticated ? (
+          <Button
+            variant="destructive"
+            onClick={() => {
+              window.location.href = "/logout";
+            }}
+          >
+            Logout
+            <LogOut className="w-4 h-4" />
+          </Button>
+        ) : (
+          <Button
+            onClick={() => {
+              window.location.href = "/login";
+            }}
+          >
+            Login
+            <LogIn className="w-4 h-4" />
+          </Button>
+        )}
       </DialogContent>
     </Dialog>
   );
