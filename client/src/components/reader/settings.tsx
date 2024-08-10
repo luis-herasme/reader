@@ -22,6 +22,7 @@ import { debounce } from "@/lib/debounce";
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { themes } from "../../themes";
+import ReplaceRules from "@/lib/replace-rules";
 
 type SettingsState = {
   speed: number;
@@ -283,6 +284,7 @@ export function ReaderSettings() {
             }
           />
         </div>
+        <ReplaceRules />
         <Logs />
       </DialogContent>
     </Dialog>

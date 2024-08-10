@@ -23,15 +23,7 @@ export class Player {
 
   constructor(text: string, sentenceIndex: number, forceUpdate: () => void) {
     this.forceUpdate = forceUpdate;
-
     this.sentences = extractSentences(text);
-
-    for (let i = 0; i < this.sentences.length; i++) {
-      this.sentences[i] = this.sentences[i]
-        .replaceAll("<", "")
-        .replaceAll(">", "");
-    }
-
     this.audioLoader = new AudioLoader(this.sentences, forceUpdate);
     this.currentSentenceIndex = sentenceIndex;
     this.audioLoader.preloadAudioIndex = this.currentSentenceIndex;

@@ -2,6 +2,7 @@ import { Player } from "./player";
 import { useEffect, useState } from "react";
 import { useForceUpdate } from "./use-force-update";
 import { useSettings } from "@/components/reader/settings";
+import { useReplaceRuleStore } from "./replace-rules";
 
 export function usePlayer({
   text,
@@ -13,6 +14,7 @@ export function usePlayer({
   const { settings } = useSettings();
   const forceUpdate = useForceUpdate();
   const [player, setPlayer] = useState<Player | null>(null);
+  const { replaceRules } = useReplaceRuleStore();
 
   useEffect(() => {
     if (settings && player) {
@@ -25,14 +27,20 @@ export function usePlayer({
     const playing = player?.isPlaying();
     player?.destroy();
 
-    const newPlayer = new Player(text, sentenceIndex, forceUpdate);
+    let newText = `${text}`;
+
+    for (const replaceRule of replaceRules) {
+      newText = newText.replaceAll(replaceRule.from, replaceRule.to);
+    }
+
+    const newPlayer = new Player(newText, sentenceIndex, forceUpdate);
 
     setPlayer(newPlayer);
 
     if (playing) {
       newPlayer.play(newPlayer.getCurrentSentenceIndex());
     }
-  }, [text, sentenceIndex]);
+  }, [text, sentenceIndex, replaceRules]);
 
   useEffect(() => {
     return () => {
