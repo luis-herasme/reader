@@ -1,7 +1,5 @@
-import { EdgeSpeechTTS } from "@lobehub/tts";
+import { fetchAudio } from "./fetch-audio";
 import { sentenceIsValid } from "./sentence-utils";
-
-const tts = new EdgeSpeechTTS({ locale: "en-US" });
 
 export class AudioLoader {
   private sentences: string[] = [];
@@ -96,38 +94,17 @@ export class AudioLoader {
   }
 
   private async fetchAudio(index: number): Promise<HTMLAudioElement> {
-    const text = this.sentences[index];
-
-    const payload = {
-      input: text,
-      options: {
-        voice: "en-US-GuyNeural",
-      },
-    };
-
     this.setFetchings(index, true);
-    const response = await tts.create(payload);
-    const audio = await this.getAudioFromResponse(response);
 
+    const audio = await fetchAudio(this.sentences[index]);
+
+    // If the fetching was aborted, don't set the audio
     if (this.fetchings.get(index) === false) {
-      // If the fetching was aborted, don't set the audio
       return audio;
     }
 
     this.deleteFetchings(index);
     this.setAudios(index, audio);
-    return audio;
-  }
-
-  private async getAudioFromResponse(
-    response: Response
-  ): Promise<HTMLAudioElement> {
-    const blob = await response.blob();
-    const url = URL.createObjectURL(blob);
-    const audio = new Audio(url);
-    audio.autoplay = true;
-    audio.muted = true;
-    await new Promise((resolve) => (audio.onloadeddata = resolve));
     return audio;
   }
 
