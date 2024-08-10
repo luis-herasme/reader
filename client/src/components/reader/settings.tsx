@@ -302,6 +302,7 @@ export function ReaderSettings() {
             onClick={() => {
               window.location.href = "/logout";
             }}
+            className="flex items-center justify-center gap-2"
           >
             Logout
             <LogOut className="w-4 h-4" />
@@ -311,6 +312,7 @@ export function ReaderSettings() {
             onClick={() => {
               window.location.href = "/login";
             }}
+            className="flex items-center justify-center gap-2"
           >
             Login
             <LogIn className="w-4 h-4" />
