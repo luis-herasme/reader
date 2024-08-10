@@ -29,11 +29,6 @@ export class AudioLoader {
     this.forceUpdate();
   }
 
-  deleteAudios(key: number) {
-    this.audios.delete(key);
-    this.forceUpdate();
-  }
-
   refetchSentences() {
     for (let i = 0; i < this.sentences.length; i++) {
       const fetching = this.fetchings.get(i);
