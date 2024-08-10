@@ -102,7 +102,7 @@ export const favorites = router({
           slug,
         },
         orderBy: {
-          chapter: "desc",
+          updatedAt: "asc",
         },
       });
 

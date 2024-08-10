@@ -10,7 +10,7 @@ export const history = router({
         userId: ctx.user.id,
       },
       orderBy: {
-        chapter: "desc",
+        updatedAt: "asc",
       },
       distinct: ["slug"],
     });
