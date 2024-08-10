@@ -14,18 +14,8 @@ export class AudioLoader {
     this.preLoadAudios();
   }
 
-  setFetchings(key: number, value: boolean) {
-    this.fetchings.set(key, value);
-    this.forceUpdate();
-  }
-
   deleteFetchings(key: number) {
     this.fetchings.delete(key);
-    this.forceUpdate();
-  }
-
-  setAudios(key: number, value: HTMLAudioElement) {
-    this.audios.set(key, value);
     this.forceUpdate();
   }
 
@@ -89,7 +79,8 @@ export class AudioLoader {
   }
 
   private async fetchAudio(index: number): Promise<HTMLAudioElement> {
-    this.setFetchings(index, true);
+    this.fetchings.set(index, true);
+    this.forceUpdate();
 
     const audio = await fetchAudio(this.sentences[index]);
 
@@ -98,8 +89,10 @@ export class AudioLoader {
       return audio;
     }
 
-    this.deleteFetchings(index);
-    this.setAudios(index, audio);
+    this.fetchings.delete(index);
+    this.audios.set(index, audio);
+    this.forceUpdate();
+
     return audio;
   }
 
