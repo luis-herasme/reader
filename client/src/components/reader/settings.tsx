@@ -53,7 +53,7 @@ export const useSettingsStore = create(
     }),
     {
       name: "settings-storage",
-      storage: createJSONStorage(() => sessionStorage),
+      storage: createJSONStorage(() => localStorage),
     }
   )
 );
