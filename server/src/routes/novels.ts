@@ -2,10 +2,15 @@ import z from "zod";
 import { publicProcedure, router } from "../trpc";
 import { prisma } from "../db";
 
-type SearchResult = {
+type SearchResultItem = {
   name: string;
   image: string;
   slug: string;
+};
+
+type SearchResult = {
+  results: SearchResultItem[];
+  next: boolean;
 };
 
 type GetChaptersResult = {
@@ -33,7 +38,7 @@ export const novels = router({
     .query(async ({ input }) => {
       const { search, page, server } = input;
       const response = await fetch(URL + `/${server}/search/${search}/${page}`);
-      return (await response.json()) as SearchResult[];
+      return (await response.json()) as SearchResult;
     }),
 
   chapters: publicProcedure

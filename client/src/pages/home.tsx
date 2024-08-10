@@ -139,22 +139,24 @@ export default function Home({ server }: { server: string }) {
               Previous
             </div>
 
-            <div
-              className={`sm:text-xl text-white flex items-center justify-between gap-2 select-none cursor-pointer`}
-              onClick={() => {
-                setSearch((value) => ({
-                  server: value.server,
-                  search: value.search,
-                  page: value.page + 1,
-                }));
-              }}
-            >
-              Next
-              <ArrowRight className="w-6 h-6" />
-            </div>
+            {searchQuery.data.next && (
+              <div
+                className={`sm:text-xl text-white flex items-center justify-between gap-2 select-none cursor-pointer`}
+                onClick={() => {
+                  setSearch((value) => ({
+                    server: value.server,
+                    search: value.search,
+                    page: value.page + 1,
+                  }));
+                }}
+              >
+                Next
+                <ArrowRight className="w-6 h-6" />
+              </div>
+            )}
           </div>
           <div className="flex flex-wrap justify-center max-w-[1200px]">
-            {searchQuery.data.map((result) => (
+            {searchQuery.data.results.map((result) => (
               <Novel
                 key={result.name + "-" + result.image}
                 name={result.name}
