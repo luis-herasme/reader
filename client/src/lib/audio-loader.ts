@@ -2,11 +2,13 @@ import { fetchAudio } from "./fetch-audio";
 import { sentenceIsValid } from "./sentence-utils";
 
 export class AudioLoader {
+  public preloadAudioIndex = 0;
+
   private sentences: string[] = [];
   private audios: Map<number, HTMLAudioElement> = new Map();
   private fetchings: Map<number, boolean> = new Map();
-
-  forceUpdate: () => void;
+  private preloadInterval: ReturnType<typeof setInterval> | undefined;
+  private forceUpdate: () => void;
 
   constructor(sentences: string[], forceUpdate: () => void) {
     this.forceUpdate = forceUpdate;
@@ -100,10 +102,7 @@ export class AudioLoader {
     clearInterval(this.preloadInterval);
   }
 
-  public preloadAudioIndex = 0;
-  private preloadInterval: ReturnType<typeof setInterval> | undefined;
-
-  async preLoadAudios() {
+  private async preLoadAudios() {
     clearInterval(this.preloadInterval);
 
     this.preloadInterval = setInterval(() => {
