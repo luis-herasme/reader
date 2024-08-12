@@ -22,6 +22,46 @@ export const settings = router({
     return settings;
   }),
 
+  updateReplacementRules: authProcedure
+    .input(
+      z.object({
+        replacementRules: z.array(
+          z.object({
+            from: z.string(),
+            to: z.string(),
+          })
+        ),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const replacementRules = input.replacementRules.map((rule) => ({
+        ...rule,
+        userId: ctx.user.id,
+      }));
+
+      await prisma.replacementRule.deleteMany({
+        where: {
+          userId: ctx.user.id,
+        },
+      });
+
+      await prisma.replacementRule.createMany({
+        data: replacementRules,
+      });
+
+      return replacementRules;
+    }),
+
+  replacementRules: authProcedure.query(async ({ ctx }) => {
+    const replacementRules = await prisma.replacementRule.findMany({
+      where: {
+        userId: ctx.user.id,
+      },
+    });
+
+    return replacementRules;
+  }),
+
   update: authProcedure
     .input(
       z.object({

@@ -7,40 +7,18 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { trpc } from "@/trpc";
 import { ArrowRight, Plus, Replace, Trash } from "lucide-react";
-import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
-
-type GlobalReplaceRuleState = {
-  replaceRules: {
-    from: string;
-    to: string;
-  }[];
-};
-
-export const useReplaceRuleStore = create(
-  persist<GlobalReplaceRuleState>(
-    () => ({
-      replaceRules: [
-        {
-          from: "<",
-          to: "",
-        },
-        {
-          from: ">",
-          to: "",
-        },
-      ],
-    }),
-    {
-      name: "replace-rules-storage",
-      storage: createJSONStorage(() => localStorage),
-    }
-  )
-);
+import { useState } from "react";
 
 export default function ReplaceRules() {
-  const { replaceRules } = useReplaceRuleStore();
+  const utils = trpc.useUtils();
+  const { data } = trpc.settings.replacementRules.useQuery();
+  const [replacementRules, setReplacementRules] = useState(data);
+  const updateReplacementRules =
+    trpc.settings.updateReplacementRules.useMutation({
+      onSuccess: () => utils.settings.replacementRules.invalidate(),
+    });
 
   return (
     <Dialog>
@@ -66,64 +44,79 @@ export default function ReplaceRules() {
           </p>
         </div>
         <div className="flex flex-col gap-2 ">
-          {replaceRules.map((rule, idx) => (
-            <div
-              key={`replace-rule-${idx}`}
-              className="flex justify-center items-center gap-2"
-            >
-              <Input
-                value={rule.from}
-                onChange={(e) => {
-                  useReplaceRuleStore.setState((state) => {
-                    const newReplaceRule = [...state.replaceRules];
-                    newReplaceRule[idx].from = e.target.value;
-                    return { replaceRules: newReplaceRule };
-                  });
-                }}
-              />
-              <ArrowRight className="w-12 h-12" />
-              <Input
-                value={rule.to}
-                onChange={(e) => {
-                  useReplaceRuleStore.setState((state) => {
-                    const newReplaceRule = [...state.replaceRules];
-                    newReplaceRule[idx].to = e.target.value;
-                    return { replaceRules: newReplaceRule };
-                  });
-                }}
-              />
-              <Button
-                variant="destructive"
-                onClick={() => {
-                  useReplaceRuleStore.setState((state) => {
-                    const newReplaceRule = [...state.replaceRules];
-                    newReplaceRule.splice(idx, 1);
-                    return { replaceRules: newReplaceRule };
-                  });
-                }}
+          {replacementRules &&
+            replacementRules.map((rule) => (
+              <div
+                key={`replace-rule-${rule.id}`}
+                className="flex justify-center items-center gap-2"
               >
-                <Trash className="w-4 h-4" />
-              </Button>
-            </div>
-          ))}
+                <Input
+                  value={rule.from}
+                  onChange={(e) => {
+                    if (replacementRules) {
+                      setReplacementRules(
+                        replacementRules.map((rule) => {
+                          if (rule.id === rule.id) {
+                            return { ...rule, from: e.target.value };
+                          }
+                          return rule;
+                        })
+                      );
+                    }
+                  }}
+                />
+                <ArrowRight className="w-12 h-12" />
+                <Input
+                  value={rule.to}
+                  onChange={(e) => {
+                    if (replacementRules) {
+                      setReplacementRules(
+                        replacementRules.map((rule) => {
+                          if (rule.id === rule.id) {
+                            return { ...rule, to: e.target.value };
+                          }
+                          return rule;
+                        })
+                      );
+                    }
+                  }}
+                />
+                <Button
+                  variant="destructive"
+                  onClick={() => {
+                    updateReplacementRules.mutate({
+                      replacementRules: replacementRules.filter(
+                        (rule) => rule.id !== rule.id
+                      ),
+                    });
+                  }}
+                >
+                  <Trash className="w-4 h-4" />
+                </Button>
+              </div>
+            ))}
           <Button
-            className="flex items-center justify-center gap-2"
+            className="flex items-center justify-center gap-2 mt-2"
             variant={"secondary"}
             onClick={() => {
-              useReplaceRuleStore.setState((state) => {
-                return {
-                  replaceRules: [
-                    ...state.replaceRules,
-                    {
-                      from: "",
-                      to: "",
-                    },
-                  ],
-                };
+              updateReplacementRules.mutate({
+                replacementRules: [
+                  ...(replacementRules || []),
+                  { from: "", to: "" },
+                ],
               });
             }}
           >
             Add new rule <Plus className="w-4 h-4" />
+          </Button>
+          <Button
+            onClick={() => {
+              updateReplacementRules.mutate({
+                replacementRules: replacementRules || [],
+              });
+            }}
+          >
+            Save
           </Button>
         </div>
       </DialogContent>

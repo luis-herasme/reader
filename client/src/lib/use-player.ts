@@ -2,7 +2,7 @@ import { Player } from "./player";
 import { useEffect, useState } from "react";
 import { useForceUpdate } from "./use-force-update";
 import { useSettings } from "@/components/reader/settings";
-import { useReplaceRuleStore } from "./replace-rules";
+import { trpc } from "@/trpc";
 
 export function usePlayer({
   text,
@@ -14,7 +14,7 @@ export function usePlayer({
   const { settings } = useSettings();
   const forceUpdate = useForceUpdate();
   const [player, setPlayer] = useState<Player | null>(null);
-  const { replaceRules } = useReplaceRuleStore();
+  const { data: replaceRules } = trpc.settings.replacementRules.useQuery();
 
   useEffect(() => {
     if (settings && player) {
@@ -29,8 +29,10 @@ export function usePlayer({
 
     let newText = `${text}`;
 
-    for (const replaceRule of replaceRules) {
-      newText = newText.replaceAll(replaceRule.from, replaceRule.to);
+    if (replaceRules) {
+      for (const replaceRule of replaceRules) {
+        newText = newText.replaceAll(replaceRule.from, replaceRule.to);
+      }
     }
 
     const newPlayer = new Player(newText, sentenceIndex, forceUpdate);

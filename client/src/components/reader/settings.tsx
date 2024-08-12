@@ -293,7 +293,7 @@ export function ReaderSettings() {
             }
           />
         </div>
-        <ReplaceRules />
+        {isAuthenticated && <ReplaceRules />}
         <Logs />
 
         {isAuthenticated !== null && isAuthenticated ? (

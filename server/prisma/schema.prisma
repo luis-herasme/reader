@@ -65,16 +65,28 @@ model Favorite {
 }
 
 model Settings {
-  userId      String
-  autoAdvance Boolean  @default(true)
-  font        Font     @default(serif)
-  fontSize    Float    @default(1.125)
-  speed       Float    @default(1)
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  updatedAt   DateTime @updatedAt
-  createdAt   DateTime @default(now())
+  userId           String
+  autoAdvance      Boolean           @default(true)
+  font             Font              @default(serif)
+  fontSize         Float             @default(1.125)
+  speed            Float             @default(1)
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  updatedAt        DateTime          @updatedAt
+  createdAt        DateTime          @default(now())
+  replacementRules ReplacementRule[]
 
   @@unique([userId])
+}
+
+model ReplacementRule {
+  id        String   @id @default(cuid())
+  userId    String
+  from      String
+  to        String
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  user Settings @relation(fields: [userId], references: [userId], onDelete: Cascade)
 }
 
 enum Font {
