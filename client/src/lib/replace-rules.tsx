@@ -7,7 +7,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { ArrowRight, Plus, Replace } from "lucide-react";
+import { ArrowRight, Plus, Replace, Trash } from "lucide-react";
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
@@ -92,6 +92,18 @@ export default function ReplaceRules() {
                   });
                 }}
               />
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  useReplaceRuleStore.setState((state) => {
+                    const newReplaceRule = [...state.replaceRules];
+                    newReplaceRule.splice(idx, 1);
+                    return { replaceRules: newReplaceRule };
+                  });
+                }}
+              >
+                <Trash className="w-4 h-4" />
+              </Button>
             </div>
           ))}
           <Button
