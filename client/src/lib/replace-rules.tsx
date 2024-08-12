@@ -9,12 +9,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { trpc } from "@/trpc";
 import { ArrowRight, Plus, Replace, Trash } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function ReplaceRules() {
   const utils = trpc.useUtils();
   const { data } = trpc.settings.replacementRules.useQuery();
   const [replacementRules, setReplacementRules] = useState(data);
+  useEffect(() => setReplacementRules(data), [data]);
+
   const updateReplacementRules =
     trpc.settings.updateReplacementRules.useMutation({
       onSuccess: () => utils.settings.replacementRules.invalidate(),
@@ -53,41 +55,35 @@ export default function ReplaceRules() {
                 <Input
                   value={rule.from}
                   onChange={(e) => {
-                    if (replacementRules) {
-                      setReplacementRules(
-                        replacementRules.map((rule) => {
-                          if (rule.id === rule.id) {
-                            return { ...rule, from: e.target.value };
-                          }
-                          return rule;
-                        })
-                      );
-                    }
+                    setReplacementRules((replacementRules) => {
+                      return replacementRules?.map((r) => {
+                        if (r.id === rule.id) {
+                          return { ...r, from: e.target.value };
+                        }
+                        return r;
+                      });
+                    });
                   }}
                 />
                 <ArrowRight className="w-12 h-12" />
                 <Input
                   value={rule.to}
                   onChange={(e) => {
-                    if (replacementRules) {
-                      setReplacementRules(
-                        replacementRules.map((rule) => {
-                          if (rule.id === rule.id) {
-                            return { ...rule, to: e.target.value };
-                          }
-                          return rule;
-                        })
-                      );
-                    }
+                    setReplacementRules((replacementRules) => {
+                      return replacementRules?.map((r) => {
+                        if (r.id === rule.id) {
+                          return { ...r, to: e.target.value };
+                        }
+                        return r;
+                      });
+                    });
                   }}
                 />
                 <Button
                   variant="destructive"
                   onClick={() => {
-                    updateReplacementRules.mutate({
-                      replacementRules: replacementRules.filter(
-                        (rule) => rule.id !== rule.id
-                      ),
+                    setReplacementRules((replacementRules) => {
+                      return replacementRules?.filter((r) => r.id !== rule.id);
                     });
                   }}
                 >
@@ -109,15 +105,19 @@ export default function ReplaceRules() {
           >
             Add new rule <Plus className="w-4 h-4" />
           </Button>
-          <Button
-            onClick={() => {
-              updateReplacementRules.mutate({
-                replacementRules: replacementRules || [],
-              });
-            }}
-          >
-            Save
-          </Button>
+          {replacementRules && (
+            <Button
+              disabled={
+                updateReplacementRules.isPending ||
+                JSON.stringify(replacementRules) === JSON.stringify(data)
+              }
+              onClick={() =>
+                updateReplacementRules.mutate({ replacementRules })
+              }
+            >
+              Save
+            </Button>
+          )}
         </div>
       </DialogContent>
     </Dialog>
