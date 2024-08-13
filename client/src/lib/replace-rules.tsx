@@ -11,26 +11,49 @@ import { trpc } from "@/trpc";
 import { ArrowRight, Plus, Replace, Trash } from "lucide-react";
 import { useEffect, useState } from "react";
 
+type ReplaceRule = {
+  from: string;
+  to: string;
+  id: string;
+};
+
 export default function ReplaceRules() {
   const utils = trpc.useUtils();
   const { data } = trpc.settings.replacementRules.useQuery();
-  const [replacementRules, setReplacementRules] = useState(data);
-  useEffect(() => setReplacementRules(data), [data]);
+  const [rules, setRules] = useState<ReplaceRule[] | undefined>(data);
+  useEffect(() => setRules(data), [data]);
 
   const updateReplacementRules =
     trpc.settings.updateReplacementRules.useMutation({
       onSuccess: () => utils.settings.replacementRules.invalidate(),
     });
 
+  const [open, setOpen] = useState(false);
+
   return (
-    <Dialog>
+    <Dialog
+      open={open}
+      onOpenChange={(open) => {
+        setOpen(open);
+
+        if (
+          !open &&
+          JSON.stringify(data) !== JSON.stringify(rules) &&
+          rules !== undefined
+        ) {
+          updateReplacementRules.mutate({
+            replacementRules: rules,
+          });
+        }
+      }}
+    >
       <DialogTrigger>
         <div className="flex items-center justify-center gap-2 py-2 text-sm text-white duration-100 bg-[#111] border border-white border-opacity-10 rounded-lg cursor-pointer hover:bg-opacity-80">
           Replace rules
           <Replace size={16} />
         </div>
       </DialogTrigger>
-      <DialogContent className="">
+      <DialogContent>
         <DialogHeader className="text-white">
           <DialogTitle>Replace rules</DialogTitle>
         </DialogHeader>
@@ -46,8 +69,8 @@ export default function ReplaceRules() {
           </p>
         </div>
         <div className="flex flex-col gap-2 ">
-          {replacementRules &&
-            replacementRules.map((rule) => (
+          {rules &&
+            rules.map((rule) => (
               <div
                 key={`replace-rule-${rule.id}`}
                 className="flex justify-center items-center gap-2"
@@ -55,7 +78,7 @@ export default function ReplaceRules() {
                 <Input
                   value={rule.from}
                   onChange={(e) => {
-                    setReplacementRules((replacementRules) => {
+                    setRules((replacementRules) => {
                       return replacementRules?.map((r) => {
                         if (r.id === rule.id) {
                           return { ...r, from: e.target.value };
@@ -69,7 +92,7 @@ export default function ReplaceRules() {
                 <Input
                   value={rule.to}
                   onChange={(e) => {
-                    setReplacementRules((replacementRules) => {
+                    setRules((replacementRules) => {
                       return replacementRules?.map((r) => {
                         if (r.id === rule.id) {
                           return { ...r, to: e.target.value };
@@ -82,7 +105,7 @@ export default function ReplaceRules() {
                 <Button
                   variant="destructive"
                   onClick={() => {
-                    setReplacementRules((replacementRules) => {
+                    setRules((replacementRules) => {
                       return replacementRules?.filter((r) => r.id !== rule.id);
                     });
                   }}
@@ -95,29 +118,16 @@ export default function ReplaceRules() {
             className="flex items-center justify-center gap-2 mt-2"
             variant={"secondary"}
             onClick={() => {
-              updateReplacementRules.mutate({
-                replacementRules: [
+              setRules((replacementRules) => {
+                return [
                   ...(replacementRules || []),
-                  { from: "", to: "" },
-                ],
+                  { id: String(Math.random()), from: "", to: "" },
+                ];
               });
             }}
           >
             Add new rule <Plus className="w-4 h-4" />
           </Button>
-          {replacementRules && (
-            <Button
-              disabled={
-                updateReplacementRules.isPending ||
-                JSON.stringify(replacementRules) === JSON.stringify(data)
-              }
-              onClick={() =>
-                updateReplacementRules.mutate({ replacementRules })
-              }
-            >
-              Save
-            </Button>
-          )}
         </div>
       </DialogContent>
     </Dialog>
