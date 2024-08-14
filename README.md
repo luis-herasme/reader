@@ -1,14 +1,14 @@
-# Requirements
+## Requirements
 - [Node.js](https://nodejs.org/en/) (npm)
 - [Bun](https://bun.sh/) (bun)
 
-# Installation
+## Installation
 After cloning the repository, you need to install the dependencies using the following command:
 ```bash
 bun i
 ```
 
-# Usage
+## Usage
 Before starting the server, you need to create a `.env` file in the server directory with the following content:
 ```env
 DATABASE_URL="<DATABASE_URL>"
