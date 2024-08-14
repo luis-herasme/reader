@@ -60,58 +60,55 @@ export function Sentence({
   }
 
   return (
-    <>
-      <span
-        ref={
-          isSentence
-            ? (element) => {
-                if (!element) return;
-                sentencesRef.current[index] = element;
-              }
-            : null
-        }
-        style={style}
-        className={`duration-300 ${
-          isSentence || status === "invalid" ? "" : "sentence_hover"
-        }`}
-        onClick={() => {
-          if (isSentence || status === "invalid") {
-            return;
-          }
-
-          // If this sentence is loading refetch it
-          if (player.audioLoader.getAudioStatus(index) === "loading") {
-            player.audioLoader.refetchSentences();
-            toast("Refetching sentence");
-            return;
-          }
-
-          if (player.isPlaying()) {
-            player.play(index);
-          } else {
-            player.setCurrentSentenceIndex(index);
-          }
-        }}
-        onDoubleClick={() => {
-          if (player.audioLoader.getAudioStatus(index) === "loading") {
-            toast("Removing sentence from queue");
-            player.audioLoader.deleteFetchings(index);
-
-            if (player.getCurrentSentenceIndex() === index) {
-              const nextIndex = player.nextIndex();
-
-              if (nextIndex) {
-                player.play(nextIndex);
-              }
+    <span
+      ref={
+        isSentence
+          ? (element) => {
+              if (!element) return;
+              sentencesRef.current[index] = element;
             }
+          : null
+      }
+      style={style}
+      className={`duration-300 ${
+        isSentence || status === "invalid" ? "" : "sentence_hover"
+      }`}
+      onClick={() => {
+        if (isSentence || status === "invalid") {
+          return;
+        }
 
-            return;
+        // If this sentence is loading refetch it
+        if (player.audioLoader.getAudioStatus(index) === "loading") {
+          player.audioLoader.refetchSentences();
+          toast("Refetching sentence");
+          return;
+        }
+
+        if (player.isPlaying()) {
+          player.play(index);
+        } else {
+          player.setCurrentSentenceIndex(index);
+        }
+      }}
+      onDoubleClick={() => {
+        if (player.audioLoader.getAudioStatus(index) === "loading") {
+          toast("Removing sentence from queue");
+          player.audioLoader.deleteFetchings(index);
+
+          if (player.getCurrentSentenceIndex() === index) {
+            const nextIndex = player.nextIndex();
+
+            if (nextIndex) {
+              player.play(nextIndex);
+            }
           }
-        }}
-      >
-        {sentence}
-      </span>
-      &nbsp;
-    </>
+
+          return;
+        }
+      }}
+    >
+      {sentence}
+    </span>
   );
 }
