@@ -35,7 +35,7 @@ export function Favorite({ slug, server }: { slug: string; server: string }) {
       <Tooltip>
         <TooltipTrigger>
           <div
-            className={`hover:bg-[#333] flex items-center justify-center gap-4 px-2 py-2 rounded-full text-white duration-300 bg-black bg-opacity-50  cursor-pointer select-none backdrop-blur ${
+            className={`flex items-center justify-center gap-4 px-2 py-2 rounded-full text-white duration-300 cursor-pointer select-none backdrop-blur ${
               data
                 ? "opacity-100 hover:opacity-50"
                 : "opacity-50 hover:opacity-100"
@@ -49,7 +49,7 @@ export function Favorite({ slug, server }: { slug: string; server: string }) {
             }}
           >
             {data ? (
-              <Star className="w-4 h-4 text-yellow-200" />
+              <Star className="w-4 h-4 text-yellow-300 fill-yellow-300" />
             ) : (
               <StarOff className="w-4 h-4" />
             )}
