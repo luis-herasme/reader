@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useSettings } from "@/components/reader/settings";
+import { useFont } from "../useFont";
 
 export function slugToTitle(slug: string): string {
   return slug
@@ -10,6 +11,7 @@ export function slugToTitle(slug: string): string {
 
 export function Title({ slug }: { slug: string }) {
   const { theme } = useSettings();
+  const font = useFont();
 
   useEffect(() => {
     document.title = slugToTitle(slug);
@@ -31,7 +33,7 @@ export function Title({ slug }: { slug: string }) {
           textShadow: `0 0 10px ${theme.background}`,
           color: theme.readySentenceColor,
         }}
-        className="text-2xl source-serif-4 mb-12"
+        className={`text-2xl mb-12 ${font}`}
       >
         {slugToTitle(slug)}
       </h1>
