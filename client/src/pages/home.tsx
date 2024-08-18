@@ -57,22 +57,20 @@ export default function Home({ server }: { server: string }) {
             ))}
         </div>
       </div>
-      <div className="mt-64 mb-32">
+      <div className="mt-64 mb-32 w-96 max-w-[90vw]">
         <Logo />
-        <div className="flex flex-wrap items-center justify-center gap-2 mt-4">
-          <Input
-            className="rounded max-w-[90vw] h-10 w-96 outline-none border border-white border-opacity-10"
-            value={search.search}
-            onChange={(e) =>
-              setSearch((value) => ({
-                ...value,
-                search: e.target.value,
-              }))
-            }
-            placeholder="Search novel..."
-            ref={inputRef}
-          />
-        </div>
+        <Input
+          className="rounded h-10 w-full outline-none border border-white border-opacity-10 mt-4"
+          value={search.search}
+          onChange={(e) =>
+            setSearch((value) => ({
+              ...value,
+              search: e.target.value,
+            }))
+          }
+          placeholder="Search novel..."
+          ref={inputRef}
+        />
         <ServerSelector server={server} />
       </div>
       {searchQuery.isLoading && (

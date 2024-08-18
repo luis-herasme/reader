@@ -14,7 +14,7 @@ const SERVERS = [
 
 export function ServerSelector({ server }: { server: string }) {
   return (
-    <div className="max-w-[90vw] w-96">
+    <>
       <div className="text-sm mt-2 bg-[#222] rounded p-4">
         You can search for novels from multiple sources. There are currently two
         sources available:
@@ -36,6 +36,6 @@ export function ServerSelector({ server }: { server: string }) {
         <b>{SERVERS.find((s) => s.slug === server)?.label}</b>. If you can't
         find anything, try searching from another server.
       </div>
-    </div>
+    </>
   );
 }
