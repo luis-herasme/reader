@@ -4,7 +4,7 @@ import { HomeButton } from "@/components/reader/home-button";
 import { PlayButton } from "@/components/reader/play-pause";
 import { Sentence } from "@/components/reader/sentence";
 import { Sentences } from "@/components/reader/sentences";
-import { ReaderSettings } from "@/components/reader/settings";
+import { ReaderSettings, useSettings } from "@/components/reader/settings";
 import { Title } from "@/components/reader/title";
 import { useTrackSentenceIndex } from "@/components/reader/track-sentence-index";
 import { Button } from "@/components/ui/button";
@@ -89,8 +89,15 @@ export function Custom() {
   useKeyboardControl({ onNext, onPrev, onTogglePlay });
   useMediaSession({ player, onTogglePlay });
 
+  const { theme } = useSettings();
+
   return (
-    <div>
+    <div
+      className="min-h-[100vh]"
+      style={{
+        backgroundColor: theme.background,
+      }}
+    >
       <div className="z-[49] fixed flex flex-col items-end justify-center gap-4 top-6 sm:top-12 left-6 sm:left-12">
         <HomeButton />
       </div>
@@ -146,7 +153,12 @@ export function Custom() {
       ) : (
         <div className="flex items-center justify-center h-[100vh]">
           <div className=" max-w-[300px]">
-            <p className="text-lg opacity-70 mb-4">
+            <p
+              className="text-lg opacity-70 mb-4"
+              style={{
+                color: theme.readySentenceColor,
+              }}
+            >
               This is a custom file that you can edit. Copy and paste your own
               text to read it.
             </p>
