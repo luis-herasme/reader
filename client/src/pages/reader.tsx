@@ -1,4 +1,3 @@
-import { log } from "@/lib/logs";
 import { useCallback, useEffect, useRef } from "react";
 import { usePlayer } from "@/lib/use-player";
 
@@ -20,6 +19,7 @@ import { toast } from "sonner";
 import { useKeyboardControl } from "@/lib/use-keyboard-control";
 import { debounce } from "@/lib/debounce";
 import { navigate } from "wouter/use-browser-location";
+import { useMediaSession } from "@/components/use-media-session";
 
 export default function Reader({
   novel,
@@ -124,32 +124,7 @@ export default function Reader({
   );
 
   useKeyboardControl({ onNext, onPrev, onTogglePlay });
-
-  useEffect(() => {
-    function handlePlay(play: boolean) {
-      log("Handling state change media session");
-
-      if (player?.isPlaying() === play) {
-        return;
-      }
-
-      onTogglePlay();
-    }
-
-    if ("mediaSession" in navigator) {
-      navigator.mediaSession.setActionHandler("play", () => handlePlay(true));
-      navigator.mediaSession.setActionHandler("pause", () => handlePlay(false));
-      navigator.mediaSession.setActionHandler("stop", () => handlePlay(false));
-    }
-
-    return () => {
-      if ("mediaSession" in navigator) {
-        navigator.mediaSession.setActionHandler("play", null);
-        navigator.mediaSession.setActionHandler("pause", null);
-        navigator.mediaSession.setActionHandler("stop", null);
-      }
-    };
-  }, [player, onTogglePlay]);
+  useMediaSession({ player, onTogglePlay });
 
   useEffect(() => {
     if (player) {
