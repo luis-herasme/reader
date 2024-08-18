@@ -19,11 +19,8 @@ export function usePlayer({
 
   useEffect(() => {
     player.onUpdate = forceUpdate;
-
-    if (settings) {
-      player.setSpeed(settings.speed);
-      player.stopOffset = settings.stopOffset;
-    }
+    player.setSpeed(settings.speed);
+    player.stopOffset = settings.stopOffset;
   }, [settings, forceUpdate]);
 
   useEffect(() => {
