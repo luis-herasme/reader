@@ -18,8 +18,8 @@ import { Sentences } from "@/components/reader/sentences";
 import { toast } from "sonner";
 import { useKeyboardControl } from "@/lib/use-keyboard-control";
 import { debounce } from "@/lib/debounce";
-import { navigate } from "wouter/use-browser-location";
 import { useMediaSession } from "@/components/use-media-session";
+import { useLocation } from "wouter";
 
 export default function Reader({
   novel,
@@ -33,6 +33,7 @@ export default function Reader({
   const utils = trpc.useUtils();
   const { settings } = useSettings();
   const sentencesRef = useRef<HTMLSpanElement[]>([]);
+  const navigate = useLocation()[1];
 
   const { data, isLoading } = trpc.novels.chapter.useQuery(
     {
@@ -127,9 +128,19 @@ export default function Reader({
 
   useEffect(() => {
     if (player) {
-      player.onComplete = () => {
+      player.onComplete = async () => {
         if (data && data.next && settings.autoAdvance) {
-          navigate(data.next);
+          await trpcVanilla.history.add.mutate({
+            server,
+            slug: novel,
+            chapter,
+            sentenceIndex: 0,
+            length: player.sentences.length,
+          });
+
+          await utils.history.novelHistory.invalidate(novel);
+
+          navigate(`/${server}/reader/${novel}/${data.next}`);
         }
       };
     }
@@ -137,6 +148,10 @@ export default function Reader({
 
   useEffect(() => {
     if (data && player && player.sentences.length) {
+      if (player.getCurrentSentenceIndex() === player.sentences.length - 1) {
+        return;
+      }
+
       trpcVanilla.history.add
         .mutate({
           server,
@@ -145,14 +160,19 @@ export default function Reader({
           sentenceIndex: player.getCurrentSentenceIndex(),
           length: player.sentences.length,
         })
-        .then(() => {
-          utils.history.novelHistory.invalidate(novel);
-        });
+        .then(() => utils.history.novelHistory.invalidate(novel));
     }
   }, [data, player?.getCurrentSentenceIndex()]);
 
+  const { theme } = useSettings();
+
   return (
-    <div>
+    <div
+      className="min-h-[100vh]"
+      style={{
+        backgroundColor: theme.background,
+      }}
+    >
       {data && (
         <NavArrows
           next={data.next ? `/${server}/reader/${novel}/${data.next}` : null}
