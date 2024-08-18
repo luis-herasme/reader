@@ -1,12 +1,14 @@
-import { useEffect, useRef, useState } from "react";
-import { FileWarning, Loader2, LogIn, LogOut } from "lucide-react";
+import { useEffect, useState } from "react";
+import { FilePlus2, FileWarning, Loader2, LogIn, LogOut } from "lucide-react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { ChaptersDialog } from "@/components/chapters";
 import HistoryDialog from "@/components/reader/history";
 import { Input } from "@/components/ui/input";
 import { trpc } from "@/trpc";
 import { Logo } from "@/components/logo";
-import { ServerSelector } from "@/components/reader/server-selector";
+import { ServerSelector } from "@/components/server-selector";
+import { Button } from "@/components/ui/button";
+import { navigate } from "wouter/use-browser-location";
 
 export default function Home({ server }: { server: string }) {
   const [search, setSearch] = useState<{
@@ -23,55 +25,63 @@ export default function Home({ server }: { server: string }) {
     enabled: Boolean(search.search),
   });
 
-  const inputRef = useRef<HTMLInputElement | null>(null);
   const { data: isAuthenticated } = trpc.auth.isAuthenticated.useQuery();
 
   return (
     <div className="flex flex-col items-center justify-center overflow-y-auto">
       <div className="fixed top-4 right-4">
-        <div>
+        <div className="flex items-center justify-center gap-2">
+          <Button
+            className="flex items-center justify-center gap-2"
+            onClick={() => {
+              navigate("/custom");
+            }}
+          >
+            Read custom file
+            <FilePlus2 className="w-4 h-4" />
+          </Button>
           {isAuthenticated !== undefined &&
             (isAuthenticated ? (
-              <div className="flex items-center justify-center gap-4">
+              <>
                 <HistoryDialog />
-                <div
-                  className="flex items-center gap-2 justify-center px-4 py-2 text-sm duration-200 text-white border border-white border-opacity-10 rounded-full cursor-pointer bg-[#151515] hover:bg-[#333]"
+                <Button
+                  variant="destructive"
+                  className="flex items-center justify-center gap-2"
                   onClick={() => {
                     window.location.href = "/logout";
                   }}
                 >
                   logout
-                  <LogOut className="inline-block w-4 h-4" />
-                </div>
-              </div>
+                  <LogOut className="w-4 h-4" />
+                </Button>
+              </>
             ) : (
-              <div
-                className="flex items-center gap-2 justify-center px-4 py-2 text-sm duration-200 text-white border border-white border-opacity-10 rounded-full cursor-pointer bg-[#151515] hover:bg-[#333]"
+              <Button
+                variant="secondary"
+                className="flex items-center justify-center gap-2"
                 onClick={() => {
                   window.location.href = "/login";
                 }}
               >
                 login
-                <LogIn className="inline-block w-4 h-4" />
-              </div>
+                <LogIn className="w-4 h-4" />
+              </Button>
             ))}
         </div>
       </div>
       <div className="mt-64 mb-32 w-96 max-w-[90vw]">
         <Logo />
-        <Input
-          className="rounded h-10 w-full outline-none border border-white border-opacity-10 mt-4"
-          value={search.search}
-          onChange={(e) =>
-            setSearch((value) => ({
-              ...value,
-              search: e.target.value,
-            }))
-          }
-          placeholder="Search novel..."
-          ref={inputRef}
-        />
-        <ServerSelector server={server} />
+        <div className="mt-4 flex flex-col gap-2">
+          <Input
+            className="rounded h-10 w-full border border-white border-opacity-10"
+            placeholder="Search novel..."
+            value={search.search}
+            onChange={(e) =>
+              setSearch((value) => ({ ...value, search: e.target.value }))
+            }
+          />
+          <ServerSelector server={server} />
+        </div>
       </div>
       {searchQuery.isLoading && (
         <div className="flex items-center justify-center w-full h-[20vh]">

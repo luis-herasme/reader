@@ -9,14 +9,18 @@ import { Bookmark, Loader2, Trash } from "lucide-react";
 import { Favorite } from "./favorite";
 import { LibraryContent } from "./library";
 import { navigate } from "wouter/use-browser-location";
+import { Button } from "../ui/button";
 
 export default function HistoryDialog() {
   return (
     <Dialog>
       <DialogTrigger>
-        <div className="flex items-center gap-2 justify-center px-4 py-2 text-sm duration-200 text-white border border-white border-opacity-10 rounded-full cursor-pointer bg-[#151515] hover:bg-[#333]">
+        <Button
+          variant="secondary"
+          className="flex items-center justify-center gap-2"
+        >
           My novels <Bookmark className="inline-block w-4 h-4" />
-        </div>
+        </Button>
       </DialogTrigger>
       <DialogContent className="text-white max-h-[100dvh] overflow-y-auto">
         <DialogHeader>

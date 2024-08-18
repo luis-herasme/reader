@@ -1,4 +1,4 @@
-import { Button } from "../ui/button";
+import { Button } from "./ui/button";
 import { navigate } from "wouter/use-browser-location";
 
 const SERVERS = [
@@ -15,7 +15,7 @@ const SERVERS = [
 export function ServerSelector({ server }: { server: string }) {
   return (
     <>
-      <div className="text-sm mt-2 bg-[#222] rounded p-4">
+      <div className="text-sm bg-[#222] rounded p-4">
         You can search for novels from multiple sources. There are currently two
         sources available:
         <div className="flex items-center mt-2 gap-2">
@@ -31,7 +31,7 @@ export function ServerSelector({ server }: { server: string }) {
           ))}
         </div>
       </div>
-      <div className="mt-2 opacity-50 text-xs">
+      <div className="opacity-50 text-xs">
         You are currently searching from{" "}
         <b>{SERVERS.find((s) => s.slug === server)?.label}</b>. If you can't
         find anything, try searching from another server.

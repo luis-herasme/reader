@@ -52,8 +52,6 @@ export default function Reader({
     sentenceIndex: data?.sentenceIndex || 0,
   });
 
-  useTrackSentenceIndex(player, sentencesRef);
-
   const onNext = useCallback(
     debounce(() => {
       if (!data || !player) {
@@ -123,6 +121,7 @@ export default function Reader({
     [player]
   );
 
+  useTrackSentenceIndex(player, sentencesRef);
   useKeyboardControl({ onNext, onPrev, onTogglePlay });
   useMediaSession({ player, onTogglePlay });
 
