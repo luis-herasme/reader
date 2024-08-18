@@ -6,19 +6,7 @@ import HistoryDialog from "@/components/reader/history";
 import { Input } from "@/components/ui/input";
 import { trpc } from "@/trpc";
 import { Logo } from "@/components/logo";
-import { Button } from "@/components/ui/button";
-import { navigate } from "wouter/use-browser-location";
-
-const SERVERS = [
-  {
-    label: "server 1",
-    slug: "s1",
-  },
-  {
-    label: "server 2",
-    slug: "s2",
-  },
-];
+import { ServerSelector } from "@/components/reader/server-selector";
 
 export default function Home({ server }: { server: string }) {
   const [search, setSearch] = useState<{
@@ -85,29 +73,7 @@ export default function Home({ server }: { server: string }) {
             ref={inputRef}
           />
         </div>
-        <div className="max-w-[90vw] w-96">
-          <div className="text-sm mt-2 bg-[#222] rounded p-4">
-            You can search for novels from multiple sources. There are currently
-            two sources available:
-            <div className="flex items-center mt-2 gap-2">
-              {SERVERS.map((s) => (
-                <Button
-                  size="sm"
-                  className="rounded"
-                  disabled={s.slug === server}
-                  onClick={() => navigate(`/${s.slug}`)}
-                >
-                  {s.label}
-                </Button>
-              ))}
-            </div>
-          </div>
-          <div className="mt-2 opacity-50 text-xs">
-            You are currently searching from{" "}
-            <b>{SERVERS.find((s) => s.slug === server)?.label}</b>. If you can't
-            find anything, try searching from another server.
-          </div>
-        </div>
+        <ServerSelector server={server} />
       </div>
       {searchQuery.isLoading && (
         <div className="flex items-center justify-center w-full h-[20vh]">
