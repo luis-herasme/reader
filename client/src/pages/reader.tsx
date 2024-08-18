@@ -53,6 +53,32 @@ export default function Reader({
     sentenceIndex: data?.sentenceIndex || 0,
   });
 
+  const goToNextPage = async () => {
+    if (!data || !player) {
+      return;
+    }
+
+    if (data.next) {
+      await utils.novels.chapter.invalidate({ server, chapter, novel });
+      navigate(`/${server}/reader/${novel}/${data.next}`);
+    } else {
+      toast("There are no more chapters");
+    }
+  };
+
+  const goToPreviousPage = async () => {
+    if (!data || !player) {
+      return;
+    }
+
+    if (data.prev) {
+      await utils.novels.chapter.invalidate({ server, chapter, novel });
+      navigate(`/${server}/reader/${novel}/${data.prev}`);
+    } else {
+      toast("There are no previous chapters");
+    }
+  };
+
   const onNext = useCallback(
     debounce(() => {
       if (!data || !player) {
@@ -62,12 +88,7 @@ export default function Reader({
       const nextIndex = player.nextIndex();
 
       if (nextIndex === null) {
-        if (data.next) {
-          navigate(data.next);
-        } else {
-          toast("There are no more chapters");
-        }
-
+        goToNextPage();
         return;
       }
 
@@ -89,12 +110,7 @@ export default function Reader({
       const previousIndex = player.previousIndex();
 
       if (previousIndex === null) {
-        if (data.prev) {
-          navigate(data.prev);
-        } else {
-          toast("There are no previous chapters");
-        }
-
+        goToPreviousPage();
         return;
       }
 
@@ -126,32 +142,23 @@ export default function Reader({
   useKeyboardControl({ onNext, onPrev, onTogglePlay });
   useMediaSession({ player, onTogglePlay });
 
-  useEffect(() => {
-    if (player) {
-      player.onComplete = async () => {
-        if (data && data.next && settings.autoAdvance) {
-          await trpcVanilla.history.add.mutate({
-            server,
-            slug: novel,
-            chapter,
-            sentenceIndex: 0,
-            length: player.sentences.length,
-          });
+  player.onComplete = async () => {
+    if (data && data.next && settings.autoAdvance) {
+      await trpcVanilla.history.add.mutate({
+        server,
+        slug: novel,
+        chapter,
+        sentenceIndex: 0,
+        length: player.sentences.length,
+      });
 
-          await utils.history.novelHistory.invalidate(novel);
-
-          navigate(`/${server}/reader/${novel}/${data.next}`);
-        }
-      };
+      await utils.history.novelHistory.invalidate(novel);
+      goToNextPage();
     }
-  }, [player, data, settings]);
+  };
 
   useEffect(() => {
     if (data && player && player.sentences.length) {
-      if (player.getCurrentSentenceIndex() === player.sentences.length - 1) {
-        return;
-      }
-
       trpcVanilla.history.add
         .mutate({
           server,
@@ -173,12 +180,7 @@ export default function Reader({
         backgroundColor: theme.background,
       }}
     >
-      {data && (
-        <NavArrows
-          next={data.next ? `/${server}/reader/${novel}/${data.next}` : null}
-          prev={data.prev ? `/${server}/reader/${novel}/${data.prev}` : null}
-        />
-      )}
+      {data && <NavArrows next={goToNextPage} prev={goToPreviousPage} />}
 
       <div className="z-[49] fixed flex flex-col items-end justify-center gap-4 top-6 sm:top-12 left-6 sm:left-12">
         <HomeButton />

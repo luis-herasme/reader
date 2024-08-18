@@ -1,31 +1,36 @@
+import { Player } from "./player";
 import { fetchAudio } from "./fetch-audio";
 import { sentenceIsValid } from "./sentence-utils";
 
 export class AudioLoader {
   public preloadAudioIndex = 0;
-  private sentences: string[] = [];
   private audios: Map<number, HTMLAudioElement> = new Map();
   private fetchings: Map<number, boolean> = new Map();
   private preloadInterval: ReturnType<typeof setInterval> | undefined;
-  private forceUpdate: () => void;
+  private player: Player;
 
-  constructor(sentences: string[], forceUpdate: () => void) {
-    this.forceUpdate = forceUpdate;
-    this.sentences = sentences;
+  constructor(player: Player) {
+    this.player = player;
     this.preLoadAudios();
   }
 
-  stopPreloading() {
+  reset() {
+    this.stopPreloading();
+    this.audios.clear();
+    this.fetchings.clear();
+  }
+
+  private stopPreloading() {
     clearInterval(this.preloadInterval);
   }
 
   deleteFetchings(key: number) {
     this.fetchings.delete(key);
-    this.forceUpdate();
+    this.player.onUpdate();
   }
 
   refetchSentences() {
-    for (let i = 0; i < this.sentences.length; i++) {
+    for (let i = 0; i < this.player.sentences.length; i++) {
       const fetching = this.fetchings.get(i);
 
       if (fetching) {
@@ -36,7 +41,7 @@ export class AudioLoader {
   }
 
   getAudioStatus(index: number): "loading" | "ready" | "inactive" | "invalid" {
-    if (!sentenceIsValid(this.sentences[index])) {
+    if (!sentenceIsValid(this.player.sentences[index])) {
       return "invalid";
     }
 
@@ -52,7 +57,7 @@ export class AudioLoader {
   }
 
   async getAudio(index: number): Promise<HTMLAudioElement | undefined> {
-    if (!sentenceIsValid(this.sentences[index])) {
+    if (!sentenceIsValid(this.player.sentences[index])) {
       return;
     }
 
@@ -85,9 +90,9 @@ export class AudioLoader {
 
   private async fetchAudio(index: number): Promise<HTMLAudioElement> {
     this.fetchings.set(index, true);
-    this.forceUpdate();
+    this.player.onUpdate();
 
-    const audio = await fetchAudio(this.sentences[index]);
+    const audio = await fetchAudio(this.player.sentences[index]);
 
     // If the fetching was aborted, don't set the audio
     if (this.fetchings.get(index) === false) {
@@ -96,16 +101,16 @@ export class AudioLoader {
 
     this.fetchings.delete(index);
     this.audios.set(index, audio);
-    this.forceUpdate();
+    this.player.onUpdate();
 
     return audio;
   }
 
-  private async preLoadAudios() {
+  async preLoadAudios() {
     clearInterval(this.preloadInterval);
 
     this.preloadInterval = setInterval(() => {
-      if (this.preloadAudioIndex >= this.sentences.length) {
+      if (this.preloadAudioIndex >= this.player.sentences.length) {
         return;
       }
 

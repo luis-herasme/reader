@@ -1,8 +1,10 @@
 import { Player } from "./player";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useForceUpdate } from "./use-force-update";
 import { useSettings } from "@/components/reader/settings";
 import { trpc } from "@/trpc";
+
+const player = new Player();
 
 export function usePlayer({
   text,
@@ -11,46 +13,42 @@ export function usePlayer({
   text: string;
   sentenceIndex: number;
 }) {
-  const { settings } = useSettings();
   const forceUpdate = useForceUpdate();
-  const [player, setPlayer] = useState<Player | null>(null);
+  const { settings } = useSettings();
   const { data: replaceRules } = trpc.settings.replacementRules.useQuery();
 
   useEffect(() => {
-    if (settings && player) {
+    player.onUpdate = forceUpdate;
+
+    if (settings) {
       player.setSpeed(settings.speed);
       player.stopOffset = settings.stopOffset;
     }
-  }, [player, settings]);
+  }, [settings, forceUpdate]);
 
   useEffect(() => {
-    const playing = player?.isPlaying();
-    player?.destroy();
-
-    let newText = `${text}`;
-
-    if (replaceRules) {
-      for (const replaceRule of replaceRules) {
-        newText = newText.replaceAll(replaceRule.from, replaceRule.to);
-      }
-    }
-
-    const newPlayer = new Player(newText, sentenceIndex, forceUpdate);
-
-    setPlayer(newPlayer);
-
-    if (playing) {
-      newPlayer.play(newPlayer.getCurrentSentenceIndex());
-    }
+    player.setText({
+      text: applyReplaceRules(text, replaceRules),
+      sentenceIndex,
+    });
   }, [text, sentenceIndex, replaceRules]);
 
   useEffect(() => {
-    return () => {
-      if (player) {
-        player.destroy();
-      }
-    };
-  }, [player]);
+    return () => player.reset();
+  }, []);
 
   return player;
+}
+
+function applyReplaceRules(
+  text: string,
+  replaceRules: { from: string; to: string }[] = []
+) {
+  let newText = `${text}`;
+
+  for (const replaceRule of replaceRules) {
+    newText = newText.replaceAll(replaceRule.from, replaceRule.to);
+  }
+
+  return newText;
 }

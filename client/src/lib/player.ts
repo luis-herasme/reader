@@ -5,9 +5,9 @@ import { extractSentences, sentenceIsValid } from "./sentence-utils";
 const noSleep = new NoSleep();
 
 export class Player {
-  readonly sentences: string[] = [];
-  readonly audioLoader: AudioLoader;
+  readonly audioLoader = new AudioLoader(this);
 
+  public sentences: string[] = [];
   private playing: boolean = false;
   private currentPlayID: number = 0;
   private currentSentenceIndex: number = 0;
@@ -15,19 +15,22 @@ export class Player {
   private readonly audioElement: HTMLAudioElement = new Audio();
 
   onComplete: () => void = () => {};
-  private forceUpdate: () => void;
+  onUpdate: () => void = () => {};
 
   // User state settings
   private speed: number = 1;
   public stopOffset: number = 0;
 
-  constructor(text: string, sentenceIndex: number, forceUpdate: () => void) {
-    this.forceUpdate = forceUpdate;
+  setText({ text, sentenceIndex }: { text: string; sentenceIndex: number }) {
+    const playing = this.playing;
+    this.reset();
     this.sentences = extractSentences(text);
-    this.audioLoader = new AudioLoader(this.sentences, forceUpdate);
-    this.currentSentenceIndex = sentenceIndex;
-    this.audioLoader.preloadAudioIndex = this.currentSentenceIndex;
-    this.forceUpdate();
+    this.setCurrentSentenceIndex(sentenceIndex);
+    this.audioLoader.preLoadAudios();
+
+    if (playing) {
+      this.play(sentenceIndex);
+    }
   }
 
   setSpeed(speed: number) {
@@ -49,7 +52,7 @@ export class Player {
       navigator.mediaSession.playbackState = "paused";
     }
 
-    this.forceUpdate();
+    this.onUpdate();
   }
 
   getCurrentSentenceIndex() {
@@ -59,10 +62,11 @@ export class Player {
   setCurrentSentenceIndex(index: number) {
     this.currentSentenceIndex = index;
     this.audioLoader.preloadAudioIndex = this.currentSentenceIndex;
-    this.forceUpdate();
+    this.onUpdate();
   }
 
   async play(index: number) {
+    this.stop();
     this.setPlaying(true);
 
     this.audioElement.currentTime = 0;
@@ -82,15 +86,16 @@ export class Player {
     this.onComplete();
   }
 
-  destroy() {
+  reset() {
     this.stop();
-    this.audioLoader.stopPreloading();
+    this.setCurrentSentenceIndex(0);
+    this.audioLoader.reset();
   }
 
   stop() {
     this.setPlaying(false);
-    this.audioElement.pause();
     this.audioElement.currentTime = 0;
+    this.audioElement.pause();
   }
 
   private stopOffsetInterval: ReturnType<typeof setInterval> | undefined;
