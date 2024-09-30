@@ -10,10 +10,10 @@ import { ScrollArea } from "../ui/scroll-area";
 export default function HistoryDialog() {
   return (
     <Dialog>
-      <DialogTrigger>
+      <DialogTrigger className="w-full sm:w-auto">
         <Button
           variant="secondary"
-          className="flex items-center justify-center gap-2"
+          className="flex items-center justify-center gap-2 w-full"
         >
           My novels <Bookmark className="inline-block w-4 h-4" />
         </Button>

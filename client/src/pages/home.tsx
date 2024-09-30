@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
-import { FilePlus2, FileWarning, Loader2, LogIn, LogOut } from "lucide-react";
+import {
+  FilePlus2,
+  FileWarning,
+  Loader2,
+  LogIn,
+  LogOut,
+  Menu,
+} from "lucide-react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { ChaptersDialog } from "@/components/chapters";
 import HistoryDialog from "@/components/reader/history";
@@ -9,6 +16,13 @@ import { Logo } from "@/components/logo";
 import { ServerSelector } from "@/components/server-selector";
 import { Button } from "@/components/ui/button";
 import { navigate } from "wouter/use-browser-location";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 export default function Home({ server }: { server: string }) {
   const [search, setSearch] = useState<{
@@ -28,9 +42,61 @@ export default function Home({ server }: { server: string }) {
   const { data: isAuthenticated } = trpc.auth.isAuthenticated.useQuery();
 
   return (
-    <div className="flex flex-col items-center justify-center overflow-y-auto">
-      <div className="fixed top-4 right-4">
-        <div className="flex items-center justify-center gap-2">
+    <div className="flex flex-col items-center justify-center">
+      <div className="fixed top-0 right-0 p-4 z-50">
+        <div className="sm:hidden block">
+          <Sheet>
+            <SheetTrigger>
+              <Button size="icon">
+                <Menu className="w-4 h-4" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent>
+              <SheetHeader>
+                <SheetTitle>Menu</SheetTitle>
+              </SheetHeader>
+              <div className="flex flex-col gap-2 mt-4">
+                <Button
+                  className="flex items-center justify-center gap-2 w-full"
+                  onClick={() => {
+                    navigate("/custom");
+                  }}
+                >
+                  Read custom file
+                  <FilePlus2 className="w-4 h-4" />
+                </Button>
+                {isAuthenticated !== undefined &&
+                  (isAuthenticated ? (
+                    <>
+                      <HistoryDialog />
+                      <Button
+                        variant="destructive"
+                        className="flex items-center justify-center gap-2 w-full"
+                        onClick={() => {
+                          window.location.href = "/logout";
+                        }}
+                      >
+                        logout
+                        <LogOut className="w-4 h-4" />
+                      </Button>
+                    </>
+                  ) : (
+                    <Button
+                      variant="secondary"
+                      className="flex items-center justify-center gap-2"
+                      onClick={() => {
+                        window.location.href = "/login";
+                      }}
+                    >
+                      login
+                      <LogIn className="w-4 h-4" />
+                    </Button>
+                  ))}
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
+        <div className="hidden items-center justify-end gap-2 flex-wrap sm:flex">
           <Button
             className="flex items-center justify-center gap-2"
             onClick={() => {
