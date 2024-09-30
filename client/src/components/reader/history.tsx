@@ -1,15 +1,11 @@
 import { trpc } from "../../trpc";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { Bookmark, Loader2, Trash } from "lucide-react";
 import { Favorite } from "./favorite";
 import { LibraryContent } from "./library";
 import { navigate } from "wouter/use-browser-location";
 import { Button } from "../ui/button";
+import { ScrollArea } from "../ui/scroll-area";
 
 export default function HistoryDialog() {
   return (
@@ -22,11 +18,7 @@ export default function HistoryDialog() {
           My novels <Bookmark className="inline-block w-4 h-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="text-white max-h-[100dvh] overflow-y-auto">
-        <DialogHeader>
-          <LibraryContent />
-        </DialogHeader>
-      </DialogContent>
+      <LibraryContent />
     </Dialog>
   );
 }
@@ -108,7 +100,7 @@ export function History() {
   const { data } = trpc.history.getNovels.useQuery();
 
   return (
-    <div className="flex flex-col gap-2 max-h-[50vh] overflow-y-auto scrollbar">
+    <ScrollArea className="max-h-[50vh] overflow-y-auto scrollbar">
       <div className="flex flex-col gap-4 mb-4">
         {data &&
           data.map((history) => (
@@ -118,6 +110,6 @@ export function History() {
             />
           ))}
       </div>
-    </div>
+    </ScrollArea>
   );
 }

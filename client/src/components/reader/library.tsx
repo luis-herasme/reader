@@ -5,7 +5,13 @@ import { trpc, trpcVanilla } from "../../trpc";
 import { toast } from "sonner";
 import { navigate } from "wouter/use-browser-location";
 import { Loading } from "../loading";
-import { DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
+import {
+  DialogContent,
+  DialogHeader,
+  DialogOverlay,
+  DialogTitle,
+} from "../ui/dialog";
+import { ScrollArea } from "../ui/scroll-area";
 
 function Favorites() {
   const utils = trpc.useUtils();
@@ -31,78 +37,80 @@ function Favorites() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      {data.map((favorite) => (
-        <div
-          key={`${favorite.slug}`}
-          className="flex items-center justify-between gap-4"
-        >
+    <ScrollArea className="max-h-[50vh] overflow-y-auto scrollbar">
+      <div className="flex flex-col gap-4">
+        {data.map((favorite) => (
           <div
-            className="flex flex-col w-full gap-1 cursor-pointer"
-            onClick={async () => {
-              const currentChapter =
-                await trpcVanilla.favorites.getNovelChapter.query({
-                  slug: favorite.slug,
-                });
-
-              navigate(
-                `/${favorite.server}/reader/${favorite.slug}/${currentChapter}`
-              );
-            }}
+            key={`${favorite.slug}`}
+            className="flex items-center justify-between gap-4"
           >
-            <div className={`text-base`}>
-              {favorite.slug
-                .split("-")
-                .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-                .join(" ")}
-            </div>
-            <div className="font-mono text-xs opacity-50">
-              {new Date(favorite.updatedAt).toLocaleDateString("en-US", {
-                weekday: "long",
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })}
-            </div>
-          </div>
-          <div className="flex items-center justify-center gap-4">
             <div
-              className={`rounded p-2  hover:bg-destructive duration-200 ${
-                removeFavorite.isPending ? "opacity-50" : "cursor-pointer"
-              }`}
-              onClick={() => {
-                if (removeFavorite.isPending) {
-                  return;
-                }
-
-                removeFavorite.mutate(
-                  {
+              className="flex flex-col w-full gap-1 cursor-pointer"
+              onClick={async () => {
+                const currentChapter =
+                  await trpcVanilla.favorites.getNovelChapter.query({
                     slug: favorite.slug,
-                    server: favorite.server,
-                  },
-                  {
-                    onSuccess() {
-                      toast("Removed novel from library");
-                      utils.favorites.read.invalidate();
-                      utils.favorites.isFavorite.invalidate({
-                        slug: favorite.slug,
-                        server: favorite.server,
-                      });
-                    },
-                  }
+                  });
+
+                navigate(
+                  `/${favorite.server}/reader/${favorite.slug}/${currentChapter}`
                 );
               }}
             >
-              {removeFavorite.isPending ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <Trash className="w-4 h-4 opacity-50" />
-              )}
+              <div className={`text-base`}>
+                {favorite.slug
+                  .split("-")
+                  .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                  .join(" ")}
+              </div>
+              <div className="font-mono text-xs opacity-50">
+                {new Date(favorite.updatedAt).toLocaleDateString("en-US", {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </div>
+            </div>
+            <div className="flex items-center justify-center gap-4">
+              <div
+                className={`rounded p-2  hover:bg-destructive duration-200 ${
+                  removeFavorite.isPending ? "opacity-50" : "cursor-pointer"
+                }`}
+                onClick={() => {
+                  if (removeFavorite.isPending) {
+                    return;
+                  }
+
+                  removeFavorite.mutate(
+                    {
+                      slug: favorite.slug,
+                      server: favorite.server,
+                    },
+                    {
+                      onSuccess() {
+                        toast("Removed novel from library");
+                        utils.favorites.read.invalidate();
+                        utils.favorites.isFavorite.invalidate({
+                          slug: favorite.slug,
+                          server: favorite.server,
+                        });
+                      },
+                    }
+                  );
+                }}
+              >
+                {removeFavorite.isPending ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Trash className="w-4 h-4 opacity-50" />
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      ))}
-    </div>
+        ))}
+      </div>
+    </ScrollArea>
   );
 }
 
@@ -110,44 +118,46 @@ export function LibraryContent() {
   const { data, isLoading } = trpc.auth.isAuthenticated.useQuery();
 
   return (
-    <DialogContent>
-      <DialogHeader>
-        <DialogTitle>
-          <Library className="inline-block w-6 h-6 mr-2" />
-          My library
-        </DialogTitle>
-      </DialogHeader>
+    <DialogOverlay>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>
+            <Library className="inline-block w-6 h-6 mr-2" />
+            My library
+          </DialogTitle>
+        </DialogHeader>
 
-      {isLoading ? (
-        <Loading />
-      ) : data ? (
-        <Tabs defaultValue="library" className="w-full">
-          <TabsList className="w-full">
-            <TabsTrigger className="w-full" value="library">
-              Favorites
-            </TabsTrigger>
-            <TabsTrigger className="w-full" value="history">
-              History
-            </TabsTrigger>
-          </TabsList>
-          <TabsContent value="library">
-            <Favorites />
-          </TabsContent>
-          <TabsContent value="history">
-            <History />
-          </TabsContent>
-        </Tabs>
-      ) : (
-        <div className="flex flex-col items-center justify-center min-h-[200px]">
-          <AlertCircle className="w-12 h-12 mb-4" strokeWidth={1} />
-          <p className="text-base opacity-80">
-            You need to be logged in to use the library.
-          </p>
-          <p className="text-sm opacity-50">
-            Click the login button below to log in.
-          </p>
-        </div>
-      )}
-    </DialogContent>
+        {isLoading ? (
+          <Loading />
+        ) : data ? (
+          <Tabs defaultValue="library" className="w-full">
+            <TabsList className="w-full">
+              <TabsTrigger className="w-full" value="library">
+                Favorites
+              </TabsTrigger>
+              <TabsTrigger className="w-full" value="history">
+                History
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="library">
+              <Favorites />
+            </TabsContent>
+            <TabsContent value="history">
+              <History />
+            </TabsContent>
+          </Tabs>
+        ) : (
+          <div className="flex flex-col items-center justify-center min-h-[200px]">
+            <AlertCircle className="w-12 h-12 mb-4" strokeWidth={1} />
+            <p className="text-base opacity-80">
+              You need to be logged in to use the library.
+            </p>
+            <p className="text-sm opacity-50">
+              Click the login button below to log in.
+            </p>
+          </div>
+        )}
+      </DialogContent>
+    </DialogOverlay>
   );
 }
