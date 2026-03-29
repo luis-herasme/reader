@@ -1,13 +1,13 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { Toaster } from "@/components/ui/sonner";
-import { TRPCProvider } from "./trpc";
+import { QueryProvider } from "./api/queryClient";
 import { Router } from "./pages/router";
 import "./index.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <TRPCProvider>
+    <QueryProvider>
       <Toaster
         toastOptions={{
           classNames: {
@@ -17,6 +17,6 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         closeButton
       />
       <Router />
-    </TRPCProvider>
+    </QueryProvider>
   </React.StrictMode>
 );
