@@ -4,20 +4,24 @@ import { jsonContent } from "stoker/openapi/helpers";
 import type { RouteHandler } from "@hono/zod-openapi";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import type { AppEnv } from "../../lib/appFactory";
-
-const URL = process.env.DATA_URL;
+import { prisma } from "../../db";
 
 const ChaptersInput = z.object({
-  slug: z.string(),
-  server: z.string(),
+  bookId: z.string().uuid(),
+  skip: z.coerce.number().min(0).int().default(0),
+  take: z.coerce.number().min(1).max(100).int().default(100),
 });
 
-const ChaptersOutput = z.array(
-  z.object({
-    title: z.string(),
-    slug: z.string(),
-  }),
-);
+const ChapterItem = z.object({
+  chapterId: z.string(),
+  title: z.string(),
+  number: z.number(),
+});
+
+const ChaptersOutput = z.object({
+  chapters: z.array(ChapterItem),
+  total: z.number(),
+});
 
 export const chaptersRoute = createRoute({
   method: "get",
@@ -31,11 +35,25 @@ export const chaptersRoute = createRoute({
 export const chaptersHandler: RouteHandler<
   typeof chaptersRoute,
   AppEnv
-> = async (c) => {
-  const { slug, server } = c.req.valid("query");
-  const response = await fetch(URL + `/${server}/chapters/${slug}`);
-  if (!response.ok) {
-    throw new Error("Failed to fetch chapters");
-  }
-  return c.json(await response.json(), HttpStatusCodes.OK);
+> = async (context) => {
+  const { bookId, skip, take } = context.req.valid("query");
+
+  const [chapters, total] = await Promise.all([
+    prisma.chapter.findMany({
+      where: { bookId },
+      skip,
+      take,
+      orderBy: { number: "asc" },
+      select: { id: true, title: true, number: true },
+    }),
+    prisma.chapter.count({ where: { bookId } }),
+  ]);
+
+  const results = chapters.map((chapter) => ({
+    chapterId: chapter.id,
+    title: chapter.title,
+    number: chapter.number,
+  }));
+
+  return context.json({ chapters: results, total }, HttpStatusCodes.OK);
 };

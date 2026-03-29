@@ -7,18 +7,17 @@ import type { AppEnv } from "../../lib/appFactory";
 import { prisma } from "../../db";
 import { optionalAuthMiddleware } from "../../auth/authMiddleware";
 
-const URL = process.env.DATA_URL;
-
 const ChapterInput = z.object({
-  novel: z.string(),
-  chapter: z.string(),
-  server: z.string(),
+  chapterId: z.string().uuid(),
 });
 
 const ChapterOutput = z.object({
+  bookId: z.string(),
+  bookTitle: z.string(),
+  chapterTitle: z.string(),
   content: z.string(),
-  next: z.string().nullable(),
-  prev: z.string().nullable(),
+  nextChapterId: z.string().nullable(),
+  previousChapterId: z.string().nullable(),
   sentenceIndex: z.number().nullable(),
 });
 
@@ -33,26 +32,39 @@ export const chapterRoute = createRoute({
 });
 
 export const chapterHandler: RouteHandler<typeof chapterRoute, AppEnv> = async (
-  c,
+  context,
 ) => {
-  const { server, novel, chapter } = c.req.valid("query");
-  const response = await fetch(URL + `/${server}/chapter/${novel}/${chapter}`);
-  if (!response.ok) {
-    throw new Error("Failed to fetch chapter");
-  }
-  const result = await response.json();
-  let sentenceIndex = null;
+  const { chapterId } = context.req.valid("query");
 
-  const user = c.get("user");
+  const chapter = await prisma.chapter.findUnique({
+    where: { id: chapterId },
+    include: { book: { select: { id: true, title: true } } },
+  });
+
+  if (!chapter) {
+    return context.json(
+      { error: "Chapter not found" } as unknown as z.infer<typeof ChapterOutput>,
+      HttpStatusCodes.NOT_FOUND as 200,
+    );
+  }
+
+  const [nextChapter, previousChapter] = await Promise.all([
+    prisma.chapter.findFirst({
+      where: { bookId: chapter.bookId, number: chapter.number + 1 },
+      select: { id: true },
+    }),
+    prisma.chapter.findFirst({
+      where: { bookId: chapter.bookId, number: chapter.number - 1 },
+      select: { id: true },
+    }),
+  ]);
+
+  let sentenceIndex: number | null = null;
+  const user = context.get("user");
   if (user) {
-    const history = await prisma.history.findFirst({
-      where: {
-        userId: user.id,
-        slug: novel,
-        chapter,
-      },
+    const history = await prisma.history.findUnique({
+      where: { userId_chapterId: { userId: user.id, chapterId } },
       select: { sentenceIndex: true },
-      orderBy: { updatedAt: "desc" },
     });
 
     if (history) {
@@ -60,5 +72,16 @@ export const chapterHandler: RouteHandler<typeof chapterRoute, AppEnv> = async (
     }
   }
 
-  return c.json({ ...result, sentenceIndex }, HttpStatusCodes.OK);
+  return context.json(
+    {
+      bookId: chapter.bookId,
+      bookTitle: chapter.book.title,
+      chapterTitle: chapter.title,
+      content: chapter.content,
+      nextChapterId: nextChapter?.id ?? null,
+      previousChapterId: previousChapter?.id ?? null,
+      sentenceIndex,
+    },
+    HttpStatusCodes.OK,
+  );
 };

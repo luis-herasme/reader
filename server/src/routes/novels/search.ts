@@ -4,24 +4,26 @@ import { jsonContent } from "stoker/openapi/helpers";
 import type { RouteHandler } from "@hono/zod-openapi";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import type { AppEnv } from "../../lib/appFactory";
-
-const URL = process.env.DATA_URL;
+import { prisma } from "../../db";
+import { getImageUrl } from "../../lib/r2";
 
 const SearchInput = z.object({
-  search: z.string(),
-  page: z.coerce.number().min(0).int(),
-  server: z.string(),
+  title: z.string(),
+  skip: z.coerce.number().min(0).int().default(0),
+  take: z.coerce.number().min(1).max(100).int().default(10),
+});
+
+const BookResult = z.object({
+  bookId: z.string(),
+  title: z.string(),
+  imageUrl: z.string().nullable(),
+  author: z.string(),
+  description: z.string(),
 });
 
 const SearchOutput = z.object({
-  results: z.array(
-    z.object({
-      name: z.string(),
-      image: z.string(),
-      slug: z.string(),
-    }),
-  ),
-  next: z.boolean(),
+  books: z.array(BookResult),
+  total: z.number(),
 });
 
 export const searchRoute = createRoute({
@@ -34,12 +36,30 @@ export const searchRoute = createRoute({
 });
 
 export const searchHandler: RouteHandler<typeof searchRoute, AppEnv> = async (
-  c,
+  context,
 ) => {
-  const { search, page, server } = c.req.valid("query");
-  const response = await fetch(URL + `/${server}/search/${search}/${page}`);
-  if (!response.ok) {
-    throw new Error("Failed to search novels");
-  }
-  return c.json(await response.json(), HttpStatusCodes.OK);
+  const { title, skip, take } = context.req.valid("query");
+
+  const [books, total] = await Promise.all([
+    prisma.book.findMany({
+      where: { title: { contains: title, mode: "insensitive" } },
+      skip,
+      take,
+      include: { image: true },
+      orderBy: { title: "asc" },
+    }),
+    prisma.book.count({
+      where: { title: { contains: title, mode: "insensitive" } },
+    }),
+  ]);
+
+  const results = books.map((book) => ({
+    bookId: book.id,
+    title: book.title,
+    imageUrl: book.imageId ? getImageUrl(book.imageId) : null,
+    author: book.author,
+    description: book.description,
+  }));
+
+  return context.json({ books: results, total }, HttpStatusCodes.OK);
 };
