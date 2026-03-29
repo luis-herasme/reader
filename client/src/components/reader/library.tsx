@@ -1,7 +1,9 @@
 import { AlertCircle, Library, Loader2, Trash } from "lucide-react";
 import { History } from "./history";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { trpc, trpcVanilla } from "../../trpc";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { api } from "@/api/client";
+import { FAVORITES, FAVORITES_IS_FAVORITE, AUTH_IS_AUTHENTICATED, type SlugServerInput } from "@/api/queryKeys";
 import { toast } from "sonner";
 import { navigate } from "wouter/use-browser-location";
 import { Loading } from "../loading";
@@ -14,9 +16,20 @@ import {
 import { ScrollArea } from "../ui/scroll-area";
 
 function Favorites() {
-  const utils = trpc.useUtils();
-  const { data, isLoading } = trpc.favorites.read.useQuery();
-  const removeFavorite = trpc.favorites.delete.useMutation();
+  const queryClient = useQueryClient();
+  const { data, isLoading } = useQuery({
+    queryKey: [FAVORITES],
+    queryFn: async () => {
+      const res = await api.api.favorites.$get();
+      return res.json();
+    },
+  });
+  const removeFavorite = useMutation({
+    mutationFn: async (input: SlugServerInput) => {
+      const res = await api.api.favorites.$delete({ query: input });
+      return res.json();
+    },
+  });
 
   if (isLoading || data === undefined) {
     return <Loading />;
@@ -47,10 +60,10 @@ function Favorites() {
             <div
               className="flex flex-col w-full gap-1 cursor-pointer"
               onClick={async () => {
-                const currentChapter =
-                  await trpcVanilla.favorites.getNovelChapter.query({
-                    slug: favorite.slug,
-                  });
+                const res = await api.api.favorites["novel-chapter"].$get({
+                  query: { slug: favorite.slug },
+                });
+                const currentChapter = await res.json();
 
                 navigate(
                   `/${favorite.server}/reader/${favorite.slug}/${currentChapter}`
@@ -90,10 +103,11 @@ function Favorites() {
                     {
                       onSuccess() {
                         toast("Removed novel from library");
-                        utils.favorites.read.invalidate();
-                        utils.favorites.isFavorite.invalidate({
-                          slug: favorite.slug,
-                          server: favorite.server,
+                        queryClient.invalidateQueries({
+                          queryKey: [FAVORITES],
+                        });
+                        queryClient.invalidateQueries({
+                          queryKey: [FAVORITES_IS_FAVORITE, favorite.slug, favorite.server],
                         });
                       },
                     }
@@ -115,7 +129,13 @@ function Favorites() {
 }
 
 export function LibraryContent() {
-  const { data, isLoading } = trpc.auth.isAuthenticated.useQuery();
+  const { data, isLoading } = useQuery({
+    queryKey: [AUTH_IS_AUTHENTICATED],
+    queryFn: async () => {
+      const res = await api.api.auth["is-authenticated"].$get();
+      return res.json();
+    },
+  });
 
   return (
     <DialogOverlay>
