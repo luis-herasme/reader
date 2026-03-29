@@ -7,7 +7,9 @@ import {
 } from "@/components/ui/dialog";
 import { Eye, List, Loader2 } from "lucide-react";
 import { CircleButton } from "./circle-button";
-import { trpc } from "@/trpc";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "@/api/client";
+import { NOVELS_CHAPTERS, HISTORY_NOVEL } from "@/api/queryKeys";
 import { navigate } from "wouter/use-browser-location";
 
 export function ListChapters({
@@ -60,12 +62,25 @@ export function ChaptersDialog({
   currentChapterSlug?: string;
   server: string;
 }) {
-  const { data: chapters, isLoading } = trpc.novels.chapters.useQuery({
-    slug,
-    server,
+  const { data: chapters, isLoading } = useQuery({
+    queryKey: [NOVELS_CHAPTERS, slug, server],
+    queryFn: async () => {
+      const res = await api.api.novels.chapters.$get({
+        query: { slug, server },
+      });
+      return res.json();
+    },
   });
 
-  const { data: history } = trpc.history.novelHistory.useQuery(slug);
+  const { data: history } = useQuery({
+    queryKey: [HISTORY_NOVEL, slug],
+    queryFn: async () => {
+      const res = await api.api.history.novel.$get({
+        query: { slug },
+      });
+      return res.json();
+    },
+  });
 
   const currentChapterRef = useCallback((node: HTMLDivElement | null) => {
     if (node) {
