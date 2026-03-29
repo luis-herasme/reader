@@ -11,7 +11,9 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 import { ChaptersDialog } from "@/components/chapters";
 import HistoryDialog from "@/components/reader/history";
 import { Input } from "@/components/ui/input";
-import { trpc } from "@/trpc";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "@/api/client";
+import { NOVELS_SEARCH, AUTH_IS_AUTHENTICATED } from "@/api/queryKeys";
 import { Logo } from "@/components/logo";
 import { ServerSelector } from "@/components/server-selector";
 import { Button } from "@/components/ui/button";
@@ -35,11 +37,28 @@ export default function Home({ server }: { server: string }) {
     setSearch((value) => ({ ...value, server, page: 0 }));
   }, [server]);
 
-  const searchQuery = trpc.novels.search.useQuery(search, {
+  const searchQuery = useQuery({
+    queryKey: [NOVELS_SEARCH, search],
+    queryFn: async () => {
+      const res = await api.api.novels.search.$get({
+        query: {
+          search: search.search,
+          page: search.page.toString(),
+          server: search.server,
+        },
+      });
+      return res.json();
+    },
     enabled: Boolean(search.search),
   });
 
-  const { data: isAuthenticated } = trpc.auth.isAuthenticated.useQuery();
+  const { data: isAuthenticated } = useQuery({
+    queryKey: [AUTH_IS_AUTHENTICATED],
+    queryFn: async () => {
+      const res = await api.api.auth["is-authenticated"].$get();
+      return res.json();
+    },
+  });
 
   return (
     <div className="flex flex-col items-center justify-center">
@@ -73,7 +92,7 @@ export default function Home({ server }: { server: string }) {
                         variant="destructive"
                         className="flex items-center justify-center gap-2 w-full"
                         onClick={() => {
-                          window.location.href = "/logout";
+                          window.location.href = "/api/auth/logout";
                         }}
                       >
                         logout
@@ -114,7 +133,7 @@ export default function Home({ server }: { server: string }) {
                   variant="destructive"
                   className="flex items-center justify-center gap-2"
                   onClick={() => {
-                    window.location.href = "/logout";
+                    window.location.href = "/api/auth/logout";
                   }}
                 >
                   logout
