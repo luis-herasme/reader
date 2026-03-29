@@ -14,8 +14,7 @@ export const readHistoryRoute = createRoute({
   middleware: [authMiddleware],
   request: {
     query: z.object({
-      slug: z.string(),
-      chapter: z.string(),
+      chapterId: z.string().uuid(),
     }),
   },
   responses: {
@@ -29,13 +28,13 @@ export const readHistoryRoute = createRoute({
 export const readHistoryHandler: RouteHandler<
   typeof readHistoryRoute,
   AppEnv
-> = async (c) => {
-  const { slug, chapter } = c.req.valid("query");
-  const user = c.get("user")!;
+> = async (context) => {
+  const { chapterId } = context.req.valid("query");
+  const user = context.get("user")!;
 
-  const entry = await prisma.history.findFirst({
-    where: { userId: user.id, slug, chapter },
+  const entry = await prisma.history.findUnique({
+    where: { userId_chapterId: { userId: user.id, chapterId } },
   });
 
-  return c.json(entry, HttpStatusCodes.OK);
+  return context.json(entry, HttpStatusCodes.OK);
 };

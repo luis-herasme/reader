@@ -6,7 +6,7 @@ import { jsonContent } from "stoker/openapi/helpers";
 import type { AppEnv } from "../../lib/appFactory";
 import { prisma } from "../../db";
 import { authMiddleware } from "../../auth/authMiddleware";
-import { HistorySchema } from "./schema";
+import { HistoryWithBookSchema } from "./schema";
 
 export const getNovelsRoute = createRoute({
   method: "get",
@@ -14,7 +14,7 @@ export const getNovelsRoute = createRoute({
   middleware: [authMiddleware],
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      z.array(HistorySchema),
+      z.array(HistoryWithBookSchema),
       "List of novels with history",
     ),
   },
@@ -23,15 +23,17 @@ export const getNovelsRoute = createRoute({
 export const getNovelsHandler: RouteHandler<
   typeof getNovelsRoute,
   AppEnv
-> = async (c) => {
-  const user = c.get("user")!;
+> = async (context) => {
+  const user = context.get("user")!;
 
-  return c.json(
-    await prisma.history.findMany({
-      where: { userId: user.id },
-      orderBy: { updatedAt: "desc" },
-      distinct: ["slug"],
-    }),
-    HttpStatusCodes.OK,
-  );
+  const histories = await prisma.history.findMany({
+    where: { userId: user.id },
+    orderBy: { updatedAt: "desc" },
+    distinct: ["bookId"],
+    include: {
+      book: { select: { id: true, title: true, imageId: true } },
+    },
+  });
+
+  return context.json(histories, HttpStatusCodes.OK);
 };
