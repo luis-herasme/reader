@@ -25,7 +25,7 @@ export default function ReplaceRules() {
     queryKey: [SETTINGS_REPLACEMENT_RULES],
     queryFn: async () => {
       const res = await api.api.settings["replacement-rules"].$get();
-      return res.json() as any;
+      return res.json();
     },
   });
   const [rules, setRules] = useState<ReplaceRule[] | undefined>(data);
@@ -36,7 +36,7 @@ export default function ReplaceRules() {
       const res = await api.api.settings["replacement-rules"].$post({
         json: data,
       });
-      return res.json() as any;
+      return res.json();
     },
     onSuccess: () =>
       queryClient.invalidateQueries({

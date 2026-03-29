@@ -42,7 +42,7 @@ function HistoryItem({
       const res = await api.api.history.novel.$delete({
         query: input,
       });
-      return res.json() as any;
+      return res.json();
     },
   });
 
@@ -112,7 +112,7 @@ export function History() {
     queryKey: [HISTORY_NOVELS],
     queryFn: async () => {
       const res = await api.api.history.novels.$get();
-      return res.json() as any;
+      return res.json();
     },
   });
 
@@ -120,7 +120,7 @@ export function History() {
     <ScrollArea className="max-h-[50vh] overflow-y-auto scrollbar">
       <div className="flex flex-col gap-4 mb-4">
         {data &&
-          data.map((history: any) => (
+          data.map((history) => (
             <HistoryItem
               {...history}
               key={history.server + "-" + history.slug + "-" + history.chapter}

@@ -68,7 +68,7 @@ export function ChaptersDialog({
       const res = await api.api.novels.chapters.$get({
         query: { slug, server },
       });
-      return res.json() as any;
+      return res.json();
     },
   });
 
@@ -78,7 +78,7 @@ export function ChaptersDialog({
       const res = await api.api.history.novel.$get({
         query: { slug },
       });
-      return res.json() as any;
+      return res.json();
     },
   });
 
@@ -110,7 +110,7 @@ export function ChaptersDialog({
               ) : (
                 <div className="max-h-[80dvh] overflow-y-auto w-full">
                   <div className="columns-1 sm:columns-2 md:columns-3">
-                    {chapters?.map((chapter: any) => (
+                    {chapters?.map((chapter) => (
                       <div
                         ref={
                           chapter.slug === currentChapterSlug
@@ -134,7 +134,7 @@ export function ChaptersDialog({
                       >
                         <div className="cursor-pointer hover:underline">
                           {chapter.title}
-                          {history?.find((c: any) => c.chapter === chapter.slug) && (
+                          {history?.find((c) => c.chapter === chapter.slug) && (
                             <span className="ml-2">
                               <Eye className="inline-block w-4 h-4" />
                             </span>

@@ -15,7 +15,7 @@ export const isAuthenticatedRoute = createRoute({
   path: "/api/auth/is-authenticated",
   middleware: [optionalAuthMiddleware],
   responses: {
-    [HttpStatusCodes.OK]: jsonContent(z.any(), "Authentication status"),
+    [HttpStatusCodes.OK]: jsonContent(z.boolean(), "Authentication status"),
   },
 });
 

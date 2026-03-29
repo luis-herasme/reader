@@ -7,6 +7,17 @@ import type { AppEnv } from "../lib/appFactory";
 import { prisma } from "../db";
 import { authMiddleware } from "../auth/authMiddleware";
 
+const HistorySchema = z.object({
+  userId: z.string(),
+  slug: z.string(),
+  chapter: z.string(),
+  server: z.string(),
+  sentenceIndex: z.number(),
+  length: z.number(),
+  updatedAt: z.string(),
+  createdAt: z.string(),
+});
+
 // --- Get Novels ---
 
 export const getNovelsRoute = createRoute({
@@ -14,7 +25,7 @@ export const getNovelsRoute = createRoute({
   path: "/api/history/novels",
   middleware: [authMiddleware],
   responses: {
-    [HttpStatusCodes.OK]: jsonContent(z.any(), "List of novels with history"),
+    [HttpStatusCodes.OK]: jsonContent(z.array(HistorySchema), "List of novels with history"),
   },
 });
 
@@ -43,7 +54,7 @@ export const novelHistoryRoute = createRoute({
     }),
   },
   responses: {
-    [HttpStatusCodes.OK]: jsonContent(z.any(), "Chapter history for a novel"),
+    [HttpStatusCodes.OK]: jsonContent(z.array(HistorySchema), "Chapter history for a novel"),
   },
 });
 
@@ -80,7 +91,7 @@ export const addHistoryRoute = createRoute({
     },
   },
   responses: {
-    [HttpStatusCodes.OK]: jsonContent(z.any(), "History entry added"),
+    [HttpStatusCodes.OK]: jsonContent(HistorySchema, "History entry added"),
   },
 });
 
@@ -114,7 +125,7 @@ export const clearNovelHistoryRoute = createRoute({
     }),
   },
   responses: {
-    [HttpStatusCodes.OK]: jsonContent(z.any(), "Novel history cleared"),
+    [HttpStatusCodes.OK]: jsonContent(z.object({ count: z.number() }), "Novel history cleared"),
   },
 });
 
@@ -142,7 +153,7 @@ export const readHistoryRoute = createRoute({
     }),
   },
   responses: {
-    [HttpStatusCodes.OK]: jsonContent(z.any(), "History entry"),
+    [HttpStatusCodes.OK]: jsonContent(HistorySchema.nullable(), "History entry"),
   },
 });
 

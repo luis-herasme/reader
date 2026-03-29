@@ -47,7 +47,7 @@ export default function Home({ server }: { server: string }) {
           server: search.server,
         },
       });
-      return res.json() as any;
+      return res.json();
     },
     enabled: Boolean(search.search),
   });
@@ -56,7 +56,7 @@ export default function Home({ server }: { server: string }) {
     queryKey: [AUTH_IS_AUTHENTICATED],
     queryFn: async () => {
       const res = await api.api.auth["is-authenticated"].$get();
-      return res.json() as any;
+      return res.json();
     },
   });
 
@@ -215,7 +215,7 @@ export default function Home({ server }: { server: string }) {
             )}
           </div>
           <div className="flex flex-wrap justify-center max-w-[1200px]">
-            {searchQuery.data.results.map((result: any) => (
+            {searchQuery.data.results.map((result) => (
               <Novel
                 key={result.name + "-" + result.image}
                 name={result.name}

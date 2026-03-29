@@ -7,6 +7,14 @@ import type { AppEnv } from "../lib/appFactory";
 import { prisma } from "../db";
 import { authMiddleware } from "../auth/authMiddleware";
 
+const FavoriteSchema = z.object({
+  userId: z.string(),
+  slug: z.string(),
+  server: z.string(),
+  updatedAt: z.string(),
+  createdAt: z.string(),
+});
+
 // --- Add ---
 
 export const addFavoriteRoute = createRoute({
@@ -26,7 +34,7 @@ export const addFavoriteRoute = createRoute({
     },
   },
   responses: {
-    [HttpStatusCodes.OK]: jsonContent(z.any(), "Favorite added"),
+    [HttpStatusCodes.OK]: jsonContent(FavoriteSchema, "Favorite added"),
   },
 });
 
@@ -58,7 +66,7 @@ export const deleteFavoriteRoute = createRoute({
     }),
   },
   responses: {
-    [HttpStatusCodes.OK]: jsonContent(z.any(), "Favorite deleted"),
+    [HttpStatusCodes.OK]: jsonContent(FavoriteSchema, "Favorite deleted"),
   },
 });
 
@@ -82,7 +90,7 @@ export const readFavoritesRoute = createRoute({
   path: "/api/favorites",
   middleware: [authMiddleware],
   responses: {
-    [HttpStatusCodes.OK]: jsonContent(z.any(), "List of favorites"),
+    [HttpStatusCodes.OK]: jsonContent(z.array(FavoriteSchema), "List of favorites"),
   },
 });
 
@@ -109,7 +117,7 @@ export const isFavoriteRoute = createRoute({
     }),
   },
   responses: {
-    [HttpStatusCodes.OK]: jsonContent(z.any(), "Boolean favorite status"),
+    [HttpStatusCodes.OK]: jsonContent(z.boolean(), "Boolean favorite status"),
   },
 });
 
@@ -136,7 +144,7 @@ export const getNovelChapterRoute = createRoute({
     }),
   },
   responses: {
-    [HttpStatusCodes.OK]: jsonContent(z.any(), "Last read chapter number"),
+    [HttpStatusCodes.OK]: jsonContent(z.union([z.string(), z.number()]), "Last read chapter number"),
   },
 });
 

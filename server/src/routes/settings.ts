@@ -7,6 +7,25 @@ import type { AppEnv } from "../lib/appFactory";
 import { prisma } from "../db";
 import { authMiddleware } from "../auth/authMiddleware";
 
+const SettingsSchema = z.object({
+  userId: z.string(),
+  autoAdvance: z.boolean(),
+  font: z.enum(["serif", "sans_serif", "monospace"]),
+  fontSize: z.number(),
+  speed: z.number(),
+  updatedAt: z.string(),
+  createdAt: z.string(),
+});
+
+const ReplacementRuleSchema = z.object({
+  id: z.string(),
+  userId: z.string(),
+  from: z.string(),
+  to: z.string(),
+  updatedAt: z.string(),
+  createdAt: z.string(),
+});
+
 // --- Get State ---
 
 export const getSettingsRoute = createRoute({
@@ -14,7 +33,7 @@ export const getSettingsRoute = createRoute({
   path: "/api/settings",
   middleware: [authMiddleware],
   responses: {
-    [HttpStatusCodes.OK]: jsonContent(z.any(), "User settings"),
+    [HttpStatusCodes.OK]: jsonContent(SettingsSchema, "User settings"),
   },
 });
 
@@ -56,7 +75,7 @@ export const updateSettingsRoute = createRoute({
     },
   },
   responses: {
-    [HttpStatusCodes.OK]: jsonContent(z.any(), "Updated settings"),
+    [HttpStatusCodes.OK]: jsonContent(SettingsSchema, "Updated settings"),
   },
 });
 
@@ -80,7 +99,7 @@ export const getReplacementRulesRoute = createRoute({
   path: "/api/settings/replacement-rules",
   middleware: [authMiddleware],
   responses: {
-    [HttpStatusCodes.OK]: jsonContent(z.any(), "Replacement rules"),
+    [HttpStatusCodes.OK]: jsonContent(z.array(ReplacementRuleSchema), "Replacement rules"),
   },
 });
 
@@ -117,7 +136,7 @@ export const updateReplacementRulesRoute = createRoute({
     },
   },
   responses: {
-    [HttpStatusCodes.OK]: jsonContent(z.any(), "Updated replacement rules"),
+    [HttpStatusCodes.OK]: jsonContent(z.array(z.object({ from: z.string(), to: z.string(), userId: z.string() })), "Updated replacement rules"),
   },
 });
 
