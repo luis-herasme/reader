@@ -2,9 +2,7 @@ import type { Context } from "hono";
 import { lucia } from "./auth";
 
 export async function logout(c: Context) {
-  const sessionId = lucia.readSessionCookie(
-    c.req.header("Cookie") ?? ""
-  );
+  const sessionId = lucia.readSessionCookie(c.req.header("Cookie") ?? "");
 
   if (!sessionId) {
     return c.redirect("/login");

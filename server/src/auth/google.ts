@@ -8,7 +8,7 @@ import { prisma } from "../db";
 export const google = new Google(
   process.env.GOOGLE_CLIENT_ID!,
   process.env.GOOGLE_CLIENT_SECRET!,
-  `${process.env.BASE_URL}/google/callback`
+  `${process.env.BASE_URL}/google/callback`,
 );
 
 export async function googleLogin(c: Context) {
@@ -52,7 +52,7 @@ export async function googleCallback(c: Context) {
 
   const tokens = await google.validateAuthorizationCode(
     code,
-    savedCodeVerifier
+    savedCodeVerifier,
   );
 
   if (tokens.refreshToken) {
@@ -65,7 +65,7 @@ export async function googleCallback(c: Context) {
       headers: {
         Authorization: `Bearer ${tokens.accessToken}`,
       },
-    }
+    },
   );
 
   const googleUser = await googleUserResponse.json();
