@@ -66,7 +66,7 @@ function HistoryItem({ bookId, chapterId, updatedAt, book }: HistoryItemProps) {
               return;
             }
 
-            deleteMutation.mutate({ bookId });
+            deleteMutation.mutate(bookId);
           }}
         >
           {deleteMutation.isPending ? (

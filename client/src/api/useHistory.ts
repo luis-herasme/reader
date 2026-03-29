@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "./client";
-import type { BookIdInput } from "./types";
 
 export const HISTORY_NOVELS = "history-novels";
 export const HISTORY_NOVEL = "history-novel";
@@ -53,9 +52,9 @@ export function useClearNovelHistory() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (input: BookIdInput) => {
+    mutationFn: async (bookId: string) => {
       const response = await api.api.history.novel.$delete({
-        query: { bookId: input.bookId },
+        query: { bookId },
       });
       if (!response.ok) {
         throw new Error("Failed to clear novel history");

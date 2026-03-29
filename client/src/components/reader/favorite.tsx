@@ -33,11 +33,11 @@ export function Favorite({ bookId }: FavoriteProps) {
             }`}
             onClick={() => {
               if (data) {
-                removeFromFavorites.mutate({ bookId }, {
+                removeFromFavorites.mutate(bookId, {
                   onSuccess: () => toast("Removed novel from library"),
                 });
               } else {
-                addToFavorites.mutate({ bookId }, {
+                addToFavorites.mutate(bookId, {
                   onSuccess: () => toast("Added novel to library"),
                 });
               }

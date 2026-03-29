@@ -75,7 +75,7 @@ function Favorites() {
                   }
 
                   removeFavorite.mutate(
-                    { bookId: favorite.bookId },
+                    favorite.bookId,
                     {
                       onSuccess() {
                         toast("Removed novel from library");

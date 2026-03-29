@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "./client";
-import type { BookIdInput } from "./types";
 
 export const FAVORITES = "favorites";
 export const FAVORITES_IS_FAVORITE = "favorites-is-favorite";
@@ -38,18 +37,18 @@ export function useAddFavorite() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (input: BookIdInput) => {
+    mutationFn: async (bookId: string) => {
       const response = await api.api.favorites.$post({
-        json: { bookId: input.bookId },
+        json: { bookId },
       });
       if (!response.ok) {
         throw new Error("Failed to add favorite");
       }
       return response.json();
     },
-    onSuccess: (_data, input) => {
+    onSuccess: (_data, bookId) => {
       queryClient.invalidateQueries({
-        queryKey: [FAVORITES_IS_FAVORITE, input.bookId],
+        queryKey: [FAVORITES_IS_FAVORITE, bookId],
       });
       queryClient.invalidateQueries({
         queryKey: [FAVORITES],
@@ -62,18 +61,18 @@ export function useDeleteFavorite() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (input: BookIdInput) => {
+    mutationFn: async (bookId: string) => {
       const response = await api.api.favorites.$delete({
-        query: { bookId: input.bookId },
+        query: { bookId },
       });
       if (!response.ok) {
         throw new Error("Failed to delete favorite");
       }
       return response.json();
     },
-    onSuccess: (_data, input) => {
+    onSuccess: (_data, bookId) => {
       queryClient.invalidateQueries({
-        queryKey: [FAVORITES_IS_FAVORITE, input.bookId],
+        queryKey: [FAVORITES_IS_FAVORITE, bookId],
       });
       queryClient.invalidateQueries({
         queryKey: [FAVORITES],
