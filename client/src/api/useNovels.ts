@@ -44,8 +44,8 @@ export function useChapters(params: ChaptersParams) {
       const response = await api.api.novels.chapters.$get({
         query: {
           bookId: params.bookId,
-          skip: params.skip ?? 0,
-          take: params.take ?? 100,
+          skip: params.skip,
+          take: params.take,
         },
       });
       if (!response.ok) {
