@@ -8,3 +8,4 @@
 - **No abbreviations in variable names.** Always use full words — `response` not `res`, `request` not `req`, `parameters` not `params`, etc.
 - **Always use curly braces for `if` statements.** Even single-line bodies must use `{ }` blocks.
 - **Always check response status codes.** When calling the API via the Hono client, check `response.ok` and throw an error if the response is not successful. This ensures React Query properly handles errors.
+- **Use `stoker` helpers for JSON content in route definitions.** Use `jsonContent` for responses and `jsonContentRequired` for request bodies — never write the `{ content: { "application/json": { schema } } }` structure manually.

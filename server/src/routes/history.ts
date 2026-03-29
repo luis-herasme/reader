@@ -2,7 +2,7 @@ import { z } from "@hono/zod-openapi";
 import { createRoute } from "@hono/zod-openapi";
 import type { RouteHandler } from "@hono/zod-openapi";
 import * as HttpStatusCodes from "stoker/http-status-codes";
-import { jsonContent } from "stoker/openapi/helpers";
+import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
 import type { AppEnv } from "../lib/appFactory";
 import { prisma } from "../db";
 import { authMiddleware } from "../auth/authMiddleware";
@@ -76,19 +76,13 @@ export const addHistoryRoute = createRoute({
   path: "/api/history",
   middleware: [authMiddleware],
   request: {
-    body: {
-      content: {
-        "application/json": {
-          schema: z.object({
-            slug: z.string(),
-            chapter: z.string(),
-            server: z.string(),
-            sentenceIndex: z.number(),
-            length: z.number(),
-          }),
-        },
-      },
-    },
+    body: jsonContentRequired(z.object({
+      slug: z.string(),
+      chapter: z.string(),
+      server: z.string(),
+      sentenceIndex: z.number(),
+      length: z.number(),
+    }), "History entry to add"),
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(HistorySchema, "History entry added"),

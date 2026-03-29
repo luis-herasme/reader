@@ -2,7 +2,7 @@ import { z } from "@hono/zod-openapi";
 import { createRoute } from "@hono/zod-openapi";
 import type { RouteHandler } from "@hono/zod-openapi";
 import * as HttpStatusCodes from "stoker/http-status-codes";
-import { jsonContent } from "stoker/openapi/helpers";
+import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
 import type { AppEnv } from "../lib/appFactory";
 import { prisma } from "../db";
 import { authMiddleware } from "../auth/authMiddleware";
@@ -61,18 +61,12 @@ export const updateSettingsRoute = createRoute({
   path: "/api/settings",
   middleware: [authMiddleware],
   request: {
-    body: {
-      content: {
-        "application/json": {
-          schema: z.object({
-            autoAdvance: z.boolean().optional(),
-            font: z.enum(["serif", "sans_serif", "monospace"]).optional(),
-            fontSize: z.number().optional(),
-            speed: z.number().optional(),
-          }),
-        },
-      },
-    },
+    body: jsonContentRequired(z.object({
+      autoAdvance: z.boolean().optional(),
+      font: z.enum(["serif", "sans_serif", "monospace"]).optional(),
+      fontSize: z.number().optional(),
+      speed: z.number().optional(),
+    }), "Settings to update"),
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(SettingsSchema, "Updated settings"),
@@ -120,20 +114,14 @@ export const updateReplacementRulesRoute = createRoute({
   path: "/api/settings/replacement-rules",
   middleware: [authMiddleware],
   request: {
-    body: {
-      content: {
-        "application/json": {
-          schema: z.object({
-            replacementRules: z.array(
-              z.object({
-                from: z.string(),
-                to: z.string(),
-              })
-            ),
-          }),
-        },
-      },
-    },
+    body: jsonContentRequired(z.object({
+      replacementRules: z.array(
+        z.object({
+          from: z.string(),
+          to: z.string(),
+        })
+      ),
+    }), "Replacement rules to update"),
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(z.array(z.object({ from: z.string(), to: z.string(), userId: z.string() })), "Updated replacement rules"),
