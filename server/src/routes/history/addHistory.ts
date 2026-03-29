@@ -31,7 +31,8 @@ export const addHistoryHandler: RouteHandler<
   typeof addHistoryRoute,
   AppEnv
 > = async (context) => {
-  const { bookId, chapterId, sentenceIndex, length } = context.req.valid("json");
+  const { bookId, chapterId, sentenceIndex, length } =
+    context.req.valid("json");
   const user = context.get("user")!;
 
   const entry = await prisma.history.upsert({

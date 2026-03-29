@@ -7,10 +7,7 @@ import type { AppEnv } from "./lib/appFactory";
 import { searchRoute, searchHandler } from "./routes/novels/search";
 import { chapterRoute, chapterHandler } from "./routes/novels/chapter";
 import { chaptersRoute, chaptersHandler } from "./routes/novels/chapters";
-import {
-  uploadBookRoute,
-  uploadBookHandler,
-} from "./routes/novels/uploadBook";
+import { uploadBookRoute, uploadBookHandler } from "./routes/novels/uploadBook";
 import {
   uploadChapterRoute,
   uploadChapterHandler,
