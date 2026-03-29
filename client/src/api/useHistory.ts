@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "./client";
-import type { SlugServerInput } from "./types";
+import type { BookIdInput } from "./types";
 
 export const HISTORY_NOVELS = "history-novels";
 export const HISTORY_NOVEL = "history-novel";
@@ -19,12 +19,12 @@ export function useHistoryNovels() {
   });
 }
 
-export function useNovelHistory(slug: string) {
+export function useNovelHistory(bookId: string) {
   return useQuery({
-    queryKey: [HISTORY_NOVEL, slug],
+    queryKey: [HISTORY_NOVEL, bookId],
     queryFn: async () => {
       const response = await api.api.history.novel.$get({
-        query: { slug },
+        query: { bookId },
       });
       if (!response.ok) {
         throw new Error("Failed to fetch novel history");
@@ -35,9 +35,8 @@ export function useNovelHistory(slug: string) {
 }
 
 type AddHistoryInput = {
-  slug: string;
-  chapter: string;
-  server: string;
+  bookId: string;
+  chapterId: string;
   sentenceIndex: number;
   length: number;
 };
@@ -54,8 +53,10 @@ export function useClearNovelHistory() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (input: SlugServerInput) => {
-      const response = await api.api.history.novel.$delete({ query: input });
+    mutationFn: async (input: BookIdInput) => {
+      const response = await api.api.history.novel.$delete({
+        query: { bookId: input.bookId },
+      });
       if (!response.ok) {
         throw new Error("Failed to clear novel history");
       }

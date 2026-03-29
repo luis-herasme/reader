@@ -6,9 +6,9 @@ export const NOVELS_CHAPTERS = "novels-chapters";
 export const NOVELS_CHAPTER = "novels-chapter";
 
 type SearchParams = {
-  search: string;
-  page: number;
-  server: string;
+  title: string;
+  skip: number;
+  take: number;
 };
 
 export function useSearchNovels(params: SearchParams) {
@@ -17,9 +17,9 @@ export function useSearchNovels(params: SearchParams) {
     queryFn: async () => {
       const response = await api.api.novels.search.$get({
         query: {
-          search: params.search,
-          page: params.page,
-          server: params.server,
+          title: params.title,
+          skip: params.skip,
+          take: params.take,
         },
       });
       if (!response.ok) {
@@ -27,21 +27,26 @@ export function useSearchNovels(params: SearchParams) {
       }
       return response.json();
     },
-    enabled: Boolean(params.search),
+    enabled: Boolean(params.title),
   });
 }
 
 type ChaptersParams = {
-  slug: string;
-  server: string;
+  bookId: string;
+  skip?: number;
+  take?: number;
 };
 
 export function useChapters(params: ChaptersParams) {
   return useQuery({
-    queryKey: [NOVELS_CHAPTERS, params.slug, params.server],
+    queryKey: [NOVELS_CHAPTERS, params.bookId],
     queryFn: async () => {
       const response = await api.api.novels.chapters.$get({
-        query: { slug: params.slug, server: params.server },
+        query: {
+          bookId: params.bookId,
+          skip: params.skip ?? 0,
+          take: params.take ?? 100,
+        },
       });
       if (!response.ok) {
         throw new Error("Failed to fetch chapters");
@@ -52,17 +57,15 @@ export function useChapters(params: ChaptersParams) {
 }
 
 type ChapterParams = {
-  novel: string;
-  chapter: string;
-  server: string;
+  chapterId: string;
 };
 
 export function useChapter(params: ChapterParams) {
   return useQuery({
-    queryKey: [NOVELS_CHAPTER, params.novel, params.chapter, params.server],
+    queryKey: [NOVELS_CHAPTER, params.chapterId],
     queryFn: async () => {
       const response = await api.api.novels.chapter.$get({
-        query: { novel: params.novel, chapter: params.chapter, server: params.server },
+        query: { chapterId: params.chapterId },
       });
       if (!response.ok) {
         throw new Error("Failed to fetch chapter");

@@ -1,4 +1,3 @@
-export type SlugServerInput = {
-  slug: string;
-  server: string;
+export type BookIdInput = {
+  bookId: string;
 };
