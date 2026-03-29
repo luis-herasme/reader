@@ -10,7 +10,7 @@ import {
 
 export function Favorite({ slug, server }: { slug: string; server: string }) {
   const { data } = useIsFavorite({ slug, server });
-  const addToFavorites = useAddFavorite({ slug, server });
+  const addToFavorites = useAddFavorite();
   const removeFromFavorites = useDeleteFavorite();
 
   if (data === undefined) {
@@ -33,7 +33,7 @@ export function Favorite({ slug, server }: { slug: string; server: string }) {
                   onSuccess: () => toast("Removed novel from library"),
                 });
               } else {
-                addToFavorites.mutate(undefined, {
+                addToFavorites.mutate({ slug, server }, {
                   onSuccess: () => toast("Added novel to library"),
                 });
               }

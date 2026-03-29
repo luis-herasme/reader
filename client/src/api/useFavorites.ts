@@ -34,22 +34,22 @@ export function useIsFavorite(params: SlugServerInput) {
   });
 }
 
-export function useAddFavorite(params: SlugServerInput) {
+export function useAddFavorite() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async () => {
+    mutationFn: async (input: SlugServerInput) => {
       const response = await api.api.favorites.$post({
-        json: { slug: params.slug, server: params.server },
+        json: { slug: input.slug, server: input.server },
       });
       if (!response.ok) {
         throw new Error("Failed to add favorite");
       }
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (_data, input) => {
       queryClient.invalidateQueries({
-        queryKey: [FAVORITES_IS_FAVORITE, params.slug, params.server],
+        queryKey: [FAVORITES_IS_FAVORITE, input.slug, input.server],
       });
       queryClient.invalidateQueries({
         queryKey: [FAVORITES],
