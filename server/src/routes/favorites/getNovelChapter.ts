@@ -13,13 +13,13 @@ export const getNovelChapterRoute = createRoute({
   middleware: [authMiddleware],
   request: {
     query: z.object({
-      slug: z.string(),
+      bookId: z.string().uuid(),
     }),
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      z.union([z.string(), z.number()]),
-      "Last read chapter number",
+      z.object({ chapterId: z.string().nullable() }),
+      "Last read chapter ID",
     ),
   },
 });
@@ -27,14 +27,17 @@ export const getNovelChapterRoute = createRoute({
 export const getNovelChapterHandler: RouteHandler<
   typeof getNovelChapterRoute,
   AppEnv
-> = async (c) => {
-  const { slug } = c.req.valid("query");
-  const user = c.get("user")!;
+> = async (context) => {
+  const { bookId } = context.req.valid("query");
+  const user = context.get("user")!;
 
   const history = await prisma.history.findFirst({
-    where: { userId: user.id, slug },
+    where: { userId: user.id, bookId },
     orderBy: { updatedAt: "desc" },
   });
 
-  return c.json(history ? history.chapter : 0, HttpStatusCodes.OK);
+  return context.json(
+    { chapterId: history ? history.chapterId : null },
+    HttpStatusCodes.OK,
+  );
 };

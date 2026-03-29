@@ -15,8 +15,7 @@ export const addFavoriteRoute = createRoute({
   request: {
     body: jsonContentRequired(
       z.object({
-        slug: z.string(),
-        server: z.string(),
+        bookId: z.string().uuid(),
       }),
       "Favorite to add",
     ),
@@ -29,17 +28,17 @@ export const addFavoriteRoute = createRoute({
 export const addFavoriteHandler: RouteHandler<
   typeof addFavoriteRoute,
   AppEnv
-> = async (c) => {
-  const { slug, server } = c.req.valid("json");
-  const user = c.get("user")!;
+> = async (context) => {
+  const { bookId } = context.req.valid("json");
+  const user = context.get("user")!;
 
   const favorite = await prisma.favorite.upsert({
     where: {
-      userId_slug_server: { slug, server, userId: user.id },
+      userId_bookId: { bookId, userId: user.id },
     },
-    create: { slug, server, userId: user.id },
+    create: { bookId, userId: user.id },
     update: {},
   });
 
-  return c.json(favorite, HttpStatusCodes.OK);
+  return context.json(favorite, HttpStatusCodes.OK);
 };

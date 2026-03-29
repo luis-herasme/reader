@@ -13,8 +13,7 @@ export const isFavoriteRoute = createRoute({
   middleware: [authMiddleware],
   request: {
     query: z.object({
-      slug: z.string(),
-      server: z.string(),
+      bookId: z.string().uuid(),
     }),
   },
   responses: {
@@ -25,13 +24,13 @@ export const isFavoriteRoute = createRoute({
 export const isFavoriteHandler: RouteHandler<
   typeof isFavoriteRoute,
   AppEnv
-> = async (c) => {
-  const { slug, server } = c.req.valid("query");
-  const user = c.get("user")!;
+> = async (context) => {
+  const { bookId } = context.req.valid("query");
+  const user = context.get("user")!;
 
-  const favorite = await prisma.favorite.findFirst({
-    where: { userId: user.id, slug, server },
+  const favorite = await prisma.favorite.findUnique({
+    where: { userId_bookId: { userId: user.id, bookId } },
   });
 
-  return c.json(Boolean(favorite), HttpStatusCodes.OK);
+  return context.json(Boolean(favorite), HttpStatusCodes.OK);
 };
