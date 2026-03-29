@@ -1,4 +1,6 @@
-import { trpc } from "../../trpc";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { api } from "@/api/client";
+import { HISTORY_NOVELS, type SlugServerInput } from "@/api/queryKeys";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { Bookmark, Loader2, Trash } from "lucide-react";
 import { Favorite } from "./favorite";
@@ -34,8 +36,15 @@ function HistoryItem({
   server: string;
   chapter: string;
 }) {
-  const utils = trpc.useUtils();
-  const deleteMutation = trpc.history.clearNovelHistory.useMutation();
+  const queryClient = useQueryClient();
+  const deleteMutation = useMutation({
+    mutationFn: async (input: SlugServerInput) => {
+      const res = await api.api.history.novel.$delete({
+        query: input,
+      });
+      return res.json();
+    },
+  });
 
   return (
     <div className="flex items-center justify-between gap-4">
@@ -79,7 +88,9 @@ function HistoryItem({
               },
               {
                 onSuccess() {
-                  utils.history.getNovels.invalidate();
+                  queryClient.invalidateQueries({
+                    queryKey: [HISTORY_NOVELS],
+                  });
                 },
               }
             );
@@ -97,7 +108,13 @@ function HistoryItem({
 }
 
 export function History() {
-  const { data } = trpc.history.getNovels.useQuery();
+  const { data } = useQuery({
+    queryKey: [HISTORY_NOVELS],
+    queryFn: async () => {
+      const res = await api.api.history.novels.$get();
+      return res.json();
+    },
+  });
 
   return (
     <ScrollArea className="max-h-[50vh] overflow-y-auto scrollbar">
