@@ -1,8 +1,7 @@
 import { AlertCircle, Library, Loader2, Trash } from "lucide-react";
 import { History } from "./history";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useQueryClient } from "@tanstack/react-query";
-import { useFavorites, useDeleteFavorite, getNovelChapter, FAVORITES_IS_FAVORITE } from "@/api/useFavorites";
+import { useFavorites, useDeleteFavorite, getNovelChapter } from "@/api/useFavorites";
 import { useIsAuthenticated } from "@/api/useAuth";
 import { toast } from "sonner";
 import { navigate } from "wouter/use-browser-location";
@@ -16,7 +15,6 @@ import {
 import { ScrollArea } from "../ui/scroll-area";
 
 function Favorites() {
-  const queryClient = useQueryClient();
   const { data, isLoading } = useFavorites();
   const removeFavorite = useDeleteFavorite();
 
@@ -89,9 +87,6 @@ function Favorites() {
                     {
                       onSuccess() {
                         toast("Removed novel from library");
-                        queryClient.invalidateQueries({
-                          queryKey: [FAVORITES_IS_FAVORITE, favorite.slug, favorite.server],
-                        });
                       },
                     }
                   );

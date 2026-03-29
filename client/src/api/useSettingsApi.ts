@@ -21,14 +21,18 @@ export function useSettingsState() {
   });
 }
 
-type SettingsUpdateInput = {
+export type SettingsUpdateInput = {
   autoAdvance?: boolean;
   font?: "serif" | "sans_serif" | "monospace";
   fontSize?: number;
   speed?: number;
 };
 
-export function useUpdateSettings() {
+type UseUpdateSettingsOptions = {
+  onMutate?: (value: SettingsUpdateInput) => void;
+};
+
+export function useUpdateSettings(options?: UseUpdateSettingsOptions) {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -39,6 +43,7 @@ export function useUpdateSettings() {
       }
       return response.json();
     },
+    onMutate: options?.onMutate,
     onSuccess: () =>
       queryClient.invalidateQueries({ queryKey: [SETTINGS] }),
   });

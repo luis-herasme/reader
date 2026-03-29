@@ -23,9 +23,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Slider } from "@/components/ui/slider";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { api } from "@/api/client";
-import { useSettingsState, SETTINGS } from "@/api/useSettingsApi";
+import { useSettingsState, useUpdateSettings } from "@/api/useSettingsApi";
 import { useIsAuthenticated } from "@/api/useAuth";
 import { useEffect, useRef } from "react";
 import { debounce } from "@/lib/debounce";
@@ -62,21 +60,11 @@ export const useSettingsStore = create(
 );
 
 export function useSettings() {
-  const queryClient = useQueryClient();
   const settings = useSettingsStore();
   const { data } = useSettingsState();
 
-  const updateSettings = useMutation({
-    mutationFn: async (value: Partial<SettingsState>) => {
-      const response = await api.api.settings.$post({ json: value });
-      if (!response.ok) {
-        throw new Error("Failed to update settings");
-      }
-      return response.json();
-    },
+  const updateSettings = useUpdateSettings({
     onMutate: (value) => useSettingsStore.setState(value),
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: [SETTINGS] }),
   });
 
   const debouncedUpdateSettings = useRef(

@@ -1,7 +1,6 @@
 import { Star, StarOff } from "lucide-react";
-import { useIsFavorite, useAddFavorite, useDeleteFavorite, FAVORITES_IS_FAVORITE } from "@/api/useFavorites";
+import { useIsFavorite, useAddFavorite, useDeleteFavorite } from "@/api/useFavorites";
 import { toast } from "sonner";
-import { useQueryClient } from "@tanstack/react-query";
 import {
   Tooltip,
   TooltipContent,
@@ -10,9 +9,7 @@ import {
 } from "@/components/ui/tooltip";
 
 export function Favorite({ slug, server }: { slug: string; server: string }) {
-  const queryClient = useQueryClient();
   const { data } = useIsFavorite({ slug, server });
-
   const addToFavorites = useAddFavorite({ slug, server });
   const removeFromFavorites = useDeleteFavorite();
 
@@ -33,18 +30,11 @@ export function Favorite({ slug, server }: { slug: string; server: string }) {
             onClick={() => {
               if (data) {
                 removeFromFavorites.mutate({ slug, server }, {
-                  onSuccess: () => {
-                    toast("Removed novel from library");
-                    queryClient.invalidateQueries({
-                      queryKey: [FAVORITES_IS_FAVORITE, slug, server],
-                    });
-                  },
+                  onSuccess: () => toast("Removed novel from library"),
                 });
               } else {
-                addToFavorites.mutate({ slug, server }, {
-                  onSuccess: () => {
-                    toast("Added novel to library");
-                  },
+                addToFavorites.mutate(undefined, {
+                  onSuccess: () => toast("Added novel to library"),
                 });
               }
             }}

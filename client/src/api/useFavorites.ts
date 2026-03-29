@@ -1,14 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "./client";
+import type { SlugServerInput } from "./types";
 
 export const FAVORITES = "favorites";
 export const FAVORITES_IS_FAVORITE = "favorites-is-favorite";
 export const FAVORITES_NOVEL_CHAPTER = "favorites-novel-chapter";
-
-export type SlugServerInput = {
-  slug: string;
-  server: string;
-};
 
 export function useFavorites() {
   return useQuery({
@@ -38,12 +34,14 @@ export function useIsFavorite(params: SlugServerInput) {
   });
 }
 
-export function useAddFavorite({ slug, server }: SlugServerInput) {
+export function useAddFavorite(params: SlugServerInput) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (input: SlugServerInput) => {
-      const response = await api.api.favorites.$post({ json: input });
+    mutationFn: async () => {
+      const response = await api.api.favorites.$post({
+        json: { slug: params.slug, server: params.server },
+      });
       if (!response.ok) {
         throw new Error("Failed to add favorite");
       }
@@ -51,7 +49,10 @@ export function useAddFavorite({ slug, server }: SlugServerInput) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: [FAVORITES_IS_FAVORITE, slug, server],
+        queryKey: [FAVORITES_IS_FAVORITE, params.slug, params.server],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [FAVORITES],
       });
     },
   });
@@ -62,14 +63,21 @@ export function useDeleteFavorite() {
 
   return useMutation({
     mutationFn: async (input: SlugServerInput) => {
-      const response = await api.api.favorites.$delete({ query: input });
+      const response = await api.api.favorites.$delete({
+        query: { slug: input.slug, server: input.server },
+      });
       if (!response.ok) {
         throw new Error("Failed to delete favorite");
       }
       return response.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [FAVORITES] });
+    onSuccess: (_data, input) => {
+      queryClient.invalidateQueries({
+        queryKey: [FAVORITES_IS_FAVORITE, input.slug, input.server],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [FAVORITES],
+      });
     },
   });
 }

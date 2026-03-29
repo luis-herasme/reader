@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "./client";
-import type { SlugServerInput } from "./useFavorites";
+import type { SlugServerInput } from "./types";
 
 export const HISTORY_NOVELS = "history-novels";
 export const HISTORY_NOVEL = "history-novel";
