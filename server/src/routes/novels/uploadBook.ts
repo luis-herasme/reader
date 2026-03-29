@@ -12,6 +12,12 @@ import { uploadImage } from "../../lib/r2";
 const ALLOWED_IMAGE_TYPES = ["image/png", "image/jpeg"];
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 
+const UploadBookInput = z.object({
+  title: z.string().trim().min(1, "title is required"),
+  author: z.string().default(""),
+  description: z.string().default(""),
+});
+
 const UploadBookOutput = z.object({
   bookId: z.string(),
 });
@@ -32,17 +38,15 @@ export const uploadBookHandler: RouteHandler<
 > = async (context) => {
   const body = await context.req.parseBody();
 
-  const title = body["title"];
-  if (typeof title !== "string" || title.trim().length === 0) {
+  const parsed = UploadBookInput.safeParse(body);
+  if (!parsed.success) {
     return context.json(
-      { error: "title is required" },
+      { error: parsed.error.errors[0].message },
       HttpStatusCodes.BAD_REQUEST,
     );
   }
 
-  const author = typeof body["author"] === "string" ? body["author"] : "";
-  const description =
-    typeof body["description"] === "string" ? body["description"] : "";
+  const { title, author, description } = parsed.data;
 
   let imageId: string | null = null;
   const imageFile = body["image"];
@@ -78,7 +82,7 @@ export const uploadBookHandler: RouteHandler<
 
   const book = await prisma.book.create({
     data: {
-      title: title.trim(),
+      title,
       author,
       description,
       imageId,
