@@ -22,7 +22,9 @@ export function useSearchNovels(params: SearchParams) {
           server: params.server,
         },
       });
-      if (!response.ok) throw new Error("Failed to search novels");
+      if (!response.ok) {
+        throw new Error("Failed to search novels");
+      }
       return response.json();
     },
     enabled: Boolean(params.search),
@@ -41,7 +43,9 @@ export function useChapters(params: ChaptersParams) {
       const response = await api.api.novels.chapters.$get({
         query: { slug: params.slug, server: params.server },
       });
-      if (!response.ok) throw new Error("Failed to fetch chapters");
+      if (!response.ok) {
+        throw new Error("Failed to fetch chapters");
+      }
       return response.json();
     },
   });
@@ -60,7 +64,9 @@ export function useChapter(params: ChapterParams) {
       const response = await api.api.novels.chapter.$get({
         query: { novel: params.novel, chapter: params.chapter, server: params.server },
       });
-      if (!response.ok) throw new Error("Failed to fetch chapter");
+      if (!response.ok) {
+        throw new Error("Failed to fetch chapter");
+      }
       return response.json();
     },
     refetchOnMount: false,

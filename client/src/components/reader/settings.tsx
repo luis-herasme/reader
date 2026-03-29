@@ -69,7 +69,9 @@ export function useSettings() {
   const updateSettings = useMutation({
     mutationFn: async (value: Partial<SettingsState>) => {
       const response = await api.api.settings.$post({ json: value });
-      if (!response.ok) throw new Error("Failed to update settings");
+      if (!response.ok) {
+        throw new Error("Failed to update settings");
+      }
       return response.json();
     },
     onMutate: (value) => useSettingsStore.setState(value),

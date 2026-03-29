@@ -11,7 +11,9 @@ export function useHistoryNovels() {
     queryKey: [HISTORY_NOVELS],
     queryFn: async () => {
       const response = await api.api.history.novels.$get();
-      if (!response.ok) throw new Error("Failed to fetch history novels");
+      if (!response.ok) {
+        throw new Error("Failed to fetch history novels");
+      }
       return response.json();
     },
   });
@@ -24,7 +26,9 @@ export function useNovelHistory(slug: string) {
       const response = await api.api.history.novel.$get({
         query: { slug },
       });
-      if (!response.ok) throw new Error("Failed to fetch novel history");
+      if (!response.ok) {
+        throw new Error("Failed to fetch novel history");
+      }
       return response.json();
     },
   });
@@ -40,7 +44,9 @@ type AddHistoryInput = {
 
 export async function addHistory(input: AddHistoryInput) {
   const response = await api.api.history.$post({ json: input });
-  if (!response.ok) throw new Error("Failed to add history");
+  if (!response.ok) {
+    throw new Error("Failed to add history");
+  }
   return response.json();
 }
 
@@ -50,7 +56,9 @@ export function useClearNovelHistory() {
   return useMutation({
     mutationFn: async (input: SlugServerInput) => {
       const response = await api.api.history.novel.$delete({ query: input });
-      if (!response.ok) throw new Error("Failed to clear novel history");
+      if (!response.ok) {
+        throw new Error("Failed to clear novel history");
+      }
       return response.json();
     },
     onSuccess: () => {

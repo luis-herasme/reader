@@ -15,7 +15,9 @@ export function useFavorites() {
     queryKey: [FAVORITES],
     queryFn: async () => {
       const response = await api.api.favorites.$get();
-      if (!response.ok) throw new Error("Failed to fetch favorites");
+      if (!response.ok) {
+        throw new Error("Failed to fetch favorites");
+      }
       return response.json();
     },
   });
@@ -28,7 +30,9 @@ export function useIsFavorite(params: SlugServerInput) {
       const response = await api.api.favorites["is-favorite"].$get({
         query: { slug: params.slug, server: params.server },
       });
-      if (!response.ok) throw new Error("Failed to check favorite status");
+      if (!response.ok) {
+        throw new Error("Failed to check favorite status");
+      }
       return response.json();
     },
   });
@@ -40,7 +44,9 @@ export function useAddFavorite({ slug, server }: SlugServerInput) {
   return useMutation({
     mutationFn: async (input: SlugServerInput) => {
       const response = await api.api.favorites.$post({ json: input });
-      if (!response.ok) throw new Error("Failed to add favorite");
+      if (!response.ok) {
+        throw new Error("Failed to add favorite");
+      }
       return response.json();
     },
     onSuccess: () => {
@@ -57,7 +63,9 @@ export function useDeleteFavorite() {
   return useMutation({
     mutationFn: async (input: SlugServerInput) => {
       const response = await api.api.favorites.$delete({ query: input });
-      if (!response.ok) throw new Error("Failed to delete favorite");
+      if (!response.ok) {
+        throw new Error("Failed to delete favorite");
+      }
       return response.json();
     },
     onSuccess: () => {
@@ -70,6 +78,8 @@ export async function getNovelChapter(slug: string) {
   const response = await api.api.favorites["novel-chapter"].$get({
     query: { slug },
   });
-  if (!response.ok) throw new Error("Failed to get novel chapter");
+  if (!response.ok) {
+    throw new Error("Failed to get novel chapter");
+  }
   return response.json();
 }
