@@ -1,7 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "./client";
-import { SETTINGS, SETTINGS_REPLACEMENT_RULES } from "./queryKeys";
-import type { ReplacementRulesInput } from "./queryKeys";
+
+export const SETTINGS = "settings";
+export const SETTINGS_REPLACEMENT_RULES = "settings-replacement-rules";
+
+export type ReplacementRulesInput = {
+  replacementRules: { from: string; to: string }[];
+};
 
 export function useSettingsState() {
   return useQuery({

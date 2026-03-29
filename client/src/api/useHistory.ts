@@ -1,7 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "./client";
-import { HISTORY_NOVELS, HISTORY_NOVEL } from "./queryKeys";
-import type { SlugServerInput } from "./queryKeys";
+import type { SlugServerInput } from "./useFavorites";
+
+export const HISTORY_NOVELS = "history-novels";
+export const HISTORY_NOVEL = "history-novel";
+export const HISTORY_READ = "history-read";
 
 export function useHistoryNovels() {
   return useQuery({

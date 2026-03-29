@@ -8,9 +8,8 @@ import { useTrackSentenceIndex } from "@/components/reader/track-sentence-index"
 import { FollowReader } from "@/components/reader/follow-reader";
 import LibaryButton from "@/components/reader/libary-button";
 import { useQueryClient } from "@tanstack/react-query";
-import { useChapter } from "@/api/useNovels";
-import { addHistory } from "@/api/useHistory";
-import { NOVELS_CHAPTER, HISTORY_NOVEL } from "@/api/queryKeys";
+import { useChapter, NOVELS_CHAPTER } from "@/api/useNovels";
+import { addHistory, HISTORY_NOVEL } from "@/api/useHistory";
 import { HomeButton } from "@/components/reader/home-button";
 import { NavArrows } from "@/components/reader/nav-arrows";
 import { PlayButton } from "@/components/reader/play-pause";

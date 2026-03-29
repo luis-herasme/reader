@@ -25,8 +25,7 @@ import {
 import { Slider } from "@/components/ui/slider";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/api/client";
-import { SETTINGS } from "@/api/queryKeys";
-import { useSettingsState } from "@/api/useSettingsApi";
+import { useSettingsState, SETTINGS } from "@/api/useSettingsApi";
 import { useIsAuthenticated } from "@/api/useAuth";
 import { useEffect, useRef } from "react";
 import { debounce } from "@/lib/debounce";

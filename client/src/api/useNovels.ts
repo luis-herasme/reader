@@ -1,6 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { api } from "./client";
-import { NOVELS_SEARCH, NOVELS_CHAPTERS, NOVELS_CHAPTER } from "./queryKeys";
+
+export const NOVELS_SEARCH = "novels-search";
+export const NOVELS_CHAPTERS = "novels-chapters";
+export const NOVELS_CHAPTER = "novels-chapter";
 
 type SearchParams = {
   search: string;

@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { api } from "./client";
-import { AUTH_IS_AUTHENTICATED } from "./queryKeys";
+
+export const AUTH_IS_AUTHENTICATED = "auth-is-authenticated";
 
 export function useIsAuthenticated() {
   return useQuery({

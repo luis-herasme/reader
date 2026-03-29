@@ -1,8 +1,7 @@
 import { Star, StarOff } from "lucide-react";
-import { useIsFavorite, useAddFavorite, useDeleteFavorite } from "@/api/useFavorites";
+import { useIsFavorite, useAddFavorite, useDeleteFavorite, FAVORITES_IS_FAVORITE } from "@/api/useFavorites";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
-import { FAVORITES_IS_FAVORITE } from "@/api/queryKeys";
 import {
   Tooltip,
   TooltipContent,

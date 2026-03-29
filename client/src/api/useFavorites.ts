@@ -1,7 +1,14 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "./client";
-import { FAVORITES, FAVORITES_IS_FAVORITE } from "./queryKeys";
-import type { SlugServerInput } from "./queryKeys";
+
+export const FAVORITES = "favorites";
+export const FAVORITES_IS_FAVORITE = "favorites-is-favorite";
+export const FAVORITES_NOVEL_CHAPTER = "favorites-novel-chapter";
+
+export type SlugServerInput = {
+  slug: string;
+  server: string;
+};
 
 export function useFavorites() {
   return useQuery({
