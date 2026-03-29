@@ -16,10 +16,12 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "@hono/zod-openapi": "^1.2.4",
     "@lucia-auth/adapter-prisma": "^4.0.1",
     "@prisma/client": "^5.17.0",
     "arctic": "^1.9.2",
     "hono": "^4.12.9",
-    "lucia": "^3.2.0"
+    "lucia": "^3.2.0",
+    "stoker": "^2.0.1"
   }
 }
