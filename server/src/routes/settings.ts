@@ -1,88 +1,139 @@
-import { z } from "zod";
+import { z } from "@hono/zod-openapi";
+import { createRoute } from "@hono/zod-openapi";
+import type { RouteHandler } from "@hono/zod-openapi";
+import * as HttpStatusCodes from "stoker/http-status-codes";
+import type { AppEnv } from "../lib/appFactory";
 import { prisma } from "../db";
-import { router } from "../trpc";
-import { authProcedure } from "../auth/authProcedure";
+import { authMiddleware } from "../auth/authMiddleware";
 
-export const settings = router({
-  getState: authProcedure.query(async ({ ctx }) => {
-    const settings = await prisma.settings.findUnique({
-      where: {
-        userId: ctx.user.id,
-      },
-    });
+// --- Get State ---
 
-    if (!settings) {
-      return await prisma.settings.create({
-        data: {
-          userId: ctx.user.id,
-        },
-      });
-    }
-
-    return settings;
-  }),
-
-  updateReplacementRules: authProcedure
-    .input(
-      z.object({
-        replacementRules: z.array(
-          z.object({
-            from: z.string(),
-            to: z.string(),
-          })
-        ),
-      })
-    )
-    .mutation(async ({ ctx, input }) => {
-      const replacementRules = input.replacementRules.map((rule) => ({
-        ...rule,
-        userId: ctx.user.id,
-      }));
-
-      await prisma.replacementRule.deleteMany({
-        where: {
-          userId: ctx.user.id,
-        },
-      });
-
-      await prisma.replacementRule.createMany({
-        data: replacementRules,
-      });
-
-      return replacementRules;
-    }),
-
-  replacementRules: authProcedure.query(async ({ ctx }) => {
-    const replacementRules = await prisma.replacementRule.findMany({
-      where: {
-        userId: ctx.user.id,
-      },
-    });
-
-    return replacementRules;
-  }),
-
-  update: authProcedure
-    .input(
-      z.object({
-        autoAdvance: z.boolean().optional(),
-        font: z.enum(["serif", "sans_serif", "monospace"]).optional(),
-        fontSize: z.number().optional(),
-        speed: z.number().optional(),
-      })
-    )
-    .mutation(async ({ ctx, input }) => {
-      const settings = await prisma.settings.upsert({
-        where: {
-          userId: ctx.user.id,
-        },
-        create: {
-          ...input,
-          userId: ctx.user.id,
-        },
-        update: input,
-      });
-
-      return settings;
-    }),
+export const getSettingsRoute = createRoute({
+  method: "get",
+  path: "/api/settings",
+  middleware: [authMiddleware],
+  responses: {
+    [HttpStatusCodes.OK]: { description: "User settings" },
+  },
 });
+
+export const getSettingsHandler: RouteHandler<typeof getSettingsRoute, AppEnv> = async (c) => {
+  const user = c.get("user")!;
+
+  const state = await prisma.settings.findUnique({
+    where: { userId: user.id },
+  });
+
+  if (!state) {
+    return c.json(
+      await prisma.settings.create({ data: { userId: user.id } }),
+      HttpStatusCodes.OK
+    );
+  }
+
+  return c.json(state, HttpStatusCodes.OK);
+};
+
+// --- Update ---
+
+export const updateSettingsRoute = createRoute({
+  method: "post",
+  path: "/api/settings",
+  middleware: [authMiddleware],
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: z.object({
+            autoAdvance: z.boolean().optional(),
+            font: z.enum(["serif", "sans_serif", "monospace"]).optional(),
+            fontSize: z.number().optional(),
+            speed: z.number().optional(),
+          }),
+        },
+      },
+    },
+  },
+  responses: {
+    [HttpStatusCodes.OK]: { description: "Updated settings" },
+  },
+});
+
+export const updateSettingsHandler: RouteHandler<typeof updateSettingsRoute, AppEnv> = async (c) => {
+  const input = c.req.valid("json");
+  const user = c.get("user")!;
+
+  const updated = await prisma.settings.upsert({
+    where: { userId: user.id },
+    create: { ...input, userId: user.id },
+    update: input,
+  });
+
+  return c.json(updated, HttpStatusCodes.OK);
+};
+
+// --- Replacement Rules ---
+
+export const getReplacementRulesRoute = createRoute({
+  method: "get",
+  path: "/api/settings/replacement-rules",
+  middleware: [authMiddleware],
+  responses: {
+    [HttpStatusCodes.OK]: { description: "Replacement rules" },
+  },
+});
+
+export const getReplacementRulesHandler: RouteHandler<typeof getReplacementRulesRoute, AppEnv> = async (c) => {
+  const user = c.get("user")!;
+
+  const rules = await prisma.replacementRule.findMany({
+    where: { userId: user.id },
+  });
+
+  return c.json(rules, HttpStatusCodes.OK);
+};
+
+// --- Update Replacement Rules ---
+
+export const updateReplacementRulesRoute = createRoute({
+  method: "post",
+  path: "/api/settings/replacement-rules",
+  middleware: [authMiddleware],
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: z.object({
+            replacementRules: z.array(
+              z.object({
+                from: z.string(),
+                to: z.string(),
+              })
+            ),
+          }),
+        },
+      },
+    },
+  },
+  responses: {
+    [HttpStatusCodes.OK]: { description: "Updated replacement rules" },
+  },
+});
+
+export const updateReplacementRulesHandler: RouteHandler<typeof updateReplacementRulesRoute, AppEnv> = async (c) => {
+  const { replacementRules } = c.req.valid("json");
+  const user = c.get("user")!;
+
+  const rules = replacementRules.map((rule) => ({
+    ...rule,
+    userId: user.id,
+  }));
+
+  await prisma.replacementRule.deleteMany({
+    where: { userId: user.id },
+  });
+
+  await prisma.replacementRule.createMany({ data: rules });
+
+  return c.json(rules, HttpStatusCodes.OK);
+};
