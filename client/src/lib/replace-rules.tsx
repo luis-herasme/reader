@@ -7,7 +7,9 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { trpc } from "@/trpc";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { api } from "@/api/client";
+import { SETTINGS_REPLACEMENT_RULES, type ReplacementRulesInput } from "@/api/queryKeys";
 import { ArrowRight, Plus, Replace, Trash } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -18,15 +20,29 @@ type ReplaceRule = {
 };
 
 export default function ReplaceRules() {
-  const utils = trpc.useUtils();
-  const { data } = trpc.settings.replacementRules.useQuery();
+  const queryClient = useQueryClient();
+  const { data } = useQuery({
+    queryKey: [SETTINGS_REPLACEMENT_RULES],
+    queryFn: async () => {
+      const res = await api.api.settings["replacement-rules"].$get();
+      return res.json();
+    },
+  });
   const [rules, setRules] = useState<ReplaceRule[] | undefined>(data);
   useEffect(() => setRules(data), [data]);
 
-  const updateReplacementRules =
-    trpc.settings.updateReplacementRules.useMutation({
-      onSuccess: () => utils.settings.replacementRules.invalidate(),
-    });
+  const updateReplacementRules = useMutation({
+    mutationFn: async (data: ReplacementRulesInput) => {
+      const res = await api.api.settings["replacement-rules"].$post({
+        json: data,
+      });
+      return res.json();
+    },
+    onSuccess: () =>
+      queryClient.invalidateQueries({
+        queryKey: [SETTINGS_REPLACEMENT_RULES],
+      }),
+  });
 
   const [open, setOpen] = useState(false);
 
