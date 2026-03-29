@@ -14,8 +14,8 @@ const HistorySchema = z.object({
   server: z.string(),
   sentenceIndex: z.number(),
   length: z.number(),
-  updatedAt: z.string(),
-  createdAt: z.string(),
+  updatedAt: z.coerce.string(),
+  createdAt: z.coerce.string(),
 });
 
 // --- Get Novels ---

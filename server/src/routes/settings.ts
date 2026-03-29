@@ -13,8 +13,8 @@ const SettingsSchema = z.object({
   font: z.enum(["serif", "sans_serif", "monospace"]),
   fontSize: z.number(),
   speed: z.number(),
-  updatedAt: z.string(),
-  createdAt: z.string(),
+  updatedAt: z.coerce.string(),
+  createdAt: z.coerce.string(),
 });
 
 const ReplacementRuleSchema = z.object({
@@ -22,8 +22,8 @@ const ReplacementRuleSchema = z.object({
   userId: z.string(),
   from: z.string(),
   to: z.string(),
-  updatedAt: z.string(),
-  createdAt: z.string(),
+  updatedAt: z.coerce.string(),
+  createdAt: z.coerce.string(),
 });
 
 // --- Get State ---

@@ -11,8 +11,8 @@ const FavoriteSchema = z.object({
   userId: z.string(),
   slug: z.string(),
   server: z.string(),
-  updatedAt: z.string(),
-  createdAt: z.string(),
+  updatedAt: z.coerce.string(),
+  createdAt: z.coerce.string(),
 });
 
 // --- Add ---

@@ -40,6 +40,9 @@ export const searchRoute = createRoute({
 export const searchHandler: RouteHandler<typeof searchRoute, AppEnv> = async (c) => {
   const { search, page, server } = c.req.valid("query");
   const response = await fetch(URL + `/${server}/search/${search}/${page}`);
+  if (!response.ok) {
+    throw new Error("Failed to search novels");
+  }
   return c.json(await response.json(), HttpStatusCodes.OK);
 };
 
@@ -69,6 +72,9 @@ export const chaptersRoute = createRoute({
 export const chaptersHandler: RouteHandler<typeof chaptersRoute, AppEnv> = async (c) => {
   const { slug, server } = c.req.valid("query");
   const response = await fetch(URL + `/${server}/chapters/${slug}`);
+  if (!response.ok) {
+    throw new Error("Failed to fetch chapters");
+  }
   return c.json(await response.json(), HttpStatusCodes.OK);
 };
 
@@ -102,6 +108,9 @@ export const chapterHandler: RouteHandler<typeof chapterRoute, AppEnv> = async (
   const response = await fetch(
     URL + `/${server}/chapter/${novel}/${chapter}`
   );
+  if (!response.ok) {
+    throw new Error("Failed to fetch chapter");
+  }
   const result = await response.json();
   let sentenceIndex = null;
 
