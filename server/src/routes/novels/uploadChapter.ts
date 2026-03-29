@@ -4,6 +4,7 @@ import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
 import type { RouteHandler } from "@hono/zod-openapi";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import type { AppEnv } from "../../lib/appFactory";
+import { ErrorSchema } from "../../lib/errorSchema";
 import { prisma } from "../../db";
 import { apiKeyMiddleware } from "../../lib/apiKeyMiddleware";
 
@@ -26,7 +27,11 @@ export const uploadChapterRoute = createRoute({
     body: jsonContentRequired(UploadChapterInput, "Chapter to upload"),
   },
   responses: {
-    [HttpStatusCodes.CREATED]: jsonContent(UploadChapterOutput, "Chapter created"),
+    [HttpStatusCodes.CREATED]: jsonContent(
+      UploadChapterOutput,
+      "Chapter created",
+    ),
+    [HttpStatusCodes.NOT_FOUND]: jsonContent(ErrorSchema, "Book not found"),
   },
 });
 
@@ -38,10 +43,7 @@ export const uploadChapterHandler: RouteHandler<
 
   const book = await prisma.book.findUnique({ where: { id: bookId } });
   if (!book) {
-    return context.json(
-      { error: "Book not found" } as unknown as z.infer<typeof UploadChapterOutput>,
-      HttpStatusCodes.NOT_FOUND as 201,
-    );
+    return context.json({ error: "Book not found" }, HttpStatusCodes.NOT_FOUND);
   }
 
   const chapter = await prisma.chapter.create({

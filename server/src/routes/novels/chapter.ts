@@ -4,6 +4,7 @@ import { jsonContent } from "stoker/openapi/helpers";
 import type { RouteHandler } from "@hono/zod-openapi";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import type { AppEnv } from "../../lib/appFactory";
+import { ErrorSchema } from "../../lib/errorSchema";
 import { prisma } from "../../db";
 import { optionalAuthMiddleware } from "../../auth/authMiddleware";
 
@@ -28,6 +29,7 @@ export const chapterRoute = createRoute({
   request: { query: ChapterInput },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(ChapterOutput, "Chapter content"),
+    [HttpStatusCodes.NOT_FOUND]: jsonContent(ErrorSchema, "Chapter not found"),
   },
 });
 
@@ -43,8 +45,8 @@ export const chapterHandler: RouteHandler<typeof chapterRoute, AppEnv> = async (
 
   if (!chapter) {
     return context.json(
-      { error: "Chapter not found" } as unknown as z.infer<typeof ChapterOutput>,
-      HttpStatusCodes.NOT_FOUND as 200,
+      { error: "Chapter not found" },
+      HttpStatusCodes.NOT_FOUND,
     );
   }
 
