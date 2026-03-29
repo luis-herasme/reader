@@ -10,8 +10,9 @@ export function useHistoryNovels() {
   return useQuery({
     queryKey: [HISTORY_NOVELS],
     queryFn: async () => {
-      const res = await api.api.history.novels.$get();
-      return res.json();
+      const response = await api.api.history.novels.$get();
+      if (!response.ok) throw new Error("Failed to fetch history novels");
+      return response.json();
     },
   });
 }
@@ -20,10 +21,11 @@ export function useNovelHistory(slug: string) {
   return useQuery({
     queryKey: [HISTORY_NOVEL, slug],
     queryFn: async () => {
-      const res = await api.api.history.novel.$get({
+      const response = await api.api.history.novel.$get({
         query: { slug },
       });
-      return res.json();
+      if (!response.ok) throw new Error("Failed to fetch novel history");
+      return response.json();
     },
   });
 }
@@ -37,8 +39,9 @@ type AddHistoryInput = {
 };
 
 export async function addHistory(input: AddHistoryInput) {
-  const res = await api.api.history.$post({ json: input });
-  return res.json();
+  const response = await api.api.history.$post({ json: input });
+  if (!response.ok) throw new Error("Failed to add history");
+  return response.json();
 }
 
 export function useClearNovelHistory() {
@@ -46,8 +49,9 @@ export function useClearNovelHistory() {
 
   return useMutation({
     mutationFn: async (input: SlugServerInput) => {
-      const res = await api.api.history.novel.$delete({ query: input });
-      return res.json();
+      const response = await api.api.history.novel.$delete({ query: input });
+      if (!response.ok) throw new Error("Failed to clear novel history");
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [HISTORY_NOVELS] });

@@ -12,8 +12,9 @@ export function useSettingsState() {
   return useQuery({
     queryKey: [SETTINGS],
     queryFn: async () => {
-      const res = await api.api.settings.$get();
-      return res.json();
+      const response = await api.api.settings.$get();
+      if (!response.ok) throw new Error("Failed to fetch settings");
+      return response.json();
     },
   });
 }
@@ -30,8 +31,9 @@ export function useUpdateSettings() {
 
   return useMutation({
     mutationFn: async (value: SettingsUpdateInput) => {
-      const res = await api.api.settings.$post({ json: value });
-      return res.json();
+      const response = await api.api.settings.$post({ json: value });
+      if (!response.ok) throw new Error("Failed to update settings");
+      return response.json();
     },
     onSuccess: () =>
       queryClient.invalidateQueries({ queryKey: [SETTINGS] }),
@@ -42,8 +44,9 @@ export function useReplacementRules() {
   return useQuery({
     queryKey: [SETTINGS_REPLACEMENT_RULES],
     queryFn: async () => {
-      const res = await api.api.settings["replacement-rules"].$get();
-      return res.json();
+      const response = await api.api.settings["replacement-rules"].$get();
+      if (!response.ok) throw new Error("Failed to fetch replacement rules");
+      return response.json();
     },
   });
 }
@@ -53,10 +56,11 @@ export function useUpdateReplacementRules() {
 
   return useMutation({
     mutationFn: async (data: ReplacementRulesInput) => {
-      const res = await api.api.settings["replacement-rules"].$post({
+      const response = await api.api.settings["replacement-rules"].$post({
         json: data,
       });
-      return res.json();
+      if (!response.ok) throw new Error("Failed to update replacement rules");
+      return response.json();
     },
     onSuccess: () =>
       queryClient.invalidateQueries({

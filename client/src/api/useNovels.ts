@@ -15,14 +15,15 @@ export function useSearchNovels(params: SearchParams) {
   return useQuery({
     queryKey: [NOVELS_SEARCH, params],
     queryFn: async () => {
-      const res = await api.api.novels.search.$get({
+      const response = await api.api.novels.search.$get({
         query: {
           search: params.search,
           page: params.page,
           server: params.server,
         },
       });
-      return res.json();
+      if (!response.ok) throw new Error("Failed to search novels");
+      return response.json();
     },
     enabled: Boolean(params.search),
   });
@@ -37,10 +38,11 @@ export function useChapters(params: ChaptersParams) {
   return useQuery({
     queryKey: [NOVELS_CHAPTERS, params.slug, params.server],
     queryFn: async () => {
-      const res = await api.api.novels.chapters.$get({
+      const response = await api.api.novels.chapters.$get({
         query: { slug: params.slug, server: params.server },
       });
-      return res.json();
+      if (!response.ok) throw new Error("Failed to fetch chapters");
+      return response.json();
     },
   });
 }
@@ -55,10 +57,11 @@ export function useChapter(params: ChapterParams) {
   return useQuery({
     queryKey: [NOVELS_CHAPTER, params.novel, params.chapter, params.server],
     queryFn: async () => {
-      const res = await api.api.novels.chapter.$get({
+      const response = await api.api.novels.chapter.$get({
         query: { novel: params.novel, chapter: params.chapter, server: params.server },
       });
-      return res.json();
+      if (!response.ok) throw new Error("Failed to fetch chapter");
+      return response.json();
     },
     refetchOnMount: false,
     refetchOnReconnect: false,

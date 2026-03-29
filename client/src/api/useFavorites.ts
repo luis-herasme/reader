@@ -14,8 +14,9 @@ export function useFavorites() {
   return useQuery({
     queryKey: [FAVORITES],
     queryFn: async () => {
-      const res = await api.api.favorites.$get();
-      return res.json();
+      const response = await api.api.favorites.$get();
+      if (!response.ok) throw new Error("Failed to fetch favorites");
+      return response.json();
     },
   });
 }
@@ -24,10 +25,11 @@ export function useIsFavorite(params: SlugServerInput) {
   return useQuery({
     queryKey: [FAVORITES_IS_FAVORITE, params.slug, params.server],
     queryFn: async () => {
-      const res = await api.api.favorites["is-favorite"].$get({
+      const response = await api.api.favorites["is-favorite"].$get({
         query: { slug: params.slug, server: params.server },
       });
-      return res.json();
+      if (!response.ok) throw new Error("Failed to check favorite status");
+      return response.json();
     },
   });
 }
@@ -37,8 +39,9 @@ export function useAddFavorite({ slug, server }: SlugServerInput) {
 
   return useMutation({
     mutationFn: async (input: SlugServerInput) => {
-      const res = await api.api.favorites.$post({ json: input });
-      return res.json();
+      const response = await api.api.favorites.$post({ json: input });
+      if (!response.ok) throw new Error("Failed to add favorite");
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -53,8 +56,9 @@ export function useDeleteFavorite() {
 
   return useMutation({
     mutationFn: async (input: SlugServerInput) => {
-      const res = await api.api.favorites.$delete({ query: input });
-      return res.json();
+      const response = await api.api.favorites.$delete({ query: input });
+      if (!response.ok) throw new Error("Failed to delete favorite");
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [FAVORITES] });
@@ -63,8 +67,9 @@ export function useDeleteFavorite() {
 }
 
 export async function getNovelChapter(slug: string) {
-  const res = await api.api.favorites["novel-chapter"].$get({
+  const response = await api.api.favorites["novel-chapter"].$get({
     query: { slug },
   });
-  return res.json();
+  if (!response.ok) throw new Error("Failed to get novel chapter");
+  return response.json();
 }
