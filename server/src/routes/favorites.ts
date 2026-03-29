@@ -1,111 +1,152 @@
-import { z } from "zod";
+import { z } from "@hono/zod-openapi";
+import { createRoute } from "@hono/zod-openapi";
+import type { RouteHandler } from "@hono/zod-openapi";
+import * as HttpStatusCodes from "stoker/http-status-codes";
+import type { AppEnv } from "../lib/appFactory";
 import { prisma } from "../db";
-import { router } from "../trpc";
-import { authProcedure } from "../auth/authProcedure";
+import { authMiddleware } from "../auth/authMiddleware";
 
-export const favorites = router({
-  add: authProcedure
-    .input(
-      z.object({
-        slug: z.string(),
-        server: z.string(),
-      })
-    )
-    .mutation(async ({ ctx, input }) => {
-      const { slug, server } = input;
+// --- Add ---
 
-      const favorite = await prisma.favorite.upsert({
-        where: {
-          userId_slug_server: {
-            slug,
-            server,
-            userId: ctx.user.id,
-          },
+export const addFavoriteRoute = createRoute({
+  method: "post",
+  path: "/api/favorites",
+  middleware: [authMiddleware],
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: z.object({
+            slug: z.string(),
+            server: z.string(),
+          }),
         },
-        create: {
-          slug,
-          server,
-          userId: ctx.user.id,
-        },
-        update: {},
-      });
-
-      return favorite;
-    }),
-
-  delete: authProcedure
-    .input(
-      z.object({
-        slug: z.string(),
-        server: z.string(),
-      })
-    )
-    .mutation(async ({ ctx, input }) => {
-      const { slug, server } = input;
-
-      const favorite = await prisma.favorite.delete({
-        where: {
-          userId_slug_server: {
-            slug,
-            server,
-            userId: ctx.user.id,
-          },
-        },
-      });
-
-      return favorite;
-    }),
-
-  read: authProcedure.query(async ({ ctx }) => {
-    const favorites = await prisma.favorite.findMany({
-      where: {
-        userId: ctx.user.id,
       },
-    });
-
-    return favorites;
-  }),
-
-  isFavorite: authProcedure
-    .input(
-      z.object({
-        slug: z.string(),
-        server: z.string(),
-      })
-    )
-    .query(async ({ ctx, input }) => {
-      const { slug, server } = input;
-
-      const favorite = await prisma.favorite.findFirst({
-        where: {
-          userId: ctx.user.id,
-          slug,
-          server,
-        },
-      });
-
-      return Boolean(favorite);
-    }),
-
-  getNovelChapter: authProcedure
-    .input(
-      z.object({
-        slug: z.string(),
-      })
-    )
-    .query(async ({ ctx, input }) => {
-      const { slug } = input;
-
-      const favorite = await prisma.history.findFirst({
-        where: {
-          userId: ctx.user.id,
-          slug,
-        },
-        orderBy: {
-          updatedAt: "desc",
-        },
-      });
-
-      return favorite ? favorite.chapter : 0;
-    }),
+    },
+  },
+  responses: {
+    [HttpStatusCodes.OK]: { description: "Favorite added" },
+  },
 });
+
+export const addFavoriteHandler: RouteHandler<typeof addFavoriteRoute, AppEnv> = async (c) => {
+  const { slug, server } = c.req.valid("json");
+  const user = c.get("user")!;
+
+  const favorite = await prisma.favorite.upsert({
+    where: {
+      userId_slug_server: { slug, server, userId: user.id },
+    },
+    create: { slug, server, userId: user.id },
+    update: {},
+  });
+
+  return c.json(favorite, HttpStatusCodes.OK);
+};
+
+// --- Delete ---
+
+export const deleteFavoriteRoute = createRoute({
+  method: "delete",
+  path: "/api/favorites",
+  middleware: [authMiddleware],
+  request: {
+    query: z.object({
+      slug: z.string(),
+      server: z.string(),
+    }),
+  },
+  responses: {
+    [HttpStatusCodes.OK]: { description: "Favorite deleted" },
+  },
+});
+
+export const deleteFavoriteHandler: RouteHandler<typeof deleteFavoriteRoute, AppEnv> = async (c) => {
+  const { slug, server } = c.req.valid("query");
+  const user = c.get("user")!;
+
+  const favorite = await prisma.favorite.delete({
+    where: {
+      userId_slug_server: { slug, server, userId: user.id },
+    },
+  });
+
+  return c.json(favorite, HttpStatusCodes.OK);
+};
+
+// --- Read ---
+
+export const readFavoritesRoute = createRoute({
+  method: "get",
+  path: "/api/favorites",
+  middleware: [authMiddleware],
+  responses: {
+    [HttpStatusCodes.OK]: { description: "List of favorites" },
+  },
+});
+
+export const readFavoritesHandler: RouteHandler<typeof readFavoritesRoute, AppEnv> = async (c) => {
+  const user = c.get("user")!;
+
+  const favs = await prisma.favorite.findMany({
+    where: { userId: user.id },
+  });
+
+  return c.json(favs, HttpStatusCodes.OK);
+};
+
+// --- Is Favorite ---
+
+export const isFavoriteRoute = createRoute({
+  method: "get",
+  path: "/api/favorites/is-favorite",
+  middleware: [authMiddleware],
+  request: {
+    query: z.object({
+      slug: z.string(),
+      server: z.string(),
+    }),
+  },
+  responses: {
+    [HttpStatusCodes.OK]: { description: "Boolean favorite status" },
+  },
+});
+
+export const isFavoriteHandler: RouteHandler<typeof isFavoriteRoute, AppEnv> = async (c) => {
+  const { slug, server } = c.req.valid("query");
+  const user = c.get("user")!;
+
+  const favorite = await prisma.favorite.findFirst({
+    where: { userId: user.id, slug, server },
+  });
+
+  return c.json(Boolean(favorite), HttpStatusCodes.OK);
+};
+
+// --- Get Novel Chapter ---
+
+export const getNovelChapterRoute = createRoute({
+  method: "get",
+  path: "/api/favorites/novel-chapter",
+  middleware: [authMiddleware],
+  request: {
+    query: z.object({
+      slug: z.string(),
+    }),
+  },
+  responses: {
+    [HttpStatusCodes.OK]: { description: "Last read chapter number" },
+  },
+});
+
+export const getNovelChapterHandler: RouteHandler<typeof getNovelChapterRoute, AppEnv> = async (c) => {
+  const { slug } = c.req.valid("query");
+  const user = c.get("user")!;
+
+  const history = await prisma.history.findFirst({
+    where: { userId: user.id, slug },
+    orderBy: { updatedAt: "desc" },
+  });
+
+  return c.json(history ? history.chapter : 0, HttpStatusCodes.OK);
+};
