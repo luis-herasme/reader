@@ -6,7 +6,7 @@ export const optionalAuthMiddleware = createMiddleware<AppEnv>(
   async (c, next) => {
     await setAuthContext(c);
     await next();
-  }
+  },
 );
 
 export const authMiddleware = createMiddleware<AppEnv>(async (c, next) => {

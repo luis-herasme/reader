@@ -4,11 +4,79 @@ import { serveStatic } from "hono/bun";
 import { defaultHook } from "stoker/openapi";
 import type { AppEnv } from "./lib/appFactory";
 
-import * as novels from "./routes/novels";
-import * as favorites from "./routes/favorites";
-import * as history from "./routes/history";
-import * as settings from "./routes/settings";
-import * as auth from "./routes/auth";
+import { searchRoute, searchHandler } from "./routes/novels/search";
+import { chapterRoute, chapterHandler } from "./routes/novels/chapter";
+import { chaptersRoute, chaptersHandler } from "./routes/novels/chapters";
+
+import {
+  addFavoriteRoute,
+  addFavoriteHandler,
+} from "./routes/favorites/addFavorite";
+import {
+  isFavoriteRoute,
+  isFavoriteHandler,
+} from "./routes/favorites/isFavorite";
+import {
+  readFavoritesRoute,
+  readFavoritesHandler,
+} from "./routes/favorites/readFavorites";
+import {
+  deleteFavoriteRoute,
+  deleteFavoriteHandler,
+} from "./routes/favorites/deleteFavorite";
+import {
+  getNovelChapterRoute,
+  getNovelChapterHandler,
+} from "./routes/favorites/getNovelChapter";
+
+import {
+  addHistoryRoute,
+  addHistoryHandler,
+} from "./routes/history/addHistory";
+import {
+  readHistoryRoute,
+  readHistoryHandler,
+} from "./routes/history/readHistory";
+import { getNovelsRoute, getNovelsHandler } from "./routes/history/getNovels";
+import {
+  novelHistoryRoute,
+  novelHistoryHandler,
+} from "./routes/history/novelHistory";
+import {
+  clearNovelHistoryRoute,
+  clearNovelHistoryHandler,
+} from "./routes/history/clearNovelHistory";
+
+import {
+  getSettingsRoute,
+  getSettingsHandler,
+} from "./routes/settings/getSettings";
+import {
+  updateSettingsRoute,
+  updateSettingsHandler,
+} from "./routes/settings/updateSettings";
+import {
+  getReplacementRulesRoute,
+  getReplacementRulesHandler,
+} from "./routes/settings/getReplacementRules";
+import {
+  updateReplacementRulesRoute,
+  updateReplacementRulesHandler,
+} from "./routes/settings/updateReplacementRules";
+
+import { logoutRoute, logoutHandler } from "./routes/auth/logout";
+import {
+  googleLoginRoute,
+  googleLoginHandler,
+} from "./routes/auth/googleLogin";
+import {
+  isAuthenticatedRoute,
+  isAuthenticatedHandler,
+} from "./routes/auth/isAuthenticated";
+import {
+  googleCallbackRoute,
+  googleCallbackHandler,
+} from "./routes/auth/googleCallback";
 
 const app = new OpenAPIHono<AppEnv>({ defaultHook });
 
@@ -17,31 +85,31 @@ app.use("/*", serveStatic({ root: "../../client/dist" }));
 
 const api = app
   // novels
-  .openapi(novels.searchRoute, novels.searchHandler)
-  .openapi(novels.chaptersRoute, novels.chaptersHandler)
-  .openapi(novels.chapterRoute, novels.chapterHandler)
+  .openapi(searchRoute, searchHandler)
+  .openapi(chapterRoute, chapterHandler)
+  .openapi(chaptersRoute, chaptersHandler)
   // favorites
-  .openapi(favorites.addFavoriteRoute, favorites.addFavoriteHandler)
-  .openapi(favorites.deleteFavoriteRoute, favorites.deleteFavoriteHandler)
-  .openapi(favorites.readFavoritesRoute, favorites.readFavoritesHandler)
-  .openapi(favorites.isFavoriteRoute, favorites.isFavoriteHandler)
-  .openapi(favorites.getNovelChapterRoute, favorites.getNovelChapterHandler)
+  .openapi(isFavoriteRoute, isFavoriteHandler)
+  .openapi(addFavoriteRoute, addFavoriteHandler)
+  .openapi(readFavoritesRoute, readFavoritesHandler)
+  .openapi(deleteFavoriteRoute, deleteFavoriteHandler)
+  .openapi(getNovelChapterRoute, getNovelChapterHandler)
   // history
-  .openapi(history.getNovelsRoute, history.getNovelsHandler)
-  .openapi(history.novelHistoryRoute, history.novelHistoryHandler)
-  .openapi(history.addHistoryRoute, history.addHistoryHandler)
-  .openapi(history.clearNovelHistoryRoute, history.clearNovelHistoryHandler)
-  .openapi(history.readHistoryRoute, history.readHistoryHandler)
+  .openapi(getNovelsRoute, getNovelsHandler)
+  .openapi(addHistoryRoute, addHistoryHandler)
+  .openapi(readHistoryRoute, readHistoryHandler)
+  .openapi(novelHistoryRoute, novelHistoryHandler)
+  .openapi(clearNovelHistoryRoute, clearNovelHistoryHandler)
   // settings
-  .openapi(settings.getSettingsRoute, settings.getSettingsHandler)
-  .openapi(settings.updateSettingsRoute, settings.updateSettingsHandler)
-  .openapi(settings.getReplacementRulesRoute, settings.getReplacementRulesHandler)
-  .openapi(settings.updateReplacementRulesRoute, settings.updateReplacementRulesHandler)
+  .openapi(getSettingsRoute, getSettingsHandler)
+  .openapi(updateSettingsRoute, updateSettingsHandler)
+  .openapi(getReplacementRulesRoute, getReplacementRulesHandler)
+  .openapi(updateReplacementRulesRoute, updateReplacementRulesHandler)
   // auth
-  .openapi(auth.isAuthenticatedRoute, auth.isAuthenticatedHandler)
-  .openapi(auth.googleLoginRoute, auth.googleLoginHandler)
-  .openapi(auth.googleCallbackRoute, auth.googleCallbackHandler)
-  .openapi(auth.logoutRoute, auth.logoutHandler);
+  .openapi(logoutRoute, logoutHandler)
+  .openapi(googleLoginRoute, googleLoginHandler)
+  .openapi(googleCallbackRoute, googleCallbackHandler)
+  .openapi(isAuthenticatedRoute, isAuthenticatedHandler);
 
 app.get("*", async () => {
   return new Response(Bun.file("../../client/dist/index.html"));
