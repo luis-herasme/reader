@@ -1,16 +1,20 @@
+import type { Context } from "hono";
 import { lucia } from "./auth";
-import type { Request, Response } from "express";
 
-export async function logout(req: Request, res: Response) {
-  const sessionId = lucia.readSessionCookie(req.headers.cookie ?? "");
+export async function logout(c: Context) {
+  const sessionId = lucia.readSessionCookie(
+    c.req.header("Cookie") ?? ""
+  );
 
   if (!sessionId) {
-    return res.redirect("/login");
+    return c.redirect("/login");
   }
 
   await lucia.invalidateSession(sessionId);
 
-  return res
-    .setHeader("Set-Cookie", lucia.createBlankSessionCookie().serialize())
-    .redirect("/login");
+  c.header("Set-Cookie", lucia.createBlankSessionCookie().serialize(), {
+    append: true,
+  });
+
+  return c.redirect("/login");
 }

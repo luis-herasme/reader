@@ -1,36 +1,42 @@
-import cors from "cors";
-import path from "path";
-import express from "express";
+import { Hono } from "hono";
+import { cors } from "hono/cors";
+import { serveStatic } from "hono/bun";
 import { appRouter } from "./router";
-import { googleCallback, googleLogin } from "./auth/google.ts";
-import { getAuthContext } from "./auth/getAuthContext.ts";
-import * as trpcExpress from "@trpc/server/adapters/express";
-import { logout } from "./auth/logout.ts";
+import { googleCallback, googleLogin } from "./auth/google";
+import { getAuthContext } from "./auth/getAuthContext";
+import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
+import { logout } from "./auth/logout";
 
-const app = express();
+const app = new Hono();
 
-app.use(cors());
-app.use(express.static(path.join(__dirname, "../../client/dist")));
+app.use("*", cors());
 
-app.use(
-  "/trpc",
-  trpcExpress.createExpressMiddleware({
+app.use("/*", serveStatic({ root: "../../client/dist" }));
+
+app.use("/trpc/*", async (c) => {
+  const response = await fetchRequestHandler({
+    endpoint: "/trpc",
+    req: c.req.raw,
     router: appRouter,
     createContext: getAuthContext,
-    onError: (context) => {
-      console.log("Error: ", context.error);
+    onError: ({ error }) => {
+      console.log("Error: ", error);
     },
-  })
-);
+  });
+  return response;
+});
 
 app.get("/logout", logout);
 app.get("/google/login", googleLogin);
 app.get("/google/callback", googleCallback);
 
-app.get("*", (_req, res) => {
-  res.sendFile(path.join(__dirname, "../../client/dist/index.html"));
+app.get("*", async (c) => {
+  return new Response(Bun.file("../../client/dist/index.html"));
 });
 
 const port = process.env.PORT || 3000;
 
-app.listen(port, () => console.log(`Server running on port ${port}`));
+export default {
+  port,
+  fetch: app.fetch,
+};

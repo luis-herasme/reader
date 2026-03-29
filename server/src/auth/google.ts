@@ -1,6 +1,6 @@
 import { generateId } from "lucia";
-import type { Request, Response } from "express";
-import { serializeCookie, parseCookies } from "oslo/cookie";
+import type { Context } from "hono";
+import { getCookie, setCookie } from "hono/cookie";
 import { Google, generateState } from "arctic";
 import { lucia } from "./auth";
 import { prisma } from "../db";
@@ -11,7 +11,7 @@ export const google = new Google(
   `${process.env.BASE_URL}/google/callback`
 );
 
-export async function googleLogin(_: Request, res: Response) {
+export async function googleLogin(c: Context) {
   const state = generateState();
   const codeVerifier = generateId(32);
 
@@ -19,46 +19,26 @@ export async function googleLogin(_: Request, res: Response) {
     scopes: ["email", "profile"],
   });
 
-  res.appendHeader(
-    "Set-Cookie",
-    serializeCookie("google_oauth_state", state, {
-      path: "/",
-      secure: process.env.NODE_ENV === "production",
-      httpOnly: true,
-      maxAge: 60 * 10,
-      sameSite: "lax",
-    })
-  );
+  const cookieOptions = {
+    path: "/",
+    secure: process.env.NODE_ENV === "production",
+    httpOnly: true,
+    maxAge: 60 * 10,
+    sameSite: "Lax" as const,
+  };
 
-  res.appendHeader(
-    "Set-Cookie",
-    serializeCookie("google_oauth_code_verifier", codeVerifier, {
-      path: "/",
-      secure: process.env.NODE_ENV === "production",
-      httpOnly: true,
-      maxAge: 60 * 10,
-      sameSite: "lax",
-    })
-  );
+  setCookie(c, "google_oauth_state", state, cookieOptions);
+  setCookie(c, "google_oauth_code_verifier", codeVerifier, cookieOptions);
 
-  res.writeHead(302, { Location: googleUrl.toString() });
-  res.end();
+  return c.redirect(googleUrl.toString(), 302);
 }
 
-export async function googleCallback(req: Request, res: Response) {
-  if (!req.url) {
-    res.writeHead(400);
-    res.end();
-    return;
-  }
+export async function googleCallback(c: Context) {
+  const code = c.req.query("code");
+  const state = c.req.query("state");
 
-  const searchParams = new URLSearchParams(req.url.split("?")[1]);
-  const code = searchParams.get("code");
-  const state = searchParams.get("state");
-
-  const cookies = parseCookies(req.headers.cookie ?? "");
-  const savedState = cookies.get("google_oauth_state") ?? null;
-  const savedCodeVerifier = cookies.get("google_oauth_code_verifier") ?? null;
+  const savedState = getCookie(c, "google_oauth_state") ?? null;
+  const savedCodeVerifier = getCookie(c, "google_oauth_code_verifier") ?? null;
 
   if (
     !code ||
@@ -67,9 +47,7 @@ export async function googleCallback(req: Request, res: Response) {
     !savedCodeVerifier ||
     state !== savedState
   ) {
-    res.writeHead(400);
-    res.end();
-    return;
+    return c.body(null, 400);
   }
 
   const tokens = await google.validateAuthorizationCode(
@@ -100,8 +78,9 @@ export async function googleCallback(req: Request, res: Response) {
 
   if (existingUser) {
     const session = await lucia.createSession(existingUser.id, {});
-    const sessionCookie = lucia.createSessionCookie(session.id);
-    res.appendHeader("Set-Cookie", sessionCookie.serialize());
+    c.header("Set-Cookie", lucia.createSessionCookie(session.id).serialize(), {
+      append: true,
+    });
   } else {
     const newUser = await prisma.user.create({
       data: {
@@ -111,11 +90,10 @@ export async function googleCallback(req: Request, res: Response) {
     });
 
     const session = await lucia.createSession(newUser.id, {});
-    const sessionCookie = lucia.createSessionCookie(session.id);
-    res.appendHeader("Set-Cookie", sessionCookie.serialize());
+    c.header("Set-Cookie", lucia.createSessionCookie(session.id).serialize(), {
+      append: true,
+    });
   }
 
-  res.writeHead(302, { Location: "/" });
-  res.end();
-  return;
+  return c.redirect("/", 302);
 }
