@@ -43,11 +43,11 @@ export default function Home({ server }: { server: string }) {
       const res = await api.api.novels.search.$get({
         query: {
           search: search.search,
-          page: search.page.toString(),
+          page: search.page,
           server: search.server,
         },
       });
-      return res.json();
+      return res.json() as any;
     },
     enabled: Boolean(search.search),
   });
@@ -56,7 +56,7 @@ export default function Home({ server }: { server: string }) {
     queryKey: [AUTH_IS_AUTHENTICATED],
     queryFn: async () => {
       const res = await api.api.auth["is-authenticated"].$get();
-      return res.json();
+      return res.json() as any;
     },
   });
 
@@ -215,7 +215,7 @@ export default function Home({ server }: { server: string }) {
             )}
           </div>
           <div className="flex flex-wrap justify-center max-w-[1200px]">
-            {searchQuery.data.results.map((result) => (
+            {searchQuery.data.results.map((result: any) => (
               <Novel
                 key={result.name + "-" + result.image}
                 name={result.name}

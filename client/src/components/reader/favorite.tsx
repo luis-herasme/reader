@@ -18,14 +18,14 @@ export function Favorite({ slug, server }: { slug: string; server: string }) {
       const res = await api.api.favorites["is-favorite"].$get({
         query: { slug, server },
       });
-      return res.json();
+      return res.json() as any;
     },
   });
 
   const addToFavorites = useMutation({
     mutationFn: async (input: SlugServerInput) => {
       const res = await api.api.favorites.$post({ json: input });
-      return res.json();
+      return res.json() as any;
     },
     onSuccess: () => {
       toast("Added novel to library");
@@ -40,7 +40,7 @@ export function Favorite({ slug, server }: { slug: string; server: string }) {
       const res = await api.api.favorites.$delete({
         query: input,
       });
-      return res.json();
+      return res.json() as any;
     },
     onSuccess: () => {
       toast("Removed novel from library");

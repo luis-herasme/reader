@@ -67,14 +67,14 @@ export function useSettings() {
     queryKey: [SETTINGS],
     queryFn: async () => {
       const res = await api.api.settings.$get();
-      return res.json();
+      return res.json() as any;
     },
   });
 
   const updateSettings = useMutation({
     mutationFn: async (value: Partial<SettingsState>) => {
       const res = await api.api.settings.$post({ json: value });
-      return res.json();
+      return res.json() as any;
     },
     onMutate: (value) => useSettingsStore.setState(value),
     onSuccess: () =>
@@ -112,7 +112,7 @@ export function ReaderSettings() {
     queryKey: [AUTH_IS_AUTHENTICATED],
     queryFn: async () => {
       const res = await api.api.auth["is-authenticated"].$get();
-      return res.json();
+      return res.json() as any;
     },
   });
 

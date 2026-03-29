@@ -2,6 +2,7 @@ import { z } from "@hono/zod-openapi";
 import { createRoute } from "@hono/zod-openapi";
 import type { RouteHandler } from "@hono/zod-openapi";
 import * as HttpStatusCodes from "stoker/http-status-codes";
+import { jsonContent } from "stoker/openapi/helpers";
 import type { AppEnv } from "../lib/appFactory";
 import { prisma } from "../db";
 import { authMiddleware } from "../auth/authMiddleware";
@@ -13,7 +14,7 @@ export const getSettingsRoute = createRoute({
   path: "/api/settings",
   middleware: [authMiddleware],
   responses: {
-    [HttpStatusCodes.OK]: { description: "User settings" },
+    [HttpStatusCodes.OK]: jsonContent(z.any(), "User settings"),
   },
 });
 
@@ -55,7 +56,7 @@ export const updateSettingsRoute = createRoute({
     },
   },
   responses: {
-    [HttpStatusCodes.OK]: { description: "Updated settings" },
+    [HttpStatusCodes.OK]: jsonContent(z.any(), "Updated settings"),
   },
 });
 
@@ -79,7 +80,7 @@ export const getReplacementRulesRoute = createRoute({
   path: "/api/settings/replacement-rules",
   middleware: [authMiddleware],
   responses: {
-    [HttpStatusCodes.OK]: { description: "Replacement rules" },
+    [HttpStatusCodes.OK]: jsonContent(z.any(), "Replacement rules"),
   },
 });
 
@@ -116,7 +117,7 @@ export const updateReplacementRulesRoute = createRoute({
     },
   },
   responses: {
-    [HttpStatusCodes.OK]: { description: "Updated replacement rules" },
+    [HttpStatusCodes.OK]: jsonContent(z.any(), "Updated replacement rules"),
   },
 });
 

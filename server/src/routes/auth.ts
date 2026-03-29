@@ -1,6 +1,8 @@
+import { z } from "@hono/zod-openapi";
 import { createRoute } from "@hono/zod-openapi";
 import type { RouteHandler } from "@hono/zod-openapi";
 import * as HttpStatusCodes from "stoker/http-status-codes";
+import { jsonContent } from "stoker/openapi/helpers";
 import type { AppEnv } from "../lib/appFactory";
 import { optionalAuthMiddleware } from "../auth/authMiddleware";
 import { googleLogin, googleCallback } from "../auth/google";
@@ -13,7 +15,7 @@ export const isAuthenticatedRoute = createRoute({
   path: "/api/auth/is-authenticated",
   middleware: [optionalAuthMiddleware],
   responses: {
-    [HttpStatusCodes.OK]: { description: "Authentication status" },
+    [HttpStatusCodes.OK]: jsonContent(z.any(), "Authentication status"),
   },
 });
 

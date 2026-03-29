@@ -2,6 +2,7 @@ import { z } from "@hono/zod-openapi";
 import { createRoute } from "@hono/zod-openapi";
 import type { RouteHandler } from "@hono/zod-openapi";
 import * as HttpStatusCodes from "stoker/http-status-codes";
+import { jsonContent } from "stoker/openapi/helpers";
 import type { AppEnv } from "../lib/appFactory";
 import { prisma } from "../db";
 import { authMiddleware } from "../auth/authMiddleware";
@@ -13,7 +14,7 @@ export const getNovelsRoute = createRoute({
   path: "/api/history/novels",
   middleware: [authMiddleware],
   responses: {
-    [HttpStatusCodes.OK]: { description: "List of novels with history" },
+    [HttpStatusCodes.OK]: jsonContent(z.any(), "List of novels with history"),
   },
 });
 
@@ -42,7 +43,7 @@ export const novelHistoryRoute = createRoute({
     }),
   },
   responses: {
-    [HttpStatusCodes.OK]: { description: "Chapter history for a novel" },
+    [HttpStatusCodes.OK]: jsonContent(z.any(), "Chapter history for a novel"),
   },
 });
 
@@ -79,7 +80,7 @@ export const addHistoryRoute = createRoute({
     },
   },
   responses: {
-    [HttpStatusCodes.OK]: { description: "History entry added" },
+    [HttpStatusCodes.OK]: jsonContent(z.any(), "History entry added"),
   },
 });
 
@@ -113,7 +114,7 @@ export const clearNovelHistoryRoute = createRoute({
     }),
   },
   responses: {
-    [HttpStatusCodes.OK]: { description: "Novel history cleared" },
+    [HttpStatusCodes.OK]: jsonContent(z.any(), "Novel history cleared"),
   },
 });
 
@@ -141,7 +142,7 @@ export const readHistoryRoute = createRoute({
     }),
   },
   responses: {
-    [HttpStatusCodes.OK]: { description: "History entry" },
+    [HttpStatusCodes.OK]: jsonContent(z.any(), "History entry"),
   },
 });
 

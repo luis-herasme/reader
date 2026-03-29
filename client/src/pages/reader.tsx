@@ -43,7 +43,7 @@ export default function Reader({
       const res = await api.api.novels.chapter.$get({
         query: { novel, chapter, server },
       });
-      return res.json();
+      return res.json() as any;
     },
     refetchOnMount: false,
     refetchOnReconnect: false,

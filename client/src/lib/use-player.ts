@@ -21,7 +21,7 @@ export function usePlayer({
     queryKey: [SETTINGS_REPLACEMENT_RULES],
     queryFn: async () => {
       const res = await api.api.settings["replacement-rules"].$get();
-      return res.json();
+      return res.json() as any;
     },
   });
 

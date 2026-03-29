@@ -21,13 +21,13 @@ function Favorites() {
     queryKey: [FAVORITES],
     queryFn: async () => {
       const res = await api.api.favorites.$get();
-      return res.json();
+      return res.json() as any;
     },
   });
   const removeFavorite = useMutation({
     mutationFn: async (input: SlugServerInput) => {
       const res = await api.api.favorites.$delete({ query: input });
-      return res.json();
+      return res.json() as any;
     },
   });
 
@@ -52,7 +52,7 @@ function Favorites() {
   return (
     <ScrollArea className="max-h-[50vh] overflow-y-auto scrollbar">
       <div className="flex flex-col gap-4">
-        {data.map((favorite) => (
+        {data.map((favorite: any) => (
           <div
             key={`${favorite.slug}`}
             className="flex items-center justify-between gap-4"
@@ -63,7 +63,7 @@ function Favorites() {
                 const res = await api.api.favorites["novel-chapter"].$get({
                   query: { slug: favorite.slug },
                 });
-                const currentChapter = await res.json();
+                const currentChapter = await res.json() as any;
 
                 navigate(
                   `/${favorite.server}/reader/${favorite.slug}/${currentChapter}`
@@ -73,7 +73,7 @@ function Favorites() {
               <div className={`text-base`}>
                 {favorite.slug
                   .split("-")
-                  .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                  .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
                   .join(" ")}
               </div>
               <div className="font-mono text-xs opacity-50">
@@ -133,7 +133,7 @@ export function LibraryContent() {
     queryKey: [AUTH_IS_AUTHENTICATED],
     queryFn: async () => {
       const res = await api.api.auth["is-authenticated"].$get();
-      return res.json();
+      return res.json() as any;
     },
   });
 

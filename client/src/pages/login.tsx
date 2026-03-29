@@ -12,7 +12,7 @@ export default function Login() {
     queryKey: [AUTH_IS_AUTHENTICATED],
     queryFn: async () => {
       const res = await api.api.auth["is-authenticated"].$get();
-      return res.json();
+      return res.json() as any;
     },
   });
   const [hover, setHover] = useState(false);
