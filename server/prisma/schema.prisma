@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider      = "prisma-client-js"
   binaryTargets = ["native", "debian-openssl-1.1.x", "debian-openssl-3.0.x"]
@@ -37,31 +31,73 @@ model User {
   settings  Settings?
 }
 
+model Image {
+  id          String   @id @default(uuid())
+  contentType String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  book Book?
+}
+
+model Book {
+  id          String   @id @default(uuid())
+  title       String
+  author      String   @default("")
+  description String   @default("")
+  imageId     String?  @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  image     Image?     @relation(fields: [imageId], references: [id])
+  chapters  Chapter[]
+  histories History[]
+  favorites Favorite[]
+
+  @@index([title])
+}
+
+model Chapter {
+  id        String   @id @default(uuid())
+  bookId    String
+  number    Int
+  title     String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  book      Book      @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  histories History[]
+
+  @@unique([bookId, number])
+}
+
 model History {
   userId        String
-  slug          String
-  chapter       String
-  server        String
+  bookId        String
+  chapterId     String
   sentenceIndex Int
   length        Int
   updatedAt     DateTime @updatedAt
   createdAt     DateTime @default(now())
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book    Book    @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  chapter Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, slug, chapter, server])
+  @@unique([userId, chapterId])
 }
 
 model Favorite {
   userId    String
-  slug      String
-  server    String
-  updatedAt DateTime @default(now()) @updatedAt
+  bookId    String
   createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, slug, server])
+  @@unique([userId, bookId])
 }
 
 model Settings {
