@@ -32,6 +32,7 @@ export const getNovelsHandler: RouteHandler<
     distinct: ["bookId"],
     include: {
       book: { select: { id: true, title: true, imageId: true } },
+      chapter: { select: { id: true, title: true, number: true } },
     },
   });
 

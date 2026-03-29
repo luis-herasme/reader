@@ -73,7 +73,7 @@ type ChaptersParams = {
 
 export function useChapters(params: ChaptersParams) {
   return useQuery({
-    queryKey: [NOVELS_CHAPTERS, params.bookId],
+    queryKey: [NOVELS_CHAPTERS, params.bookId, params.skip, params.take],
     queryFn: async () => {
       const response = await api.api.novels.chapters.$get({
         query: {

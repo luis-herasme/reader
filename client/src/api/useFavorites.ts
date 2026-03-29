@@ -81,12 +81,16 @@ export function useDeleteFavorite() {
   });
 }
 
-export async function getNovelChapter(bookId: string) {
-  const response = await api.api.favorites["novel-chapter"].$get({
-    query: { bookId },
+export function useNovelChapter() {
+  return useMutation({
+    mutationFn: async (bookId: string) => {
+      const response = await api.api.favorites["novel-chapter"].$get({
+        query: { bookId },
+      });
+      if (!response.ok) {
+        throw new Error("Failed to get novel chapter");
+      }
+      return response.json();
+    },
   });
-  if (!response.ok) {
-    throw new Error("Failed to get novel chapter");
-  }
-  return response.json();
 }

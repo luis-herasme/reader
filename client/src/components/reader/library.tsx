@@ -1,7 +1,7 @@
 import { AlertCircle, Library, Loader2, Trash } from "lucide-react";
 import { History } from "./history";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useFavorites, useDeleteFavorite, getNovelChapter } from "@/api/useFavorites";
+import { useFavorites, useDeleteFavorite, useNovelChapter } from "@/api/useFavorites";
 import { useIsAuthenticated } from "@/api/useAuth";
 import { toast } from "sonner";
 import { navigate } from "wouter/use-browser-location";
@@ -17,6 +17,7 @@ import { ScrollArea } from "../ui/scroll-area";
 function Favorites() {
   const { data, isLoading } = useFavorites();
   const removeFavorite = useDeleteFavorite();
+  const novelChapter = useNovelChapter();
 
   if (isLoading || data === undefined) {
     return <Loading />;
@@ -46,12 +47,14 @@ function Favorites() {
           >
             <div
               className="flex flex-col w-full gap-1 cursor-pointer"
-              onClick={async () => {
-                const result = await getNovelChapter(favorite.bookId);
-
-                if (result.chapterId) {
-                  navigate(`/reader/${favorite.bookId}/${result.chapterId}`);
-                }
+              onClick={() => {
+                novelChapter.mutate(favorite.bookId, {
+                  onSuccess: (result) => {
+                    if (result.chapterId) {
+                      navigate(`/reader/${favorite.bookId}/${result.chapterId}`);
+                    }
+                  },
+                });
               }}
             >
               <div className={`text-base`}>{favorite.book.title}</div>

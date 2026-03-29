@@ -23,6 +23,11 @@ export const HistoryWithBookSchema = z.object({
     title: z.string(),
     imageId: z.string().nullable(),
   }),
+  chapter: z.object({
+    id: z.string(),
+    title: z.string(),
+    number: z.number(),
+  }),
 });
 
 export const HistoryWithChapterSchema = z.object({

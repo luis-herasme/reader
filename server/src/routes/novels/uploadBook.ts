@@ -71,36 +71,35 @@ export const uploadBookHandler: RouteHandler<
     imageContentType = imageFile.type;
   }
 
-  const book = await prisma.$transaction(async (transaction) => {
-    let createdImageId: string | null = null;
+  let createdImageId: string | null = null;
 
-    if (imageBuffer && imageContentType) {
-      const image = await transaction.image.create({
-        data: {
-          contentType: imageContentType,
-        },
+  if (imageBuffer && imageContentType) {
+    const image = await prisma.image.create({
+      data: { contentType: imageContentType },
+    });
+
+    createdImageId = image.id;
+
+    try {
+      await uploadImage({
+        key: image.id,
+        body: imageBuffer,
+        contentType: imageContentType,
       });
-
-      createdImageId = image.id;
+    } catch (error) {
+      await prisma.image.delete({ where: { id: image.id } });
+      throw error;
     }
-
-    return transaction.book.create({
-      data: {
-        title,
-        author,
-        description,
-        imageId: createdImageId,
-      },
-    });
-  });
-
-  if (imageBuffer && imageContentType && book.imageId) {
-    await uploadImage({
-      key: book.imageId,
-      body: imageBuffer,
-      contentType: imageContentType,
-    });
   }
+
+  const book = await prisma.book.create({
+    data: {
+      title,
+      author,
+      description,
+      imageId: createdImageId,
+    },
+  });
 
   return context.json({ bookId: book.id }, HttpStatusCodes.CREATED);
 };

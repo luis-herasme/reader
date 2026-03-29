@@ -32,9 +32,14 @@ type HistoryItemProps = {
     title: string;
     imageId: string | null;
   };
+  chapter: {
+    id: string;
+    title: string;
+    number: number;
+  };
 };
 
-function HistoryItem({ bookId, chapterId, updatedAt, book }: HistoryItemProps) {
+function HistoryItem({ bookId, chapterId, updatedAt, book, chapter }: HistoryItemProps) {
   const deleteMutation = useClearNovelHistory();
 
   return (
@@ -46,6 +51,7 @@ function HistoryItem({ bookId, chapterId, updatedAt, book }: HistoryItemProps) {
         }}
       >
         <div className={`text-base`}>{book.title}</div>
+        <div className="text-sm font-light">{chapter.title}</div>
         <div className="font-mono text-xs opacity-50">
           {new Date(updatedAt).toLocaleDateString("en-US", {
             weekday: "long",
@@ -94,6 +100,7 @@ export function History() {
               chapterId={history.chapterId}
               updatedAt={history.updatedAt}
               book={history.book}
+              chapter={history.chapter}
             />
           ))}
       </div>
