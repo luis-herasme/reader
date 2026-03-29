@@ -23,7 +23,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Slider } from "@/components/ui/slider";
-import { trpc } from "../../trpc";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { api } from "@/api/client";
+import { SETTINGS, AUTH_IS_AUTHENTICATED } from "@/api/queryKeys";
 import { useEffect, useRef } from "react";
 import { debounce } from "@/lib/debounce";
 import { create } from "zustand";
@@ -59,13 +61,24 @@ export const useSettingsStore = create(
 );
 
 export function useSettings() {
-  const utils = trpc.useUtils();
+  const queryClient = useQueryClient();
   const settings = useSettingsStore();
-  const { data } = trpc.settings.getState.useQuery();
+  const { data } = useQuery({
+    queryKey: [SETTINGS],
+    queryFn: async () => {
+      const res = await api.api.settings.$get();
+      return res.json();
+    },
+  });
 
-  const updateSettings = trpc.settings.update.useMutation({
+  const updateSettings = useMutation({
+    mutationFn: async (value: Partial<SettingsState>) => {
+      const res = await api.api.settings.$post({ json: value });
+      return res.json();
+    },
     onMutate: (value) => useSettingsStore.setState(value),
-    onSuccess: () => utils.settings.getState.invalidate(),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: [SETTINGS] }),
   });
 
   const debouncedUpdateSettings = useRef(
@@ -95,7 +108,13 @@ export function useSettings() {
 export function ReaderSettings() {
   const { settings, updateSettings, optimisticUpdateWithDebounce } =
     useSettings();
-  const { data: isAuthenticated } = trpc.auth.isAuthenticated.useQuery();
+  const { data: isAuthenticated } = useQuery({
+    queryKey: [AUTH_IS_AUTHENTICATED],
+    queryFn: async () => {
+      const res = await api.api.auth["is-authenticated"].$get();
+      return res.json();
+    },
+  });
 
   return (
     <Dialog>
@@ -300,7 +319,7 @@ export function ReaderSettings() {
           <Button
             variant="destructive"
             onClick={() => {
-              window.location.href = "/logout";
+              window.location.href = "/api/auth/logout";
             }}
             className="flex items-center justify-center gap-2"
           >
