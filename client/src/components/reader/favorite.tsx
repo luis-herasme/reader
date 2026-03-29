@@ -1,5 +1,5 @@
 import { Star, StarOff } from "lucide-react";
-import { trpc } from "../../trpc";
+import { useIsFavorite, useAddFavorite, useDeleteFavorite } from "@/api/useFavorites";
 import { toast } from "sonner";
 import {
   Tooltip,
@@ -9,22 +9,9 @@ import {
 } from "@/components/ui/tooltip";
 
 export function Favorite({ slug, server }: { slug: string; server: string }) {
-  const utils = trpc.useUtils();
-  const { data } = trpc.favorites.isFavorite.useQuery({ slug, server });
-
-  const addToFavorites = trpc.favorites.add.useMutation({
-    onSuccess: () => {
-      toast("Added novel to library");
-      utils.favorites.isFavorite.invalidate({ slug, server });
-    },
-  });
-
-  const removeFromFavorites = trpc.favorites.delete.useMutation({
-    onSuccess: () => {
-      toast("Removed novel from library");
-      utils.favorites.isFavorite.invalidate({ slug, server });
-    },
-  });
+  const { data } = useIsFavorite({ slug, server });
+  const addToFavorites = useAddFavorite();
+  const removeFromFavorites = useDeleteFavorite();
 
   if (data === undefined) {
     return null;
@@ -42,9 +29,13 @@ export function Favorite({ slug, server }: { slug: string; server: string }) {
             }`}
             onClick={() => {
               if (data) {
-                removeFromFavorites.mutate({ slug, server });
+                removeFromFavorites.mutate({ slug, server }, {
+                  onSuccess: () => toast("Removed novel from library"),
+                });
               } else {
-                addToFavorites.mutate({ slug, server });
+                addToFavorites.mutate({ slug, server }, {
+                  onSuccess: () => toast("Added novel to library"),
+                });
               }
             }}
           >

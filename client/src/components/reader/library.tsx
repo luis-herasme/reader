@@ -1,7 +1,8 @@
 import { AlertCircle, Library, Loader2, Trash } from "lucide-react";
 import { History } from "./history";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { trpc, trpcVanilla } from "../../trpc";
+import { useFavorites, useDeleteFavorite, getNovelChapter } from "@/api/useFavorites";
+import { useIsAuthenticated } from "@/api/useAuth";
 import { toast } from "sonner";
 import { navigate } from "wouter/use-browser-location";
 import { Loading } from "../loading";
@@ -14,9 +15,8 @@ import {
 import { ScrollArea } from "../ui/scroll-area";
 
 function Favorites() {
-  const utils = trpc.useUtils();
-  const { data, isLoading } = trpc.favorites.read.useQuery();
-  const removeFavorite = trpc.favorites.delete.useMutation();
+  const { data, isLoading } = useFavorites();
+  const removeFavorite = useDeleteFavorite();
 
   if (isLoading || data === undefined) {
     return <Loading />;
@@ -47,10 +47,7 @@ function Favorites() {
             <div
               className="flex flex-col w-full gap-1 cursor-pointer"
               onClick={async () => {
-                const currentChapter =
-                  await trpcVanilla.favorites.getNovelChapter.query({
-                    slug: favorite.slug,
-                  });
+                const currentChapter = await getNovelChapter(favorite.slug);
 
                 navigate(
                   `/${favorite.server}/reader/${favorite.slug}/${currentChapter}`
@@ -90,11 +87,6 @@ function Favorites() {
                     {
                       onSuccess() {
                         toast("Removed novel from library");
-                        utils.favorites.read.invalidate();
-                        utils.favorites.isFavorite.invalidate({
-                          slug: favorite.slug,
-                          server: favorite.server,
-                        });
                       },
                     }
                   );
@@ -115,7 +107,7 @@ function Favorites() {
 }
 
 export function LibraryContent() {
-  const { data, isLoading } = trpc.auth.isAuthenticated.useQuery();
+  const { data, isLoading } = useIsAuthenticated();
 
   return (
     <DialogOverlay>

@@ -1,4 +1,4 @@
-import { trpc } from "../../trpc";
+import { useHistoryNovels, useClearNovelHistory } from "@/api/useHistory";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { Bookmark, Loader2, Trash } from "lucide-react";
 import { Favorite } from "./favorite";
@@ -34,8 +34,7 @@ function HistoryItem({
   server: string;
   chapter: string;
 }) {
-  const utils = trpc.useUtils();
-  const deleteMutation = trpc.history.clearNovelHistory.useMutation();
+  const deleteMutation = useClearNovelHistory();
 
   return (
     <div className="flex items-center justify-between gap-4">
@@ -72,17 +71,10 @@ function HistoryItem({
               return;
             }
 
-            deleteMutation.mutate(
-              {
-                slug,
-                server,
-              },
-              {
-                onSuccess() {
-                  utils.history.getNovels.invalidate();
-                },
-              }
-            );
+            deleteMutation.mutate({
+              slug,
+              server,
+            });
           }}
         >
           {deleteMutation.isPending ? (
@@ -97,7 +89,7 @@ function HistoryItem({
 }
 
 export function History() {
-  const { data } = trpc.history.getNovels.useQuery();
+  const { data } = useHistoryNovels();
 
   return (
     <ScrollArea className="max-h-[50vh] overflow-y-auto scrollbar">

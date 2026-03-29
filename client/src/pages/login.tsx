@@ -1,4 +1,4 @@
-import { trpc } from "@/trpc";
+import { useIsAuthenticated } from "@/api/useAuth";
 import { useState } from "react";
 import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
@@ -6,8 +6,7 @@ import { ArrowRight, Loader2 } from "lucide-react";
 import { navigate } from "wouter/use-browser-location";
 
 export default function Login() {
-  const { data: isAuthenticated, isLoading } =
-    trpc.auth.isAuthenticated.useQuery();
+  const { data: isAuthenticated, isLoading } = useIsAuthenticated();
   const [hover, setHover] = useState(false);
 
   if (isAuthenticated) {
@@ -28,7 +27,7 @@ export default function Login() {
         <Logo />
         <Button
           onClick={() => {
-            window.location.href = "/google/login";
+            window.location.href = "/api/auth/google/login";
           }}
           className=" overflow-hidden relative bg-[#FFF] hover:bg-[#FFF] text-black border border-white border-opacity-10 h-14 justify-center w-[360px] rounded-full transition-all duration-3000 text-base"
           onMouseEnter={() => setHover(true)}

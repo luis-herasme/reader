@@ -7,7 +7,9 @@ import { FullScreen } from "@/components/reader/fullscreen";
 import { useTrackSentenceIndex } from "@/components/reader/track-sentence-index";
 import { FollowReader } from "@/components/reader/follow-reader";
 import LibaryButton from "@/components/reader/libary-button";
-import { trpc, trpcVanilla } from "../trpc";
+import { useQueryClient } from "@tanstack/react-query";
+import { useChapter, NOVELS_CHAPTER } from "@/api/useNovels";
+import { addHistory, HISTORY_NOVEL } from "@/api/useHistory";
 import { HomeButton } from "@/components/reader/home-button";
 import { NavArrows } from "@/components/reader/nav-arrows";
 import { PlayButton } from "@/components/reader/play-pause";
@@ -30,23 +32,12 @@ export default function Reader({
   chapter: string;
   server: string;
 }) {
-  const utils = trpc.useUtils();
+  const queryClient = useQueryClient();
   const { settings } = useSettings();
   const sentencesRef = useRef<HTMLSpanElement[]>([]);
   const navigate = useLocation()[1];
 
-  const { data, isLoading } = trpc.novels.chapter.useQuery(
-    {
-      novel,
-      chapter,
-      server,
-    },
-    {
-      refetchOnMount: false,
-      refetchOnReconnect: false,
-      refetchOnWindowFocus: false,
-    }
-  );
+  const { data, isLoading } = useChapter({ novel, chapter, server });
 
   const player = usePlayer({
     text: data?.content || "",
@@ -59,7 +50,9 @@ export default function Reader({
     }
 
     if (data.next) {
-      await utils.novels.chapter.invalidate({ server, chapter, novel });
+      await queryClient.invalidateQueries({
+        queryKey: [NOVELS_CHAPTER, novel, chapter, server],
+      });
       navigate(`/${server}/reader/${novel}/${data.next}`);
     } else {
       toast("There are no more chapters");
@@ -72,7 +65,9 @@ export default function Reader({
     }
 
     if (data.prev) {
-      await utils.novels.chapter.invalidate({ server, chapter, novel });
+      await queryClient.invalidateQueries({
+        queryKey: [NOVELS_CHAPTER, novel, chapter, server],
+      });
       navigate(`/${server}/reader/${novel}/${data.prev}`);
     } else {
       toast("There are no previous chapters");
@@ -144,7 +139,7 @@ export default function Reader({
 
   player.onComplete = async () => {
     if (data && data.next && settings.autoAdvance) {
-      await trpcVanilla.history.add.mutate({
+      await addHistory({
         server,
         slug: novel,
         chapter,
@@ -152,22 +147,26 @@ export default function Reader({
         length: player.sentences.length,
       });
 
-      await utils.history.novelHistory.invalidate(novel);
+      await queryClient.invalidateQueries({
+        queryKey: [HISTORY_NOVEL, novel],
+      });
       goToNextPage();
     }
   };
 
   useEffect(() => {
     if (data && player && player.sentences.length) {
-      trpcVanilla.history.add
-        .mutate({
-          server,
-          slug: novel,
-          chapter,
-          sentenceIndex: player.getCurrentSentenceIndex(),
-          length: player.sentences.length,
-        })
-        .then(() => utils.history.novelHistory.invalidate(novel));
+      addHistory({
+        server,
+        slug: novel,
+        chapter,
+        sentenceIndex: player.getCurrentSentenceIndex(),
+        length: player.sentences.length,
+      }).then(() =>
+          queryClient.invalidateQueries({
+            queryKey: [HISTORY_NOVEL, novel],
+          })
+        );
     }
   }, [data, player?.getCurrentSentenceIndex()]);
 

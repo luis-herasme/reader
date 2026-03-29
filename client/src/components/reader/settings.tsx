@@ -23,7 +23,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Slider } from "@/components/ui/slider";
-import { trpc } from "../../trpc";
+import { useSettingsState, useUpdateSettings } from "@/api/useSettingsApi";
+import { useIsAuthenticated } from "@/api/useAuth";
 import { useEffect, useRef } from "react";
 import { debounce } from "@/lib/debounce";
 import { create } from "zustand";
@@ -59,13 +60,11 @@ export const useSettingsStore = create(
 );
 
 export function useSettings() {
-  const utils = trpc.useUtils();
   const settings = useSettingsStore();
-  const { data } = trpc.settings.getState.useQuery();
+  const { data } = useSettingsState();
 
-  const updateSettings = trpc.settings.update.useMutation({
+  const updateSettings = useUpdateSettings({
     onMutate: (value) => useSettingsStore.setState(value),
-    onSuccess: () => utils.settings.getState.invalidate(),
   });
 
   const debouncedUpdateSettings = useRef(
@@ -95,7 +94,7 @@ export function useSettings() {
 export function ReaderSettings() {
   const { settings, updateSettings, optimisticUpdateWithDebounce } =
     useSettings();
-  const { data: isAuthenticated } = trpc.auth.isAuthenticated.useQuery();
+  const { data: isAuthenticated } = useIsAuthenticated();
 
   return (
     <Dialog>
@@ -300,7 +299,7 @@ export function ReaderSettings() {
           <Button
             variant="destructive"
             onClick={() => {
-              window.location.href = "/logout";
+              window.location.href = "/api/auth/logout";
             }}
             className="flex items-center justify-center gap-2"
           >

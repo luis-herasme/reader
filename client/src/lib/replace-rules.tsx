@@ -7,7 +7,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { trpc } from "@/trpc";
+import { useReplacementRules, useUpdateReplacementRules } from "@/api/useSettingsApi";
 import { ArrowRight, Plus, Replace, Trash } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -18,15 +18,11 @@ type ReplaceRule = {
 };
 
 export default function ReplaceRules() {
-  const utils = trpc.useUtils();
-  const { data } = trpc.settings.replacementRules.useQuery();
+  const { data } = useReplacementRules();
   const [rules, setRules] = useState<ReplaceRule[] | undefined>(data);
   useEffect(() => setRules(data), [data]);
 
-  const updateReplacementRules =
-    trpc.settings.updateReplacementRules.useMutation({
-      onSuccess: () => utils.settings.replacementRules.invalidate(),
-    });
+  const updateReplacementRules = useUpdateReplacementRules();
 
   const [open, setOpen] = useState(false);
 

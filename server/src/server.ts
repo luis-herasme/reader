@@ -1,38 +1,53 @@
-import { Hono } from "hono";
+import { OpenAPIHono } from "@hono/zod-openapi";
 import { cors } from "hono/cors";
 import { serveStatic } from "hono/bun";
-import { appRouter } from "./router";
-import { googleCallback, googleLogin } from "./auth/google";
-import { getAuthContext } from "./auth/getAuthContext";
-import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
-import { logout } from "./auth/logout";
+import { defaultHook } from "stoker/openapi";
+import type { AppEnv } from "./lib/appFactory";
 
-const app = new Hono();
+import * as novels from "./routes/novels";
+import * as favorites from "./routes/favorites";
+import * as history from "./routes/history";
+import * as settings from "./routes/settings";
+import * as auth from "./routes/auth";
+
+const app = new OpenAPIHono<AppEnv>({ defaultHook });
 
 app.use("*", cors());
-
 app.use("/*", serveStatic({ root: "../../client/dist" }));
 
-app.use("/trpc/*", async (c) => {
-  const response = await fetchRequestHandler({
-    endpoint: "/trpc",
-    req: c.req.raw,
-    router: appRouter,
-    createContext: getAuthContext,
-    onError: ({ error }) => {
-      console.log("Error: ", error);
-    },
-  });
-  return response;
-});
+const api = app
+  // novels
+  .openapi(novels.searchRoute, novels.searchHandler)
+  .openapi(novels.chaptersRoute, novels.chaptersHandler)
+  .openapi(novels.chapterRoute, novels.chapterHandler)
+  // favorites
+  .openapi(favorites.addFavoriteRoute, favorites.addFavoriteHandler)
+  .openapi(favorites.deleteFavoriteRoute, favorites.deleteFavoriteHandler)
+  .openapi(favorites.readFavoritesRoute, favorites.readFavoritesHandler)
+  .openapi(favorites.isFavoriteRoute, favorites.isFavoriteHandler)
+  .openapi(favorites.getNovelChapterRoute, favorites.getNovelChapterHandler)
+  // history
+  .openapi(history.getNovelsRoute, history.getNovelsHandler)
+  .openapi(history.novelHistoryRoute, history.novelHistoryHandler)
+  .openapi(history.addHistoryRoute, history.addHistoryHandler)
+  .openapi(history.clearNovelHistoryRoute, history.clearNovelHistoryHandler)
+  .openapi(history.readHistoryRoute, history.readHistoryHandler)
+  // settings
+  .openapi(settings.getSettingsRoute, settings.getSettingsHandler)
+  .openapi(settings.updateSettingsRoute, settings.updateSettingsHandler)
+  .openapi(settings.getReplacementRulesRoute, settings.getReplacementRulesHandler)
+  .openapi(settings.updateReplacementRulesRoute, settings.updateReplacementRulesHandler)
+  // auth
+  .openapi(auth.isAuthenticatedRoute, auth.isAuthenticatedHandler)
+  .openapi(auth.googleLoginRoute, auth.googleLoginHandler)
+  .openapi(auth.googleCallbackRoute, auth.googleCallbackHandler)
+  .openapi(auth.logoutRoute, auth.logoutHandler);
 
-app.get("/logout", logout);
-app.get("/google/login", googleLogin);
-app.get("/google/callback", googleCallback);
-
-app.get("*", async (c) => {
+app.get("*", async () => {
   return new Response(Bun.file("../../client/dist/index.html"));
 });
+
+export type AppType = typeof api;
 
 const port = process.env.PORT || 3000;
 

@@ -2,7 +2,7 @@ import { Player } from "./player";
 import { useEffect } from "react";
 import { useForceUpdate } from "./use-force-update";
 import { useSettings } from "@/components/reader/settings";
-import { trpc } from "@/trpc";
+import { useReplacementRules } from "@/api/useSettingsApi";
 
 const player = new Player();
 
@@ -15,7 +15,7 @@ export function usePlayer({
 }) {
   const forceUpdate = useForceUpdate();
   const { settings } = useSettings();
-  const { data: replaceRules } = trpc.settings.replacementRules.useQuery();
+  const { data: replaceRules } = useReplacementRules();
 
   useEffect(() => {
     player.onUpdate = forceUpdate;

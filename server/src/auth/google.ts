@@ -4,14 +4,15 @@ import { getCookie, setCookie } from "hono/cookie";
 import { Google, generateState } from "arctic";
 import { lucia } from "./auth";
 import { prisma } from "../db";
+import type { AppEnv } from "../lib/appFactory";
 
 export const google = new Google(
   process.env.GOOGLE_CLIENT_ID!,
   process.env.GOOGLE_CLIENT_SECRET!,
-  `${process.env.BASE_URL}/google/callback`,
+  `${process.env.BASE_URL}/api/auth/google/callback`,
 );
 
-export async function googleLogin(c: Context) {
+export async function googleLogin(c: Context<AppEnv>) {
   const state = generateState();
   const codeVerifier = generateId(32);
 
@@ -33,7 +34,7 @@ export async function googleLogin(c: Context) {
   return c.redirect(googleUrl.toString(), 302);
 }
 
-export async function googleCallback(c: Context) {
+export async function googleCallback(c: Context<AppEnv>) {
   const code = c.req.query("code");
   const state = c.req.query("state");
 
