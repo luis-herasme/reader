@@ -1,33 +1,36 @@
 import { lucia } from "./auth";
-import type { FetchCreateContextFnOptions } from "@trpc/server/adapters/fetch";
+import type { Context } from "hono";
+import type { AppEnv } from "../lib/appFactory";
 
-export async function getAuthContext({
-  req,
-  resHeaders,
-}: FetchCreateContextFnOptions) {
+export async function setAuthContext(c: Context<AppEnv>) {
   const sessionId = lucia.readSessionCookie(
-    req.headers.get("Cookie") ?? ""
+    c.req.header("Cookie") ?? ""
   );
 
   if (!sessionId) {
-    return { session: null, user: null };
+    c.set("user", null);
+    c.set("session", null);
+    return;
   }
 
   const { session, user } = await lucia.validateSession(sessionId);
 
   if (session && session.fresh) {
-    resHeaders.append(
+    c.header(
       "Set-Cookie",
-      lucia.createSessionCookie(session.id).serialize()
+      lucia.createSessionCookie(session.id).serialize(),
+      { append: true }
     );
   }
 
   if (!session) {
-    resHeaders.append(
+    c.header(
       "Set-Cookie",
-      lucia.createBlankSessionCookie().serialize()
+      lucia.createBlankSessionCookie().serialize(),
+      { append: true }
     );
   }
 
-  return { session, user };
+  c.set("session", session);
+  c.set("user", user);
 }
