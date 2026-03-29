@@ -11,17 +11,17 @@ import { useChapters } from "@/api/useNovels";
 import { useNovelHistory } from "@/api/useHistory";
 import { navigate } from "wouter/use-browser-location";
 
-export function ListChapters({
-  slug,
-  name,
-  currentChapterSlug,
-  server,
-}: {
-  slug: string;
+type ListChaptersProps = {
+  bookId: string;
   name: string;
-  currentChapterSlug: string;
-  server: string;
-}) {
+  currentChapterId: string;
+};
+
+export function ListChapters({
+  bookId,
+  name,
+  currentChapterId,
+}: ListChaptersProps) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -35,34 +35,33 @@ export function ListChapters({
         <List className="w-6 h-6" />
       </CircleButton>
       <ChaptersDialog
-        server={server}
+        bookId={bookId}
         name={name}
         open={open}
-        slug={slug}
         setOpen={setOpen}
-        currentChapterSlug={currentChapterSlug}
+        currentChapterId={currentChapterId}
       />
     </>
   );
 }
 
+type ChaptersDialogProps = {
+  name: string;
+  open: boolean;
+  bookId: string;
+  setOpen: (open: boolean) => void;
+  currentChapterId?: string;
+};
+
 export function ChaptersDialog({
   name,
   open,
-  slug,
+  bookId,
   setOpen,
-  currentChapterSlug,
-  server,
-}: {
-  name: string;
-  open: boolean;
-  slug: string;
-  setOpen: (open: boolean) => void;
-  currentChapterSlug?: string;
-  server: string;
-}) {
-  const { data: chapters, isLoading } = useChapters({ slug, server });
-  const { data: history } = useNovelHistory(slug);
+  currentChapterId,
+}: ChaptersDialogProps) {
+  const { data, isLoading } = useChapters({ bookId });
+  const { data: history } = useNovelHistory(bookId);
 
   const currentChapterRef = useCallback((node: HTMLDivElement | null) => {
     if (node) {
@@ -82,41 +81,41 @@ export function ChaptersDialog({
           ) : (
             <>
               <div className="text-white">
-                {chapters && chapters.length} chapters
+                {data && data.total} chapters
               </div>
 
-              {chapters?.length === 0 ? (
+              {data?.chapters.length === 0 ? (
                 <div className="h-[300px] w-full flex items-center justify-center">
                   <div className="text-white">No chapters found</div>
                 </div>
               ) : (
                 <div className="max-h-[80dvh] overflow-y-auto w-full">
                   <div className="columns-1 sm:columns-2 md:columns-3">
-                    {chapters?.map((chapter) => (
+                    {data?.chapters.map((chapter) => (
                       <div
                         ref={
-                          chapter.slug === currentChapterSlug
+                          chapter.chapterId === currentChapterId
                             ? currentChapterRef
                             : null
                         }
                         style={{
                           backgroundColor:
-                            chapter.slug === currentChapterSlug
+                            chapter.chapterId === currentChapterId
                               ? "#FF0"
                               : "transparent",
                           color:
-                            chapter.slug === currentChapterSlug
+                            chapter.chapterId === currentChapterId
                               ? "#000"
                               : "#FFF",
                         }}
-                        key={chapter.slug + "-" + chapter.title}
+                        key={chapter.chapterId}
                         onClick={() =>
-                          navigate(`/${server}/reader/${slug}/${chapter.slug}`)
+                          navigate(`/reader/${bookId}/${chapter.chapterId}`)
                         }
                       >
                         <div className="cursor-pointer hover:underline">
                           {chapter.title}
-                          {history?.find((c) => c.chapter === chapter.slug) && (
+                          {history?.find((entry) => entry.chapterId === chapter.chapterId) && (
                             <span className="ml-2">
                               <Eye className="inline-block w-4 h-4" />
                             </span>

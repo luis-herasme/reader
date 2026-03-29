@@ -8,8 +8,12 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-export function Favorite({ slug, server }: { slug: string; server: string }) {
-  const { data } = useIsFavorite({ slug, server });
+type FavoriteProps = {
+  bookId: string;
+};
+
+export function Favorite({ bookId }: FavoriteProps) {
+  const { data } = useIsFavorite(bookId);
   const addToFavorites = useAddFavorite();
   const removeFromFavorites = useDeleteFavorite();
 
@@ -29,11 +33,11 @@ export function Favorite({ slug, server }: { slug: string; server: string }) {
             }`}
             onClick={() => {
               if (data) {
-                removeFromFavorites.mutate({ slug, server }, {
+                removeFromFavorites.mutate({ bookId }, {
                   onSuccess: () => toast("Removed novel from library"),
                 });
               } else {
-                addToFavorites.mutate({ slug, server }, {
+                addToFavorites.mutate({ bookId }, {
                   onSuccess: () => toast("Added novel to library"),
                 });
               }

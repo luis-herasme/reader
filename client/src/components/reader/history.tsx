@@ -23,17 +23,18 @@ export default function HistoryDialog() {
   );
 }
 
-function HistoryItem({
-  slug,
-  updatedAt,
-  server,
-  chapter,
-}: {
-  slug: string;
+type HistoryItemProps = {
+  bookId: string;
+  chapterId: string;
   updatedAt: string;
-  server: string;
-  chapter: string;
-}) {
+  book: {
+    id: string;
+    title: string;
+    imageId: string | null;
+  };
+};
+
+function HistoryItem({ bookId, chapterId, updatedAt, book }: HistoryItemProps) {
   const deleteMutation = useClearNovelHistory();
 
   return (
@@ -41,16 +42,10 @@ function HistoryItem({
       <div
         className="flex flex-col w-full gap-0.5 cursor-pointer"
         onClick={() => {
-          navigate(`/${server}/reader/${slug}/${chapter}`);
+          navigate(`/reader/${bookId}/${chapterId}`);
         }}
       >
-        <div className={`text-base`}>
-          {slug
-            .split("-")
-            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(" ")}
-        </div>
-        <div className="text-sm min-w-[90px] font-light">Chapter {chapter}</div>
+        <div className={`text-base`}>{book.title}</div>
         <div className="font-mono text-xs opacity-50">
           {new Date(updatedAt).toLocaleDateString("en-US", {
             weekday: "long",
@@ -61,7 +56,7 @@ function HistoryItem({
         </div>
       </div>
       <div className="flex items-center justify-center gap-4">
-        <Favorite slug={slug} server={server} />
+        <Favorite bookId={bookId} />
         <div
           className={`rounded-full p-2 hover:bg-destructive duration-200 ${
             deleteMutation.isPending ? "opacity-50" : "cursor-pointer"
@@ -71,10 +66,7 @@ function HistoryItem({
               return;
             }
 
-            deleteMutation.mutate({
-              slug,
-              server,
-            });
+            deleteMutation.mutate({ bookId });
           }}
         >
           {deleteMutation.isPending ? (
@@ -97,8 +89,11 @@ export function History() {
         {data &&
           data.map((history) => (
             <HistoryItem
-              {...history}
-              key={history.server + "-" + history.slug + "-" + history.chapter}
+              key={history.bookId}
+              bookId={history.bookId}
+              chapterId={history.chapterId}
+              updatedAt={history.updatedAt}
+              book={history.book}
             />
           ))}
       </div>

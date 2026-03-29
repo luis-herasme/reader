@@ -41,25 +41,20 @@ function Favorites() {
       <div className="flex flex-col gap-4">
         {data.map((favorite) => (
           <div
-            key={`${favorite.slug}`}
+            key={favorite.bookId}
             className="flex items-center justify-between gap-4"
           >
             <div
               className="flex flex-col w-full gap-1 cursor-pointer"
               onClick={async () => {
-                const currentChapter = await getNovelChapter(favorite.slug);
+                const result = await getNovelChapter(favorite.bookId);
 
-                navigate(
-                  `/${favorite.server}/reader/${favorite.slug}/${currentChapter}`
-                );
+                if (result.chapterId) {
+                  navigate(`/reader/${favorite.bookId}/${result.chapterId}`);
+                }
               }}
             >
-              <div className={`text-base`}>
-                {favorite.slug
-                  .split("-")
-                  .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-                  .join(" ")}
-              </div>
+              <div className={`text-base`}>{favorite.book.title}</div>
               <div className="font-mono text-xs opacity-50">
                 {new Date(favorite.updatedAt).toLocaleDateString("en-US", {
                   weekday: "long",
@@ -80,10 +75,7 @@ function Favorites() {
                   }
 
                   removeFavorite.mutate(
-                    {
-                      slug: favorite.slug,
-                      server: favorite.server,
-                    },
+                    { bookId: favorite.bookId },
                     {
                       onSuccess() {
                         toast("Removed novel from library");
