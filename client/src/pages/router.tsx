@@ -13,20 +13,16 @@ export function Router() {
       <Route path="login">
         <Login />
       </Route>
-      <Route path="/:server/reader/:novel/:chapter">
+      <Route path="/reader/:bookId/:chapterId">
         {(params) => (
           <Reader
-            server={params.server}
-            chapter={params.chapter}
-            novel={params.novel}
+            bookId={params.bookId}
+            chapterId={params.chapterId}
           />
         )}
       </Route>
-      <Route path="/:server">
-        {(params) => <Home server={params.server} />}
-      </Route>
       <Route>
-        <Home server="s1" />
+        <Home />
       </Route>
     </Switch>
   );

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   FilePlus2,
   FileWarning,
@@ -14,7 +14,6 @@ import { Input } from "@/components/ui/input";
 import { useSearchNovels } from "@/api/useNovels";
 import { useIsAuthenticated } from "@/api/useAuth";
 import { Logo } from "@/components/logo";
-import { ServerSelector } from "@/components/server-selector";
 import { Button } from "@/components/ui/button";
 import { navigate } from "wouter/use-browser-location";
 import {
@@ -25,19 +24,23 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
-export default function Home({ server }: { server: string }) {
-  const [search, setSearch] = useState<{
-    search: string;
-    page: number;
-    server: string;
-  }>({ search: "", page: 0, server });
+const PAGE_SIZE = 10;
 
-  useEffect(() => {
-    setSearch((value) => ({ ...value, server, page: 0 }));
-  }, [server]);
+export default function Home() {
+  const [search, setSearch] = useState<{
+    title: string;
+    skip: number;
+    take: number;
+  }>({ title: "", skip: 0, take: PAGE_SIZE });
 
   const searchQuery = useSearchNovels(search);
   const { data: isAuthenticated } = useIsAuthenticated();
+
+  const hasMore = searchQuery.data
+    ? search.skip + search.take < searchQuery.data.total
+    : false;
+
+  const hasPrevious = search.skip > 0;
 
   return (
     <div className="flex flex-col items-center justify-center">
@@ -139,12 +142,11 @@ export default function Home({ server }: { server: string }) {
           <Input
             className="rounded h-10 w-full border border-white border-opacity-10"
             placeholder="Search novel..."
-            value={search.search}
-            onChange={(e) =>
-              setSearch((value) => ({ ...value, search: e.target.value }))
+            value={search.title}
+            onChange={(event) =>
+              setSearch({ title: event.target.value, skip: 0, take: PAGE_SIZE })
             }
           />
-          <ServerSelector server={server} />
         </div>
       </div>
       {searchQuery.isLoading && (
@@ -157,34 +159,28 @@ export default function Home({ server }: { server: string }) {
           <div className="flex items-center justify-between w-full relative  mb-8 ">
             <div
               className={`sm:text-xl text-white flex items-center justify-between gap-2 select-none ${
-                search.page ? "cursor-pointer" : "opacity-0"
+                hasPrevious ? "cursor-pointer" : "opacity-0"
               }`}
               onClick={() => {
-                setSearch((value) => {
-                  if (value.page === 0) {
-                    return value;
-                  }
-
-                  return {
-                    server: value.server,
-                    search: value.search,
-                    page: value.page - 1,
-                  };
-                });
+                if (hasPrevious) {
+                  setSearch((value) => ({
+                    ...value,
+                    skip: Math.max(0, value.skip - value.take),
+                  }));
+                }
               }}
             >
               <ArrowLeft className="w-6 h-6" />
               Previous
             </div>
 
-            {searchQuery.data.next && (
+            {hasMore && (
               <div
                 className={`sm:text-xl text-white flex items-center justify-between gap-2 select-none cursor-pointer`}
                 onClick={() => {
                   setSearch((value) => ({
-                    server: value.server,
-                    search: value.search,
-                    page: value.page + 1,
+                    ...value,
+                    skip: value.skip + value.take,
                   }));
                 }}
               >
@@ -194,13 +190,12 @@ export default function Home({ server }: { server: string }) {
             )}
           </div>
           <div className="flex flex-wrap justify-center max-w-[1200px]">
-            {searchQuery.data.results.map((result) => (
-              <Novel
-                key={result.name + "-" + result.image}
-                name={result.name}
-                slug={result.slug}
-                image={result.image}
-                server={server}
+            {searchQuery.data.books.map((book) => (
+              <BookCard
+                key={book.bookId}
+                bookId={book.bookId}
+                title={book.title}
+                imageUrl={book.imageUrl}
               />
             ))}
           </div>
@@ -210,40 +205,35 @@ export default function Home({ server }: { server: string }) {
   );
 }
 
-function Novel({
-  image,
-  name,
-  slug,
-  server,
-}: {
-  image: string;
-  name: string;
-  slug: string;
-  server: string;
-}) {
+type BookCardProps = {
+  bookId: string;
+  title: string;
+  imageUrl: string | null;
+};
+
+function BookCard({ bookId, title, imageUrl }: BookCardProps) {
   const [open, setOpen] = useState(false);
 
   return (
     <>
-      <div key={name + "-" + image} onClick={async () => setOpen(true)}>
+      <div onClick={async () => setOpen(true)}>
         <div className="flex flex-col items-center justify-center m-4 duration-100 cursor-pointer hover:scale-105">
-          {image ? (
-            <img className="w-48 h-64 shadow-xl" src={image} />
+          {imageUrl ? (
+            <img className="w-48 h-64 shadow-xl" src={imageUrl} />
           ) : (
             <div className="w-48 h-64 bg-[#222] border border-white border-opacity-20 shadow-xl text-white flex flex-col gap-2 items-center justify-center font-mono text-xs">
               <FileWarning className="w-12 h-12" strokeWidth={1} />
               no image
             </div>
           )}
-          <div className="w-48 mt-2 text-center text-white">{name}</div>
+          <div className="w-48 mt-2 text-center text-white">{title}</div>
         </div>
       </div>
       <ChaptersDialog
-        server={server}
-        name={name}
+        bookId={bookId}
+        name={title}
         open={open}
         setOpen={setOpen}
-        slug={slug}
       />
     </>
   );
