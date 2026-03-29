@@ -13,7 +13,7 @@ import { addHistory, HISTORY_NOVEL } from "@/api/useHistory";
 import { HomeButton } from "@/components/reader/home-button";
 import { NavArrows } from "@/components/reader/nav-arrows";
 import { PlayButton } from "@/components/reader/play-pause";
-import { slugToTitle, Title } from "@/components/reader/title";
+import { Title } from "@/components/reader/title";
 import { Sentence } from "@/components/reader/sentence";
 import { LoadingScreen } from "@/components/reader/loading-screen";
 import { Sentences } from "@/components/reader/sentences";
@@ -23,21 +23,18 @@ import { debounce } from "@/lib/debounce";
 import { useMediaSession } from "@/components/use-media-session";
 import { useLocation } from "wouter";
 
-export default function Reader({
-  novel,
-  chapter,
-  server,
-}: {
-  novel: string;
-  chapter: string;
-  server: string;
-}) {
+type ReaderProps = {
+  bookId: string;
+  chapterId: string;
+};
+
+export default function Reader({ bookId, chapterId }: ReaderProps) {
   const queryClient = useQueryClient();
   const { settings } = useSettings();
   const sentencesRef = useRef<HTMLSpanElement[]>([]);
   const navigate = useLocation()[1];
 
-  const { data, isLoading } = useChapter({ novel, chapter, server });
+  const { data, isLoading } = useChapter({ chapterId });
 
   const player = usePlayer({
     text: data?.content || "",
@@ -49,11 +46,11 @@ export default function Reader({
       return;
     }
 
-    if (data.next) {
+    if (data.nextChapterId) {
       await queryClient.invalidateQueries({
-        queryKey: [NOVELS_CHAPTER, novel, chapter, server],
+        queryKey: [NOVELS_CHAPTER, chapterId],
       });
-      navigate(`/${server}/reader/${novel}/${data.next}`);
+      navigate(`/reader/${bookId}/${data.nextChapterId}`);
     } else {
       toast("There are no more chapters");
     }
@@ -64,11 +61,11 @@ export default function Reader({
       return;
     }
 
-    if (data.prev) {
+    if (data.previousChapterId) {
       await queryClient.invalidateQueries({
-        queryKey: [NOVELS_CHAPTER, novel, chapter, server],
+        queryKey: [NOVELS_CHAPTER, chapterId],
       });
-      navigate(`/${server}/reader/${novel}/${data.prev}`);
+      navigate(`/reader/${bookId}/${data.previousChapterId}`);
     } else {
       toast("There are no previous chapters");
     }
@@ -138,17 +135,16 @@ export default function Reader({
   useMediaSession({ player, onTogglePlay });
 
   player.onComplete = async () => {
-    if (data && data.next && settings.autoAdvance) {
+    if (data && data.nextChapterId && settings.autoAdvance) {
       await addHistory({
-        server,
-        slug: novel,
-        chapter,
+        bookId,
+        chapterId,
         sentenceIndex: 0,
         length: player.sentences.length,
       });
 
       await queryClient.invalidateQueries({
-        queryKey: [HISTORY_NOVEL, novel],
+        queryKey: [HISTORY_NOVEL, bookId],
       });
       goToNextPage();
     }
@@ -157,14 +153,13 @@ export default function Reader({
   useEffect(() => {
     if (data && player && player.sentences.length) {
       addHistory({
-        server,
-        slug: novel,
-        chapter,
+        bookId,
+        chapterId,
         sentenceIndex: player.getCurrentSentenceIndex(),
         length: player.sentences.length,
       }).then(() =>
           queryClient.invalidateQueries({
-            queryKey: [HISTORY_NOVEL, novel],
+            queryKey: [HISTORY_NOVEL, bookId],
           })
         );
     }
@@ -185,10 +180,9 @@ export default function Reader({
         <HomeButton />
 
         <ListChapters
-          server={server}
-          slug={novel}
-          name={slugToTitle(novel)}
-          currentChapterSlug={chapter}
+          bookId={bookId}
+          name={data?.bookTitle ?? ""}
+          currentChapterId={chapterId}
         />
       </div>
 
@@ -202,7 +196,9 @@ export default function Reader({
         <PlayButton
           playing={player ? player.isPlaying() : false}
           onClick={() => {
-            if (!player) return;
+            if (!player) {
+              return;
+            }
 
             if (player.isPlaying()) {
               player.stop();
@@ -219,7 +215,7 @@ export default function Reader({
         />
       </div>
 
-      <Title slug={novel} />
+      <Title title={data?.bookTitle ?? ""} />
 
       {isLoading ? (
         <LoadingScreen />

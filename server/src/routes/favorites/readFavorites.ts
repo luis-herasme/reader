@@ -6,7 +6,7 @@ import { jsonContent } from "stoker/openapi/helpers";
 import type { AppEnv } from "../../lib/appFactory";
 import { prisma } from "../../db";
 import { authMiddleware } from "../../auth/authMiddleware";
-import { FavoriteSchema } from "./schema";
+import { FavoriteWithBookSchema } from "./schema";
 
 export const readFavoritesRoute = createRoute({
   method: "get",
@@ -14,7 +14,7 @@ export const readFavoritesRoute = createRoute({
   middleware: [authMiddleware],
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      z.array(FavoriteSchema),
+      z.array(FavoriteWithBookSchema),
       "List of favorites",
     ),
   },
@@ -23,12 +23,15 @@ export const readFavoritesRoute = createRoute({
 export const readFavoritesHandler: RouteHandler<
   typeof readFavoritesRoute,
   AppEnv
-> = async (c) => {
-  const user = c.get("user")!;
+> = async (context) => {
+  const user = context.get("user")!;
 
-  const favs = await prisma.favorite.findMany({
+  const favorites = await prisma.favorite.findMany({
     where: { userId: user.id },
+    include: {
+      book: { select: { id: true, title: true, imageId: true } },
+    },
   });
 
-  return c.json(favs, HttpStatusCodes.OK);
+  return context.json(favorites, HttpStatusCodes.OK);
 };

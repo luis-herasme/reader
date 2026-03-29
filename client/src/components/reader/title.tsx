@@ -2,24 +2,21 @@ import { useEffect } from "react";
 import { useSettings } from "@/components/reader/settings";
 import { useFont } from "../useFont";
 
-export function slugToTitle(slug: string): string {
-  return slug
-    .split("-")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
-}
+type TitleProps = {
+  title: string;
+};
 
-export function Title({ slug }: { slug: string }) {
+export function Title({ title }: TitleProps) {
   const { theme } = useSettings();
   const font = useFont();
 
   useEffect(() => {
-    document.title = slugToTitle(slug);
+    document.title = title || "Reader";
 
     return () => {
       document.title = "Reader";
     };
-  }, [slug]);
+  }, [title]);
 
   return (
     <div
@@ -35,7 +32,7 @@ export function Title({ slug }: { slug: string }) {
         }}
         className={`text-2xl mb-12 ${font}`}
       >
-        {slugToTitle(slug)}
+        {title}
       </h1>
     </div>
   );

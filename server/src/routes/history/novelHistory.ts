@@ -6,7 +6,7 @@ import { jsonContent } from "stoker/openapi/helpers";
 import type { AppEnv } from "../../lib/appFactory";
 import { prisma } from "../../db";
 import { authMiddleware } from "../../auth/authMiddleware";
-import { HistorySchema } from "./schema";
+import { HistoryWithChapterSchema } from "./schema";
 
 export const novelHistoryRoute = createRoute({
   method: "get",
@@ -14,12 +14,12 @@ export const novelHistoryRoute = createRoute({
   middleware: [authMiddleware],
   request: {
     query: z.object({
-      slug: z.string(),
+      bookId: z.string().uuid(),
     }),
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      z.array(HistorySchema),
+      z.array(HistoryWithChapterSchema),
       "Chapter history for a novel",
     ),
   },
@@ -28,13 +28,16 @@ export const novelHistoryRoute = createRoute({
 export const novelHistoryHandler: RouteHandler<
   typeof novelHistoryRoute,
   AppEnv
-> = async (c) => {
-  const { slug } = c.req.valid("query");
-  const user = c.get("user")!;
+> = async (context) => {
+  const { bookId } = context.req.valid("query");
+  const user = context.get("user")!;
 
   const chapters = await prisma.history.findMany({
-    where: { userId: user.id, slug },
+    where: { userId: user.id, bookId },
+    include: {
+      chapter: { select: { id: true, title: true, number: true } },
+    },
   });
 
-  return c.json(chapters, HttpStatusCodes.OK);
+  return context.json(chapters, HttpStatusCodes.OK);
 };

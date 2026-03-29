@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "./client";
-import type { SlugServerInput } from "./types";
 
 export const FAVORITES = "favorites";
 export const FAVORITES_IS_FAVORITE = "favorites-is-favorite";
@@ -19,12 +18,12 @@ export function useFavorites() {
   });
 }
 
-export function useIsFavorite(params: SlugServerInput) {
+export function useIsFavorite(bookId: string) {
   return useQuery({
-    queryKey: [FAVORITES_IS_FAVORITE, params.slug, params.server],
+    queryKey: [FAVORITES_IS_FAVORITE, bookId],
     queryFn: async () => {
       const response = await api.api.favorites["is-favorite"].$get({
-        query: { slug: params.slug, server: params.server },
+        query: { bookId },
       });
       if (!response.ok) {
         throw new Error("Failed to check favorite status");
@@ -38,18 +37,18 @@ export function useAddFavorite() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (input: SlugServerInput) => {
+    mutationFn: async (bookId: string) => {
       const response = await api.api.favorites.$post({
-        json: { slug: input.slug, server: input.server },
+        json: { bookId },
       });
       if (!response.ok) {
         throw new Error("Failed to add favorite");
       }
       return response.json();
     },
-    onSuccess: (_data, input) => {
+    onSuccess: (_data, bookId) => {
       queryClient.invalidateQueries({
-        queryKey: [FAVORITES_IS_FAVORITE, input.slug, input.server],
+        queryKey: [FAVORITES_IS_FAVORITE, bookId],
       });
       queryClient.invalidateQueries({
         queryKey: [FAVORITES],
@@ -62,18 +61,18 @@ export function useDeleteFavorite() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (input: SlugServerInput) => {
+    mutationFn: async (bookId: string) => {
       const response = await api.api.favorites.$delete({
-        query: { slug: input.slug, server: input.server },
+        query: { bookId },
       });
       if (!response.ok) {
         throw new Error("Failed to delete favorite");
       }
       return response.json();
     },
-    onSuccess: (_data, input) => {
+    onSuccess: (_data, bookId) => {
       queryClient.invalidateQueries({
-        queryKey: [FAVORITES_IS_FAVORITE, input.slug, input.server],
+        queryKey: [FAVORITES_IS_FAVORITE, bookId],
       });
       queryClient.invalidateQueries({
         queryKey: [FAVORITES],
@@ -82,12 +81,16 @@ export function useDeleteFavorite() {
   });
 }
 
-export async function getNovelChapter(slug: string) {
-  const response = await api.api.favorites["novel-chapter"].$get({
-    query: { slug },
+export function useNovelChapter() {
+  return useMutation({
+    mutationFn: async (bookId: string) => {
+      const response = await api.api.favorites["novel-chapter"].$get({
+        query: { bookId },
+      });
+      if (!response.ok) {
+        throw new Error("Failed to get novel chapter");
+      }
+      return response.json();
+    },
   });
-  if (!response.ok) {
-    throw new Error("Failed to get novel chapter");
-  }
-  return response.json();
 }

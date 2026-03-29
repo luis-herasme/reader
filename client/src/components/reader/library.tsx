@@ -1,7 +1,7 @@
 import { AlertCircle, Library, Loader2, Trash } from "lucide-react";
 import { History } from "./history";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useFavorites, useDeleteFavorite, getNovelChapter } from "@/api/useFavorites";
+import { useFavorites, useDeleteFavorite, useNovelChapter } from "@/api/useFavorites";
 import { useIsAuthenticated } from "@/api/useAuth";
 import { toast } from "sonner";
 import { navigate } from "wouter/use-browser-location";
@@ -17,6 +17,7 @@ import { ScrollArea } from "../ui/scroll-area";
 function Favorites() {
   const { data, isLoading } = useFavorites();
   const removeFavorite = useDeleteFavorite();
+  const novelChapter = useNovelChapter();
 
   if (isLoading || data === undefined) {
     return <Loading />;
@@ -41,25 +42,22 @@ function Favorites() {
       <div className="flex flex-col gap-4">
         {data.map((favorite) => (
           <div
-            key={`${favorite.slug}`}
+            key={favorite.bookId}
             className="flex items-center justify-between gap-4"
           >
             <div
               className="flex flex-col w-full gap-1 cursor-pointer"
-              onClick={async () => {
-                const currentChapter = await getNovelChapter(favorite.slug);
-
-                navigate(
-                  `/${favorite.server}/reader/${favorite.slug}/${currentChapter}`
-                );
+              onClick={() => {
+                novelChapter.mutate(favorite.bookId, {
+                  onSuccess: (result) => {
+                    if (result.chapterId) {
+                      navigate(`/reader/${favorite.bookId}/${result.chapterId}`);
+                    }
+                  },
+                });
               }}
             >
-              <div className={`text-base`}>
-                {favorite.slug
-                  .split("-")
-                  .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-                  .join(" ")}
-              </div>
+              <div className={`text-base`}>{favorite.book.title}</div>
               <div className="font-mono text-xs opacity-50">
                 {new Date(favorite.updatedAt).toLocaleDateString("en-US", {
                   weekday: "long",
@@ -80,10 +78,7 @@ function Favorites() {
                   }
 
                   removeFavorite.mutate(
-                    {
-                      slug: favorite.slug,
-                      server: favorite.server,
-                    },
+                    favorite.bookId,
                     {
                       onSuccess() {
                         toast("Removed novel from library");

@@ -8,21 +8,19 @@ import { prisma } from "../../db";
 import { authMiddleware } from "../../auth/authMiddleware";
 import { HistorySchema } from "./schema";
 
+const AddHistoryInput = z.object({
+  bookId: z.string().uuid(),
+  chapterId: z.string().uuid(),
+  sentenceIndex: z.number(),
+  length: z.number(),
+});
+
 export const addHistoryRoute = createRoute({
   method: "post",
   path: "/api/history",
   middleware: [authMiddleware],
   request: {
-    body: jsonContentRequired(
-      z.object({
-        slug: z.string(),
-        chapter: z.string(),
-        server: z.string(),
-        sentenceIndex: z.number(),
-        length: z.number(),
-      }),
-      "History entry to add",
-    ),
+    body: jsonContentRequired(AddHistoryInput, "History entry to add"),
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(HistorySchema, "History entry added"),
@@ -32,22 +30,20 @@ export const addHistoryRoute = createRoute({
 export const addHistoryHandler: RouteHandler<
   typeof addHistoryRoute,
   AppEnv
-> = async (c) => {
-  const { slug, server, chapter, sentenceIndex, length } = c.req.valid("json");
-  const user = c.get("user")!;
+> = async (context) => {
+  const { bookId, chapterId, sentenceIndex, length } = context.req.valid("json");
+  const user = context.get("user")!;
 
   const entry = await prisma.history.upsert({
     where: {
-      userId_slug_chapter_server: {
-        slug,
-        chapter,
-        server,
+      userId_chapterId: {
         userId: user.id,
+        chapterId,
       },
     },
-    create: { slug, chapter, server, sentenceIndex, length, userId: user.id },
-    update: { length, sentenceIndex },
+    create: { bookId, chapterId, sentenceIndex, length, userId: user.id },
+    update: { sentenceIndex, length },
   });
 
-  return c.json(entry, HttpStatusCodes.OK);
+  return context.json(entry, HttpStatusCodes.OK);
 };

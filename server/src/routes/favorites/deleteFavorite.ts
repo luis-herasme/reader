@@ -14,8 +14,7 @@ export const deleteFavoriteRoute = createRoute({
   middleware: [authMiddleware],
   request: {
     query: z.object({
-      slug: z.string(),
-      server: z.string(),
+      bookId: z.string().uuid(),
     }),
   },
   responses: {
@@ -26,15 +25,15 @@ export const deleteFavoriteRoute = createRoute({
 export const deleteFavoriteHandler: RouteHandler<
   typeof deleteFavoriteRoute,
   AppEnv
-> = async (c) => {
-  const { slug, server } = c.req.valid("query");
-  const user = c.get("user")!;
+> = async (context) => {
+  const { bookId } = context.req.valid("query");
+  const user = context.get("user")!;
 
   const favorite = await prisma.favorite.delete({
     where: {
-      userId_slug_server: { slug, server, userId: user.id },
+      userId_bookId: { bookId, userId: user.id },
     },
   });
 
-  return c.json(favorite, HttpStatusCodes.OK);
+  return context.json(favorite, HttpStatusCodes.OK);
 };

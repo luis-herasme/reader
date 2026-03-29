@@ -7,6 +7,14 @@ import type { AppEnv } from "./lib/appFactory";
 import { searchRoute, searchHandler } from "./routes/novels/search";
 import { chapterRoute, chapterHandler } from "./routes/novels/chapter";
 import { chaptersRoute, chaptersHandler } from "./routes/novels/chapters";
+import {
+  uploadBookRoute,
+  uploadBookHandler,
+} from "./routes/novels/uploadBook";
+import {
+  uploadChapterRoute,
+  uploadChapterHandler,
+} from "./routes/novels/uploadChapter";
 
 import {
   addFavoriteRoute,
@@ -88,6 +96,8 @@ const api = app
   .openapi(searchRoute, searchHandler)
   .openapi(chapterRoute, chapterHandler)
   .openapi(chaptersRoute, chaptersHandler)
+  .openapi(uploadBookRoute, uploadBookHandler)
+  .openapi(uploadChapterRoute, uploadChapterHandler)
   // favorites
   .openapi(isFavoriteRoute, isFavoriteHandler)
   .openapi(addFavoriteRoute, addFavoriteHandler)

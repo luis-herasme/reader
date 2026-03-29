@@ -136,7 +136,7 @@ export function Custom() {
         />
       </div>
 
-      <Title slug="Custom file" />
+      <Title title="Custom file" />
 
       {text ? (
         <Sentences>

@@ -13,8 +13,7 @@ export const clearNovelHistoryRoute = createRoute({
   middleware: [authMiddleware],
   request: {
     query: z.object({
-      slug: z.string(),
-      server: z.string(),
+      bookId: z.string().uuid(),
     }),
   },
   responses: {
@@ -28,13 +27,13 @@ export const clearNovelHistoryRoute = createRoute({
 export const clearNovelHistoryHandler: RouteHandler<
   typeof clearNovelHistoryRoute,
   AppEnv
-> = async (c) => {
-  const { slug, server } = c.req.valid("query");
-  const user = c.get("user")!;
+> = async (context) => {
+  const { bookId } = context.req.valid("query");
+  const user = context.get("user")!;
 
   const result = await prisma.history.deleteMany({
-    where: { userId: user.id, server, slug },
+    where: { userId: user.id, bookId },
   });
 
-  return c.json(result, HttpStatusCodes.OK);
+  return context.json(result, HttpStatusCodes.OK);
 };
