@@ -23,9 +23,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Slider } from "@/components/ui/slider";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/api/client";
-import { SETTINGS, AUTH_IS_AUTHENTICATED } from "@/api/queryKeys";
+import { SETTINGS } from "@/api/queryKeys";
+import { useSettingsState } from "@/api/useSettingsApi";
+import { useIsAuthenticated } from "@/api/useAuth";
 import { useEffect, useRef } from "react";
 import { debounce } from "@/lib/debounce";
 import { create } from "zustand";
@@ -63,13 +65,7 @@ export const useSettingsStore = create(
 export function useSettings() {
   const queryClient = useQueryClient();
   const settings = useSettingsStore();
-  const { data } = useQuery({
-    queryKey: [SETTINGS],
-    queryFn: async () => {
-      const res = await api.api.settings.$get();
-      return res.json();
-    },
-  });
+  const { data } = useSettingsState();
 
   const updateSettings = useMutation({
     mutationFn: async (value: Partial<SettingsState>) => {
@@ -108,13 +104,7 @@ export function useSettings() {
 export function ReaderSettings() {
   const { settings, updateSettings, optimisticUpdateWithDebounce } =
     useSettings();
-  const { data: isAuthenticated } = useQuery({
-    queryKey: [AUTH_IS_AUTHENTICATED],
-    queryFn: async () => {
-      const res = await api.api.auth["is-authenticated"].$get();
-      return res.json();
-    },
-  });
+  const { data: isAuthenticated } = useIsAuthenticated();
 
   return (
     <Dialog>

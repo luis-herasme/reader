@@ -1,0 +1,64 @@
+import { useQuery } from "@tanstack/react-query";
+import { api } from "./client";
+import { NOVELS_SEARCH, NOVELS_CHAPTERS, NOVELS_CHAPTER } from "./queryKeys";
+
+type SearchParams = {
+  search: string;
+  page: number;
+  server: string;
+};
+
+export function useSearchNovels(params: SearchParams) {
+  return useQuery({
+    queryKey: [NOVELS_SEARCH, params],
+    queryFn: async () => {
+      const res = await api.api.novels.search.$get({
+        query: {
+          search: params.search,
+          page: params.page,
+          server: params.server,
+        },
+      });
+      return res.json();
+    },
+    enabled: Boolean(params.search),
+  });
+}
+
+type ChaptersParams = {
+  slug: string;
+  server: string;
+};
+
+export function useChapters(params: ChaptersParams) {
+  return useQuery({
+    queryKey: [NOVELS_CHAPTERS, params.slug, params.server],
+    queryFn: async () => {
+      const res = await api.api.novels.chapters.$get({
+        query: { slug: params.slug, server: params.server },
+      });
+      return res.json();
+    },
+  });
+}
+
+type ChapterParams = {
+  novel: string;
+  chapter: string;
+  server: string;
+};
+
+export function useChapter(params: ChapterParams) {
+  return useQuery({
+    queryKey: [NOVELS_CHAPTER, params.novel, params.chapter, params.server],
+    queryFn: async () => {
+      const res = await api.api.novels.chapter.$get({
+        query: { novel: params.novel, chapter: params.chapter, server: params.server },
+      });
+      return res.json();
+    },
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    refetchOnWindowFocus: false,
+  });
+}

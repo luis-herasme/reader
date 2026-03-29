@@ -2,9 +2,7 @@ import { Player } from "./player";
 import { useEffect } from "react";
 import { useForceUpdate } from "./use-force-update";
 import { useSettings } from "@/components/reader/settings";
-import { useQuery } from "@tanstack/react-query";
-import { api } from "@/api/client";
-import { SETTINGS_REPLACEMENT_RULES } from "@/api/queryKeys";
+import { useReplacementRules } from "@/api/useSettingsApi";
 
 const player = new Player();
 
@@ -17,13 +15,7 @@ export function usePlayer({
 }) {
   const forceUpdate = useForceUpdate();
   const { settings } = useSettings();
-  const { data: replaceRules } = useQuery({
-    queryKey: [SETTINGS_REPLACEMENT_RULES],
-    queryFn: async () => {
-      const res = await api.api.settings["replacement-rules"].$get();
-      return res.json();
-    },
-  });
+  const { data: replaceRules } = useReplacementRules();
 
   useEffect(() => {
     player.onUpdate = forceUpdate;

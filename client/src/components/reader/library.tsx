@@ -1,9 +1,10 @@
 import { AlertCircle, Library, Loader2, Trash } from "lucide-react";
 import { History } from "./history";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { api } from "@/api/client";
-import { FAVORITES, FAVORITES_IS_FAVORITE, AUTH_IS_AUTHENTICATED, type SlugServerInput } from "@/api/queryKeys";
+import { useQueryClient } from "@tanstack/react-query";
+import { useFavorites, useDeleteFavorite, getNovelChapter } from "@/api/useFavorites";
+import { useIsAuthenticated } from "@/api/useAuth";
+import { FAVORITES_IS_FAVORITE } from "@/api/queryKeys";
 import { toast } from "sonner";
 import { navigate } from "wouter/use-browser-location";
 import { Loading } from "../loading";
@@ -17,19 +18,8 @@ import { ScrollArea } from "../ui/scroll-area";
 
 function Favorites() {
   const queryClient = useQueryClient();
-  const { data, isLoading } = useQuery({
-    queryKey: [FAVORITES],
-    queryFn: async () => {
-      const res = await api.api.favorites.$get();
-      return res.json();
-    },
-  });
-  const removeFavorite = useMutation({
-    mutationFn: async (input: SlugServerInput) => {
-      const res = await api.api.favorites.$delete({ query: input });
-      return res.json();
-    },
-  });
+  const { data, isLoading } = useFavorites();
+  const removeFavorite = useDeleteFavorite();
 
   if (isLoading || data === undefined) {
     return <Loading />;
@@ -60,10 +50,7 @@ function Favorites() {
             <div
               className="flex flex-col w-full gap-1 cursor-pointer"
               onClick={async () => {
-                const res = await api.api.favorites["novel-chapter"].$get({
-                  query: { slug: favorite.slug },
-                });
-                const currentChapter = await res.json();
+                const currentChapter = await getNovelChapter(favorite.slug);
 
                 navigate(
                   `/${favorite.server}/reader/${favorite.slug}/${currentChapter}`
@@ -104,9 +91,6 @@ function Favorites() {
                       onSuccess() {
                         toast("Removed novel from library");
                         queryClient.invalidateQueries({
-                          queryKey: [FAVORITES],
-                        });
-                        queryClient.invalidateQueries({
                           queryKey: [FAVORITES_IS_FAVORITE, favorite.slug, favorite.server],
                         });
                       },
@@ -129,13 +113,7 @@ function Favorites() {
 }
 
 export function LibraryContent() {
-  const { data, isLoading } = useQuery({
-    queryKey: [AUTH_IS_AUTHENTICATED],
-    queryFn: async () => {
-      const res = await api.api.auth["is-authenticated"].$get();
-      return res.json();
-    },
-  });
+  const { data, isLoading } = useIsAuthenticated();
 
   return (
     <DialogOverlay>

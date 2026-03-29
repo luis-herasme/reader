@@ -1,6 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
-import { api } from "@/api/client";
-import { AUTH_IS_AUTHENTICATED } from "@/api/queryKeys";
+import { useIsAuthenticated } from "@/api/useAuth";
 import { useState } from "react";
 import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
@@ -8,13 +6,7 @@ import { ArrowRight, Loader2 } from "lucide-react";
 import { navigate } from "wouter/use-browser-location";
 
 export default function Login() {
-  const { data: isAuthenticated, isLoading } = useQuery({
-    queryKey: [AUTH_IS_AUTHENTICATED],
-    queryFn: async () => {
-      const res = await api.api.auth["is-authenticated"].$get();
-      return res.json();
-    },
-  });
+  const { data: isAuthenticated, isLoading } = useIsAuthenticated();
   const [hover, setHover] = useState(false);
 
   if (isAuthenticated) {

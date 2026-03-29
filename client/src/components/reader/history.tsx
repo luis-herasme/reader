@@ -1,6 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { api } from "@/api/client";
-import { HISTORY_NOVELS, type SlugServerInput } from "@/api/queryKeys";
+import { useHistoryNovels, useClearNovelHistory } from "@/api/useHistory";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { Bookmark, Loader2, Trash } from "lucide-react";
 import { Favorite } from "./favorite";
@@ -36,15 +34,7 @@ function HistoryItem({
   server: string;
   chapter: string;
 }) {
-  const queryClient = useQueryClient();
-  const deleteMutation = useMutation({
-    mutationFn: async (input: SlugServerInput) => {
-      const res = await api.api.history.novel.$delete({
-        query: input,
-      });
-      return res.json();
-    },
-  });
+  const deleteMutation = useClearNovelHistory();
 
   return (
     <div className="flex items-center justify-between gap-4">
@@ -81,19 +71,10 @@ function HistoryItem({
               return;
             }
 
-            deleteMutation.mutate(
-              {
-                slug,
-                server,
-              },
-              {
-                onSuccess() {
-                  queryClient.invalidateQueries({
-                    queryKey: [HISTORY_NOVELS],
-                  });
-                },
-              }
-            );
+            deleteMutation.mutate({
+              slug,
+              server,
+            });
           }}
         >
           {deleteMutation.isPending ? (
@@ -108,13 +89,7 @@ function HistoryItem({
 }
 
 export function History() {
-  const { data } = useQuery({
-    queryKey: [HISTORY_NOVELS],
-    queryFn: async () => {
-      const res = await api.api.history.novels.$get();
-      return res.json();
-    },
-  });
+  const { data } = useHistoryNovels();
 
   return (
     <ScrollArea className="max-h-[50vh] overflow-y-auto scrollbar">

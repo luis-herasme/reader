@@ -11,9 +11,8 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 import { ChaptersDialog } from "@/components/chapters";
 import HistoryDialog from "@/components/reader/history";
 import { Input } from "@/components/ui/input";
-import { useQuery } from "@tanstack/react-query";
-import { api } from "@/api/client";
-import { NOVELS_SEARCH, AUTH_IS_AUTHENTICATED } from "@/api/queryKeys";
+import { useSearchNovels } from "@/api/useNovels";
+import { useIsAuthenticated } from "@/api/useAuth";
 import { Logo } from "@/components/logo";
 import { ServerSelector } from "@/components/server-selector";
 import { Button } from "@/components/ui/button";
@@ -37,28 +36,8 @@ export default function Home({ server }: { server: string }) {
     setSearch((value) => ({ ...value, server, page: 0 }));
   }, [server]);
 
-  const searchQuery = useQuery({
-    queryKey: [NOVELS_SEARCH, search],
-    queryFn: async () => {
-      const res = await api.api.novels.search.$get({
-        query: {
-          search: search.search,
-          page: search.page,
-          server: search.server,
-        },
-      });
-      return res.json();
-    },
-    enabled: Boolean(search.search),
-  });
-
-  const { data: isAuthenticated } = useQuery({
-    queryKey: [AUTH_IS_AUTHENTICATED],
-    queryFn: async () => {
-      const res = await api.api.auth["is-authenticated"].$get();
-      return res.json();
-    },
-  });
+  const searchQuery = useSearchNovels(search);
+  const { data: isAuthenticated } = useIsAuthenticated();
 
   return (
     <div className="flex flex-col items-center justify-center">

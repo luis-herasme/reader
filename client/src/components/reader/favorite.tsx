@@ -1,8 +1,8 @@
 import { Star, StarOff } from "lucide-react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { api } from "@/api/client";
-import { FAVORITES_IS_FAVORITE, type SlugServerInput } from "@/api/queryKeys";
+import { useIsFavorite, useAddFavorite, useDeleteFavorite } from "@/api/useFavorites";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
+import { FAVORITES_IS_FAVORITE } from "@/api/queryKeys";
 import {
   Tooltip,
   TooltipContent,
@@ -12,43 +12,10 @@ import {
 
 export function Favorite({ slug, server }: { slug: string; server: string }) {
   const queryClient = useQueryClient();
-  const { data } = useQuery({
-    queryKey: [FAVORITES_IS_FAVORITE, slug, server],
-    queryFn: async () => {
-      const res = await api.api.favorites["is-favorite"].$get({
-        query: { slug, server },
-      });
-      return res.json();
-    },
-  });
+  const { data } = useIsFavorite({ slug, server });
 
-  const addToFavorites = useMutation({
-    mutationFn: async (input: SlugServerInput) => {
-      const res = await api.api.favorites.$post({ json: input });
-      return res.json();
-    },
-    onSuccess: () => {
-      toast("Added novel to library");
-      queryClient.invalidateQueries({
-        queryKey: [FAVORITES_IS_FAVORITE, slug, server],
-      });
-    },
-  });
-
-  const removeFromFavorites = useMutation({
-    mutationFn: async (input: SlugServerInput) => {
-      const res = await api.api.favorites.$delete({
-        query: input,
-      });
-      return res.json();
-    },
-    onSuccess: () => {
-      toast("Removed novel from library");
-      queryClient.invalidateQueries({
-        queryKey: [FAVORITES_IS_FAVORITE, slug, server],
-      });
-    },
-  });
+  const addToFavorites = useAddFavorite({ slug, server });
+  const removeFromFavorites = useDeleteFavorite();
 
   if (data === undefined) {
     return null;
@@ -66,9 +33,20 @@ export function Favorite({ slug, server }: { slug: string; server: string }) {
             }`}
             onClick={() => {
               if (data) {
-                removeFromFavorites.mutate({ slug, server });
+                removeFromFavorites.mutate({ slug, server }, {
+                  onSuccess: () => {
+                    toast("Removed novel from library");
+                    queryClient.invalidateQueries({
+                      queryKey: [FAVORITES_IS_FAVORITE, slug, server],
+                    });
+                  },
+                });
               } else {
-                addToFavorites.mutate({ slug, server });
+                addToFavorites.mutate({ slug, server }, {
+                  onSuccess: () => {
+                    toast("Added novel to library");
+                  },
+                });
               }
             }}
           >
