@@ -33,14 +33,8 @@ export default function Home() {
     take: number;
   }>({ title: "", skip: 0, take: PAGE_SIZE });
 
-  const searchQuery = useSearchNovels(search);
+  const { hasMore, hasPrevious, isLoading, data: searchData } = useSearchNovels(search);
   const { data: isAuthenticated } = useIsAuthenticated();
-
-  const hasMore = searchQuery.data
-    ? search.skip + search.take < searchQuery.data.total
-    : false;
-
-  const hasPrevious = search.skip > 0;
 
   return (
     <div className="flex flex-col items-center justify-center">
@@ -149,12 +143,12 @@ export default function Home() {
           />
         </div>
       </div>
-      {searchQuery.isLoading && (
+      {isLoading && (
         <div className="flex items-center justify-center w-full h-[20vh]">
           <Loader2 className="w-32 h-32 animate-spin" />
         </div>
       )}
-      {searchQuery.data && (
+      {searchData && (
         <div className="flex flex-col justify-center max-w-[1200px] w-full">
           <div className="flex items-center justify-between w-full relative  mb-8 ">
             <div
@@ -190,7 +184,7 @@ export default function Home() {
             )}
           </div>
           <div className="flex flex-wrap justify-center max-w-[1200px]">
-            {searchQuery.data.books.map((book) => (
+            {searchData.books.map((book) => (
               <BookCard
                 key={book.bookId}
                 bookId={book.bookId}
