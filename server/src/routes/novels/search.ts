@@ -40,17 +40,22 @@ export const searchHandler: RouteHandler<typeof searchRoute, AppEnv> = async (
 ) => {
   const { title, skip, take } = context.req.valid("query");
 
+  const where = {
+    title: {
+      contains: title,
+      mode: "insensitive" as const,
+    },
+  };
+
   const [books, total] = await Promise.all([
     prisma.book.findMany({
-      where: { title: { contains: title, mode: "insensitive" } },
+      where,
       skip,
       take,
       include: { image: true },
       orderBy: { title: "asc" },
     }),
-    prisma.book.count({
-      where: { title: { contains: title, mode: "insensitive" } },
-    }),
+    prisma.book.count({ where }),
   ]);
 
   const results = books.map((book) => ({

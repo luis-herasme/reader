@@ -89,7 +89,7 @@ export function History() {
         {data &&
           data.map((history) => (
             <HistoryItem
-              key={history.bookId}
+              key={history.chapterId}
               bookId={history.bookId}
               chapterId={history.chapterId}
               updatedAt={history.updatedAt}

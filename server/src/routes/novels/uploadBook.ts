@@ -48,7 +48,8 @@ export const uploadBookHandler: RouteHandler<
 
   const { title, author, description } = parsed.data;
 
-  let imageId: string | null = null;
+  let imageBuffer: Buffer | null = null;
+  let imageContentType: string | null = null;
   const imageFile = body["image"];
 
   if (imageFile instanceof File) {
@@ -66,28 +67,40 @@ export const uploadBookHandler: RouteHandler<
       );
     }
 
-    const image = await prisma.image.create({
-      data: { contentType: imageFile.type },
-    });
-
-    const buffer = Buffer.from(await imageFile.arrayBuffer());
-    await uploadImage({
-      key: image.id,
-      body: buffer,
-      contentType: imageFile.type,
-    });
-
-    imageId = image.id;
+    imageBuffer = Buffer.from(await imageFile.arrayBuffer());
+    imageContentType = imageFile.type;
   }
 
-  const book = await prisma.book.create({
-    data: {
-      title,
-      author,
-      description,
-      imageId,
-    },
+  const book = await prisma.$transaction(async (transaction) => {
+    let createdImageId: string | null = null;
+
+    if (imageBuffer && imageContentType) {
+      const image = await transaction.image.create({
+        data: {
+          contentType: imageContentType,
+        },
+      });
+
+      createdImageId = image.id;
+    }
+
+    return transaction.book.create({
+      data: {
+        title,
+        author,
+        description,
+        imageId: createdImageId,
+      },
+    });
   });
+
+  if (imageBuffer && imageContentType && book.imageId) {
+    await uploadImage({
+      key: book.imageId,
+      body: imageBuffer,
+      contentType: imageContentType,
+    });
+  }
 
   return context.json({ bookId: book.id }, HttpStatusCodes.CREATED);
 };

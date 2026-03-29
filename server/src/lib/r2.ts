@@ -1,16 +1,24 @@
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 
+function requireEnv(name: string): string {
+  const value = process.env[name];
+  if (!value) {
+    throw new Error(`Missing required environment variable: ${name}`);
+  }
+  return value;
+}
+
 const s3Client = new S3Client({
   region: "auto",
-  endpoint: process.env.R2_ENDPOINT!,
+  endpoint: requireEnv("R2_ENDPOINT"),
   credentials: {
-    accessKeyId: process.env.R2_ACCESS_KEY_ID!,
-    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
+    accessKeyId: requireEnv("R2_ACCESS_KEY_ID"),
+    secretAccessKey: requireEnv("R2_SECRET_ACCESS_KEY"),
   },
 });
 
-const bucketName = process.env.R2_BUCKET_NAME!;
-const publicUrl = process.env.R2_PUBLIC_URL!;
+const publicUrl = requireEnv("R2_PUBLIC_URL");
+const bucketName = requireEnv("R2_BUCKET_NAME");
 
 type UploadImageInput = {
   key: string;
