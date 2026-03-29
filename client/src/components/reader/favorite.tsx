@@ -1,5 +1,7 @@
 import { Star, StarOff } from "lucide-react";
-import { trpc } from "../../trpc";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { api } from "@/api/client";
+import { FAVORITES_IS_FAVORITE, type SlugServerInput } from "@/api/queryKeys";
 import { toast } from "sonner";
 import {
   Tooltip,
@@ -9,20 +11,42 @@ import {
 } from "@/components/ui/tooltip";
 
 export function Favorite({ slug, server }: { slug: string; server: string }) {
-  const utils = trpc.useUtils();
-  const { data } = trpc.favorites.isFavorite.useQuery({ slug, server });
-
-  const addToFavorites = trpc.favorites.add.useMutation({
-    onSuccess: () => {
-      toast("Added novel to library");
-      utils.favorites.isFavorite.invalidate({ slug, server });
+  const queryClient = useQueryClient();
+  const { data } = useQuery({
+    queryKey: [FAVORITES_IS_FAVORITE, slug, server],
+    queryFn: async () => {
+      const res = await api.api.favorites["is-favorite"].$get({
+        query: { slug, server },
+      });
+      return res.json();
     },
   });
 
-  const removeFromFavorites = trpc.favorites.delete.useMutation({
+  const addToFavorites = useMutation({
+    mutationFn: async (input: SlugServerInput) => {
+      const res = await api.api.favorites.$post({ json: input });
+      return res.json();
+    },
+    onSuccess: () => {
+      toast("Added novel to library");
+      queryClient.invalidateQueries({
+        queryKey: [FAVORITES_IS_FAVORITE, slug, server],
+      });
+    },
+  });
+
+  const removeFromFavorites = useMutation({
+    mutationFn: async (input: SlugServerInput) => {
+      const res = await api.api.favorites.$delete({
+        query: input,
+      });
+      return res.json();
+    },
     onSuccess: () => {
       toast("Removed novel from library");
-      utils.favorites.isFavorite.invalidate({ slug, server });
+      queryClient.invalidateQueries({
+        queryKey: [FAVORITES_IS_FAVORITE, slug, server],
+      });
     },
   });
 
