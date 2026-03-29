@@ -1,8 +1,13 @@
 import { lucia } from "./auth";
-import type { CreateHTTPContextOptions } from "@trpc/server/adapters/standalone";
+import type { FetchCreateContextFnOptions } from "@trpc/server/adapters/fetch";
 
-export async function getAuthContext({ req, res }: CreateHTTPContextOptions) {
-  const sessionId = lucia.readSessionCookie(req.headers.cookie ?? "");
+export async function getAuthContext({
+  req,
+  resHeaders,
+}: FetchCreateContextFnOptions) {
+  const sessionId = lucia.readSessionCookie(
+    req.headers.get("Cookie") ?? ""
+  );
 
   if (!sessionId) {
     return { session: null, user: null };
@@ -11,14 +16,14 @@ export async function getAuthContext({ req, res }: CreateHTTPContextOptions) {
   const { session, user } = await lucia.validateSession(sessionId);
 
   if (session && session.fresh) {
-    res.appendHeader(
+    resHeaders.append(
       "Set-Cookie",
       lucia.createSessionCookie(session.id).serialize()
     );
   }
 
   if (!session) {
-    res.appendHeader(
+    resHeaders.append(
       "Set-Cookie",
       lucia.createBlankSessionCookie().serialize()
     );
