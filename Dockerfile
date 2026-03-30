@@ -4,7 +4,7 @@ FROM ubuntu:22.04
 RUN apt-get update && apt-get install -y curl gnupg zip unzip
 
 # Install NodeJS
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
     apt-get install -y nodejs
 
 # Install BunJS

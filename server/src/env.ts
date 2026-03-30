@@ -5,6 +5,7 @@ const envSchema = z.object({
     .enum(["development", "production", "test"])
     .default("development"),
   PORT: z.coerce.number().default(3000),
+  DATABASE_URL: z.string().url(),
   API_KEY: z.string(),
   BASE_URL: z.string().url(),
   GOOGLE_CLIENT_ID: z.string(),
