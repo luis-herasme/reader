@@ -2,7 +2,7 @@ import { createMiddleware } from "hono/factory";
 import { timingSafeEqual } from "crypto";
 
 import { env } from "../env";
-import type { AppEnv } from "./appFactory";
+import type { AppEnv } from "./app-factory";
 
 export const apiKeyMiddleware = createMiddleware<AppEnv>(
   async (context, next) => {

@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { useSettings } from "./settings";
-import { useFont } from "../useFont";
+import { useFont } from "../use-font";
 
 export function Sentences({ children }: { children: ReactNode }) {
   const { theme, settings } = useSettings();

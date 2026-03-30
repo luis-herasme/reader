@@ -7,8 +7,8 @@ import {
 } from "@/components/ui/dialog";
 import { Eye, List, Loader2 } from "lucide-react";
 import { CircleButton } from "./circle-button";
-import { useChapters } from "@/api/useNovels";
-import { useNovelHistory } from "@/api/useHistory";
+import { useChapters } from "@/api/use-novels";
+import { useNovelHistory } from "@/api/use-history";
 import { navigate } from "wouter/use-browser-location";
 
 type ListChaptersProps = {

@@ -7,7 +7,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { useReplacementRules, useUpdateReplacementRules } from "@/api/useSettingsApi";
+import { useReplacementRules, useUpdateReplacementRules } from "@/api/use-settings-api";
 import { ArrowRight, Plus, Replace, Trash } from "lucide-react";
 import { useEffect, useState } from "react";
 

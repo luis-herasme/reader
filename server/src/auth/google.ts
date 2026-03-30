@@ -5,7 +5,7 @@ import { Google, generateState } from "arctic";
 import { lucia } from "./auth";
 import { prisma } from "../db";
 import { env } from "../env";
-import type { AppEnv } from "../lib/appFactory";
+import type { AppEnv } from "../lib/app-factory";
 
 export const google = new Google(
   env.GOOGLE_CLIENT_ID,

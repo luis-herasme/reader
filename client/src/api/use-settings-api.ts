@@ -44,8 +44,7 @@ export function useUpdateSettings(options?: UseUpdateSettingsOptions) {
       return response.json();
     },
     onMutate: options?.onMutate,
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: [SETTINGS] }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: [SETTINGS] }),
   });
 }
 

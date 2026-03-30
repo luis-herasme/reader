@@ -2,7 +2,7 @@ import { Player } from "./player";
 import { useEffect } from "react";
 import { useForceUpdate } from "./use-force-update";
 import { useSettings } from "@/components/reader/settings";
-import { useReplacementRules } from "@/api/useSettingsApi";
+import { useReplacementRules } from "@/api/use-settings-api";
 
 const player = new Player();
 

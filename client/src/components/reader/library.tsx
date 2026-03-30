@@ -1,8 +1,8 @@
 import { AlertCircle, Library, Loader2, Trash } from "lucide-react";
 import { History } from "./history";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useFavorites, useDeleteFavorite, useNovelChapter } from "@/api/useFavorites";
-import { useIsAuthenticated } from "@/api/useAuth";
+import { useFavorites, useDeleteFavorite, useNovelChapter } from "@/api/use-favorites";
+import { useIsAuthenticated } from "@/api/use-auth";
 import { toast } from "sonner";
 import { navigate } from "wouter/use-browser-location";
 import { Loading } from "../loading";

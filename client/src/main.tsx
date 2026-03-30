@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { Toaster } from "@/components/ui/sonner";
-import { QueryProvider } from "./api/queryClient";
+import { QueryProvider } from "./api/query-client";
 import { Router } from "./pages/router";
 import "./index.css";
 

@@ -7,86 +7,89 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { env } from "./env";
-import type { AppEnv } from "./lib/appFactory";
+import type { AppEnv } from "./lib/app-factory";
 
 import { searchRoute, searchHandler } from "./routes/novels/search";
 import { chapterRoute, chapterHandler } from "./routes/novels/chapter";
 import { chaptersRoute, chaptersHandler } from "./routes/novels/chapters";
-import { uploadBookRoute, uploadBookHandler } from "./routes/novels/uploadBook";
+import {
+  uploadBookRoute,
+  uploadBookHandler,
+} from "./routes/novels/upload-book";
 import {
   uploadChapterRoute,
   uploadChapterHandler,
-} from "./routes/novels/uploadChapter";
+} from "./routes/novels/upload-chapter";
 
 import {
   addFavoriteRoute,
   addFavoriteHandler,
-} from "./routes/favorites/addFavorite";
+} from "./routes/favorites/add-favorite";
 import {
   isFavoriteRoute,
   isFavoriteHandler,
-} from "./routes/favorites/isFavorite";
+} from "./routes/favorites/is-favorite";
 import {
   readFavoritesRoute,
   readFavoritesHandler,
-} from "./routes/favorites/readFavorites";
+} from "./routes/favorites/read-favorites";
 import {
   deleteFavoriteRoute,
   deleteFavoriteHandler,
-} from "./routes/favorites/deleteFavorite";
+} from "./routes/favorites/delete-favorite";
 import {
   getNovelChapterRoute,
   getNovelChapterHandler,
-} from "./routes/favorites/getNovelChapter";
+} from "./routes/favorites/get-novel-chapter";
 
 import {
   addHistoryRoute,
   addHistoryHandler,
-} from "./routes/history/addHistory";
+} from "./routes/history/add-history";
 import {
   readHistoryRoute,
   readHistoryHandler,
-} from "./routes/history/readHistory";
-import { getNovelsRoute, getNovelsHandler } from "./routes/history/getNovels";
+} from "./routes/history/read-history";
+import { getNovelsRoute, getNovelsHandler } from "./routes/history/get-novels";
 import {
   novelHistoryRoute,
   novelHistoryHandler,
-} from "./routes/history/novelHistory";
+} from "./routes/history/novel-history";
 import {
   clearNovelHistoryRoute,
   clearNovelHistoryHandler,
-} from "./routes/history/clearNovelHistory";
+} from "./routes/history/clear-novel-history";
 
 import {
   getSettingsRoute,
   getSettingsHandler,
-} from "./routes/settings/getSettings";
+} from "./routes/settings/get-settings";
 import {
   updateSettingsRoute,
   updateSettingsHandler,
-} from "./routes/settings/updateSettings";
+} from "./routes/settings/update-settings";
 import {
   getReplacementRulesRoute,
   getReplacementRulesHandler,
-} from "./routes/settings/getReplacementRules";
+} from "./routes/settings/get-replacement-rules";
 import {
   updateReplacementRulesRoute,
   updateReplacementRulesHandler,
-} from "./routes/settings/updateReplacementRules";
+} from "./routes/settings/update-replacement-rules";
 
 import { logoutRoute, logoutHandler } from "./routes/auth/logout";
 import {
   googleLoginRoute,
   googleLoginHandler,
-} from "./routes/auth/googleLogin";
+} from "./routes/auth/google-login";
 import {
   isAuthenticatedRoute,
   isAuthenticatedHandler,
-} from "./routes/auth/isAuthenticated";
+} from "./routes/auth/is-authenticated";
 import {
   googleCallbackRoute,
   googleCallbackHandler,
-} from "./routes/auth/googleCallback";
+} from "./routes/auth/google-callback";
 
 const app = new OpenAPIHono<AppEnv>({ defaultHook });
 

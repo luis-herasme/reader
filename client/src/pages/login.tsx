@@ -1,4 +1,4 @@
-import { useIsAuthenticated } from "@/api/useAuth";
+import { useIsAuthenticated } from "@/api/use-auth";
 import { useState } from "react";
 import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";

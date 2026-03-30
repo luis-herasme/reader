@@ -23,8 +23,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Slider } from "@/components/ui/slider";
-import { useSettingsState, useUpdateSettings } from "@/api/useSettingsApi";
-import { useIsAuthenticated } from "@/api/useAuth";
+import { useSettingsState, useUpdateSettings } from "@/api/use-settings-api";
+import { useIsAuthenticated } from "@/api/use-auth";
 import { useEffect, useRef } from "react";
 import { debounce } from "@/lib/debounce";
 import { create } from "zustand";

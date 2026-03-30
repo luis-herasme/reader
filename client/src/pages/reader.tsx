@@ -8,8 +8,8 @@ import { useTrackSentenceIndex } from "@/components/reader/track-sentence-index"
 import { FollowReader } from "@/components/reader/follow-reader";
 import LibaryButton from "@/components/reader/libary-button";
 import { useQueryClient } from "@tanstack/react-query";
-import { useChapter, NOVELS_CHAPTER } from "@/api/useNovels";
-import { addHistory, HISTORY_NOVEL } from "@/api/useHistory";
+import { useChapter, NOVELS_CHAPTER } from "@/api/use-novels";
+import { addHistory, HISTORY_NOVEL } from "@/api/use-history";
 import { HomeButton } from "@/components/reader/home-button";
 import { NavArrows } from "@/components/reader/nav-arrows";
 import { PlayButton } from "@/components/reader/play-pause";
@@ -90,7 +90,7 @@ export default function Reader({ bookId, chapterId }: ReaderProps) {
         player.setCurrentSentenceIndex(nextIndex);
       }
     }, 100),
-    [player, data]
+    [player, data],
   );
 
   const onPrev = useCallback(
@@ -112,7 +112,7 @@ export default function Reader({ bookId, chapterId }: ReaderProps) {
         player.setCurrentSentenceIndex(previousIndex);
       }
     }, 100),
-    [player, data]
+    [player, data],
   );
 
   const onTogglePlay = useCallback(
@@ -127,7 +127,7 @@ export default function Reader({ bookId, chapterId }: ReaderProps) {
         player.play(player.getCurrentSentenceIndex());
       }
     }, 300),
-    [player]
+    [player],
   );
 
   useTrackSentenceIndex(player, sentencesRef);
@@ -158,10 +158,10 @@ export default function Reader({ bookId, chapterId }: ReaderProps) {
         sentenceIndex: player.getCurrentSentenceIndex(),
         length: player.sentences.length,
       }).then(() =>
-          queryClient.invalidateQueries({
-            queryKey: [HISTORY_NOVEL, bookId],
-          })
-        );
+        queryClient.invalidateQueries({
+          queryKey: [HISTORY_NOVEL, bookId],
+        }),
+      );
     }
   }, [data, player?.getCurrentSentenceIndex()]);
 

@@ -3,10 +3,10 @@ import { createRoute } from "@hono/zod-openapi";
 import { jsonContent } from "stoker/openapi/helpers";
 import type { RouteHandler } from "@hono/zod-openapi";
 import * as HttpStatusCodes from "stoker/http-status-codes";
-import type { AppEnv } from "../../lib/appFactory";
-import { ErrorSchema } from "../../lib/errorSchema";
+import type { AppEnv } from "../../lib/app-factory";
+import { ErrorSchema } from "../../lib/error-schema";
 import { prisma } from "../../db";
-import { optionalAuthMiddleware } from "../../auth/authMiddleware";
+import { optionalAuthMiddleware } from "../../auth/auth-middleware";
 
 const ChapterInput = z.object({
   chapterId: z.string().uuid(),

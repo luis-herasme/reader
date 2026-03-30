@@ -3,14 +3,13 @@ import { createRoute } from "@hono/zod-openapi";
 import type { RouteHandler } from "@hono/zod-openapi";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import { jsonContent } from "stoker/openapi/helpers";
-import type { AppEnv } from "../../lib/appFactory";
+import type { AppEnv } from "../../lib/app-factory";
 import { prisma } from "../../db";
-import { authMiddleware } from "../../auth/authMiddleware";
-import { HistoryWithChapterSchema } from "./schema";
+import { authMiddleware } from "../../auth/auth-middleware";
 
-export const novelHistoryRoute = createRoute({
+export const getNovelChapterRoute = createRoute({
   method: "get",
-  path: "/api/history/novel",
+  path: "/api/favorites/novel-chapter",
   middleware: [authMiddleware],
   request: {
     query: z.object({
@@ -19,25 +18,26 @@ export const novelHistoryRoute = createRoute({
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      z.array(HistoryWithChapterSchema),
-      "Chapter history for a novel",
+      z.object({ chapterId: z.string().nullable() }),
+      "Last read chapter ID",
     ),
   },
 });
 
-export const novelHistoryHandler: RouteHandler<
-  typeof novelHistoryRoute,
+export const getNovelChapterHandler: RouteHandler<
+  typeof getNovelChapterRoute,
   AppEnv
 > = async (context) => {
   const { bookId } = context.req.valid("query");
   const user = context.get("user")!;
 
-  const chapters = await prisma.history.findMany({
+  const history = await prisma.history.findFirst({
     where: { userId: user.id, bookId },
-    include: {
-      chapter: { select: { id: true, title: true, number: true } },
-    },
+    orderBy: { updatedAt: "desc" },
   });
 
-  return context.json(chapters, HttpStatusCodes.OK);
+  return context.json(
+    { chapterId: history ? history.chapterId : null },
+    HttpStatusCodes.OK,
+  );
 };

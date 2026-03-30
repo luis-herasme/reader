@@ -1,5 +1,5 @@
 import { Star, StarOff } from "lucide-react";
-import { useIsFavorite, useAddFavorite, useDeleteFavorite } from "@/api/useFavorites";
+import { useIsFavorite, useAddFavorite, useDeleteFavorite } from "@/api/use-favorites";
 import { toast } from "sonner";
 import {
   Tooltip,

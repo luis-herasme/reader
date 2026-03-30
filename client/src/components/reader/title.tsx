@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useSettings } from "@/components/reader/settings";
-import { useFont } from "../useFont";
+import { useFont } from "../use-font";
 
 type TitleProps = {
   title: string;

@@ -11,8 +11,8 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 import { ChaptersDialog } from "@/components/chapters";
 import HistoryDialog from "@/components/reader/history";
 import { Input } from "@/components/ui/input";
-import { useSearchNovels } from "@/api/useNovels";
-import { useIsAuthenticated } from "@/api/useAuth";
+import { useSearchNovels } from "@/api/use-novels";
+import { useIsAuthenticated } from "@/api/use-auth";
 import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
 import { navigate } from "wouter/use-browser-location";
@@ -33,7 +33,12 @@ export default function Home() {
     take: number;
   }>({ title: "", skip: 0, take: PAGE_SIZE });
 
-  const { hasMore, hasPrevious, isLoading, data: searchData } = useSearchNovels(search);
+  const {
+    hasMore,
+    hasPrevious,
+    isLoading,
+    data: searchData,
+  } = useSearchNovels(search);
   const { data: isAuthenticated } = useIsAuthenticated();
 
   return (

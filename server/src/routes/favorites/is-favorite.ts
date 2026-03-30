@@ -3,9 +3,9 @@ import { createRoute } from "@hono/zod-openapi";
 import type { RouteHandler } from "@hono/zod-openapi";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import { jsonContent } from "stoker/openapi/helpers";
-import type { AppEnv } from "../../lib/appFactory";
+import type { AppEnv } from "../../lib/app-factory";
 import { prisma } from "../../db";
-import { authMiddleware } from "../../auth/authMiddleware";
+import { authMiddleware } from "../../auth/auth-middleware";
 
 export const isFavoriteRoute = createRoute({
   method: "get",

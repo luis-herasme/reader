@@ -1,7 +1,7 @@
 import { createRoute } from "@hono/zod-openapi";
 import type { RouteHandler } from "@hono/zod-openapi";
 import * as HttpStatusCodes from "stoker/http-status-codes";
-import type { AppEnv } from "../../lib/appFactory";
+import type { AppEnv } from "../../lib/app-factory";
 import { logout } from "../../auth/logout";
 
 export const logoutRoute = createRoute({

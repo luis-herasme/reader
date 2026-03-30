@@ -1,4 +1,4 @@
-import { useHistoryNovels, useClearNovelHistory } from "@/api/useHistory";
+import { useHistoryNovels, useClearNovelHistory } from "@/api/use-history";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { Bookmark, Loader2, Trash } from "lucide-react";
 import { Favorite } from "./favorite";

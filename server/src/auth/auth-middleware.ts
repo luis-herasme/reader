@@ -1,6 +1,6 @@
 import { createMiddleware } from "hono/factory";
-import type { AppEnv } from "../lib/appFactory";
-import { setAuthContext } from "./getAuthContext";
+import type { AppEnv } from "../lib/app-factory";
+import { setAuthContext } from "./get-auth-context";
 
 export const optionalAuthMiddleware = createMiddleware<AppEnv>(
   async (c, next) => {
