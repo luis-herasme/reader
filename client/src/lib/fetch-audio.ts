@@ -1,22 +1,25 @@
-import { EdgeSpeechTTS } from "@lobehub/tts";
-
-const tts = new EdgeSpeechTTS({ locale: "en-US" });
+import { api } from "@/api/client";
 
 export async function fetchAudio(text: string): Promise<HTMLAudioElement> {
-  const payload = {
-    input: text,
-    options: {
-      voice: "en-US-GuyNeural",
+  const response = await api.api.tts.speech.$post({
+    json: {
+      input: text,
+      options: {
+        voice: "en-US-GuyNeural",
+      },
     },
-  };
+  });
 
-  const response = await tts.create(payload);
+  if (!response.ok) {
+    throw new Error("TTS request failed");
+  }
+
   const audio = await getAudioFromResponse(response);
   return audio;
 }
 
 async function getAudioFromResponse(
-  response: Response
+  response: Response,
 ): Promise<HTMLAudioElement> {
   const blob = await response.blob();
   const url = URL.createObjectURL(blob);

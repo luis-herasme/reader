@@ -4,7 +4,8 @@ import { OpenAPIHono } from "@hono/zod-openapi";
 import { cors } from "hono/cors";
 import { defaultHook } from "stoker/openapi";
 import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { resolve, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 
 import { env } from "./env";
 import type { AppEnv } from "./lib/app-factory";
@@ -77,6 +78,7 @@ import {
   updateReplacementRulesHandler,
 } from "./routes/settings/update-replacement-rules";
 
+import { speechRoute, speechHandler } from "./routes/tts/speech";
 import { logoutRoute, logoutHandler } from "./routes/auth/logout";
 import {
   googleLoginRoute,
@@ -94,7 +96,7 @@ import {
 const app = new OpenAPIHono<AppEnv>({ defaultHook });
 
 app.use("*", cors());
-app.use("/*", serveStatic({ root: "../../client/dist/" }));
+app.use("/*", serveStatic({ root: "../client/dist/" }));
 
 const api = app
   // novels
@@ -120,13 +122,16 @@ const api = app
   .openapi(updateSettingsRoute, updateSettingsHandler)
   .openapi(getReplacementRulesRoute, getReplacementRulesHandler)
   .openapi(updateReplacementRulesRoute, updateReplacementRulesHandler)
+  // tts
+  .openapi(speechRoute, speechHandler)
   // auth
   .openapi(logoutRoute, logoutHandler)
   .openapi(googleLoginRoute, googleLoginHandler)
   .openapi(googleCallbackRoute, googleCallbackHandler)
   .openapi(isAuthenticatedRoute, isAuthenticatedHandler);
 
-const indexHtmlPath = resolve(__dirname, "../../client/dist/index.html");
+const currentDirectory = dirname(fileURLToPath(import.meta.url));
+const indexHtmlPath = resolve(currentDirectory, "../../client/dist/index.html");
 
 app.get("*", async (context) => {
   const html = readFileSync(indexHtmlPath, "utf-8");
