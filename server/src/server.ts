@@ -2,6 +2,8 @@ import { OpenAPIHono } from "@hono/zod-openapi";
 import { cors } from "hono/cors";
 import { serveStatic } from "hono/bun";
 import { defaultHook } from "stoker/openapi";
+
+import { env } from "./env";
 import type { AppEnv } from "./lib/appFactory";
 
 import { searchRoute, searchHandler } from "./routes/novels/search";
@@ -124,9 +126,7 @@ app.get("*", async () => {
 
 export type AppType = typeof api;
 
-const port = process.env.PORT || 3000;
-
 export default {
-  port,
+  port: env.PORT,
   fetch: app.fetch,
 };
