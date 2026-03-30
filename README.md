@@ -1,11 +1,10 @@
 ## Requirements
-- [Node.js](https://nodejs.org/en/) (npm)
-- [Bun](https://bun.sh/) (bun)
+- [Node.js](https://nodejs.org/en/) (v22.12+)
 
 ## Installation
 After cloning the repository, you need to install the dependencies using the following command:
 ```bash
-bun i
+npm install
 ```
 
 ## Usage

@@ -7,22 +7,15 @@ RUN apt-get update && apt-get install -y curl gnupg zip unzip
 RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
     apt-get install -y nodejs
 
-# Install BunJS
-ENV BUN_INSTALL=$HOME/bun
-RUN curl -fsSL https://bun.sh/install | bash
-ENV PATH=$PATH:$HOME/bun/bin
-
 WORKDIR /app
 
-COPY . .    
-
-RUN apt-get update && apt-get install -y openssl1.1
+COPY . .
 
 WORKDIR /app/client
-RUN bun i
-RUN bun vite build
+RUN npm install
+RUN npx vite build
 
 WORKDIR /app/server
-RUN bun i
-RUN bunx prisma generate
-CMD ["bun", "src/server.ts"]
+RUN npm install
+RUN npx prisma generate
+CMD ["npx", "tsx", "src/server.ts"]

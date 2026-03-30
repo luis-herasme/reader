@@ -1,7 +1,10 @@
+import { serve } from "@hono/node-server";
+import { serveStatic } from "@hono/node-server/serve-static";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { cors } from "hono/cors";
-import { serveStatic } from "hono/bun";
 import { defaultHook } from "stoker/openapi";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 
 import { env } from "./env";
 import type { AppEnv } from "./lib/appFactory";
@@ -88,7 +91,7 @@ import {
 const app = new OpenAPIHono<AppEnv>({ defaultHook });
 
 app.use("*", cors());
-app.use("/*", serveStatic({ root: "../../client/dist" }));
+app.use("/*", serveStatic({ root: "../../client/dist/" }));
 
 const api = app
   // novels
@@ -120,13 +123,15 @@ const api = app
   .openapi(googleCallbackRoute, googleCallbackHandler)
   .openapi(isAuthenticatedRoute, isAuthenticatedHandler);
 
-app.get("*", async () => {
-  return new Response(Bun.file("../../client/dist/index.html"));
+const indexHtmlPath = resolve(__dirname, "../../client/dist/index.html");
+
+app.get("*", async (context) => {
+  const html = readFileSync(indexHtmlPath, "utf-8");
+  return context.html(html);
 });
 
 export type AppType = typeof api;
 
-export default {
-  port: env.PORT,
-  fetch: app.fetch,
-};
+serve({ fetch: app.fetch, port: env.PORT }, (info) => {
+  console.log(`Server running on http://localhost:${info.port}`);
+});
